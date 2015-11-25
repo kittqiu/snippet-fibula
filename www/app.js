@@ -8,7 +8,11 @@ var
 	koa = require("koa"),
 	route = require('koa-route'),
 	bodyParser = require('koa-bodyparser'),
+	config = require('./config'),
 	app = koa();//global app
+
+var 
+	db = require('./db');
 
 app.name = 'snippet-fibula';
 
