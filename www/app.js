@@ -9,12 +9,16 @@ var
 	route = require('koa-route'),
 	bodyParser = require('koa-bodyparser'),
 	config = require('./config'),
+	i18n = require('./i18n'),
 	app = koa();//global app
 
 var 
 	db = require('./db');
 
 app.name = 'snippet-fibula';
+
+//load i18n
+var i18nT = i18n.getI18NTranslators('./view/i18n');
 
 app.use( bodyParser());
 
