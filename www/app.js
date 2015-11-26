@@ -10,6 +10,7 @@ var
 	bodyParser = require('koa-bodyparser'),
 	config = require('./config'),
 	i18n = require('./i18n'),
+	cache = require( './cache'),
 	app = koa();//global app
 
 var 

@@ -30,4 +30,15 @@
         // waiting queue size:
         queueLimit: 10
     },
+    cache:{
+        prefix: 'snippet-fibula/',
+        // host or ip address of memcached:
+        host: '127.0.0.1',
+        // port of memcached, default to 11211:
+        port: 11211,
+        // connection timeout, default to 1 second:
+        timeout: 1000,
+        // retries when failed:
+        retries: 3
+    }
  };
