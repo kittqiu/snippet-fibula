@@ -10,6 +10,10 @@
  */
 
  module.exports = {
+     // server domain name:
+    domain: 'www.example.com',
+    // the theme used, default to 'default':
+    theme: 'default',
 	db: {
         // host or ip address of mysql, e.g. '192.168.1.123':
         host: 'localhost',
@@ -40,5 +44,12 @@
         timeout: 1000,
         // retries when failed:
         retries: 3
-    }
+    },
+    // NOT USED NOW:
+    cdn: {
+        static_prefix: ''
+    },
+
+    // END:
+    END: 'END'
  };
