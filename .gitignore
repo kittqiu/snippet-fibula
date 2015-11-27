@@ -29,3 +29,4 @@ node_modules
 # private config files:
 config_production.js
 config_development.js
+schema.sql
