@@ -9,5 +9,16 @@ module.exports = {
 		MASTER:      100,
 		DEVELOPER:   10000,
 		GUEST:       100000000
-	}
+	},
+
+	//cache keys:
+	cache:{
+		NAVIGATIONS: '__navigations__',
+		WEBSITE: '__website__',
+		SNIPPETS: '__snippets__',
+		SETTINGS: '__settings__'
+	},
+
+	// END:
+    END: 'ended.'
 };
