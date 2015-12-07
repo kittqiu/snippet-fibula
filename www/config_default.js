@@ -23,8 +23,8 @@
         user: 'www',
         // password to login to mysql, change to your mysql password:
         password: 'www',
-        // database used in mysql, default to 'itranswarp':
-        database: 'snippet-fibula',
+        // database used in mysql, default to 'snippet':
+        database: 'snippet',
         // timeout before initial a connection to mysql, default to 3 seconds:
         connectTimeout: 3000,
         // maximum concurrent db connections:

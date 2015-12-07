@@ -36,7 +36,7 @@ function getJavaScriptFiles(file) {
     });
 }
 
-console.log(getJavaScriptFiles('./views/themes/' + theme + '/_base.html'));
+console.log(getJavaScriptFiles('./view/theme/' + theme + '/_base.html'));
 
 gulp.task('jslint', function () {
     return gulp.src([
@@ -63,9 +63,9 @@ gulp.task('uglify', function () {
 });
 
 gulp.task('less', function () {
-    return gulp.src(['./static/css/itranswarp.less'])
+    return gulp.src(['./static/css/theme/default.less'])
         .pipe(less())
-        .pipe(gulp.dest('./static/css'));
+        .pipe(gulp.dest('./static/css/theme'));
 });
 
-gulp.task('default', ['uglify', 'less']);
+gulp.task('default', ['less']);

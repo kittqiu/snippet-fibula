@@ -147,7 +147,7 @@ function* $getSettings(group) {
     // 'group1:key1' ==> 'key1'
     var 
         settings = yield Setting.$findAll({
-            where: 'group=?',
+            where: '`group`=?',
             params: [group]
         }),
         obj = {},

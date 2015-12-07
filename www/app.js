@@ -19,6 +19,7 @@ var
 	db = require('./db');
 
 app.name = 'snippet-fibula';
+app.proxy = true;
 
 //load i18n
 var i18nT = i18n.getI18NTranslators('./view/i18n');
@@ -31,10 +32,11 @@ function serveStatic(){
 	var root = __dirname;
 	app.use( function* (next){
 		var
-			method = this.request.method;
-			path = this.request.path;
+			method = this.request.method,
+			path = this.request.path,
 			pos;
-		if( method === 'GET' && (path.indexof('/static/') === 0 || path === '/favicon.ico')){
+
+		if( method === 'GET' && (path.indexOf('/static/') === 0 || path === '/favicon.ico')){
 			console.log('>>> static path: ' + path);
 			pos = path.lastIndexOf('.');
 			if( pos !== -1 ){
@@ -98,6 +100,7 @@ app.use( function* theMiddleWare(next){
 		isApi = path.indexOf('/api/') === 0 ;
 
 	console.log('[%s] %s %s', new Date().toISOString(), method, path);
+	
 
     if (prefix8 === '/manage/' && request.path !== '/manage/signin') {
         if (! request.user || request.user.role > constants.role.DEVELOPER) {
@@ -190,11 +193,11 @@ app.use( function* theMiddleWare(next){
 //return file name array
 function loadControllerFileNames(){
 	var files = fs.readdirSync( __dirname + "/controller" ),
-		re = new RegExp( "[A-Za-z][A-Za-z0-9\\_]*\\.js^$"),
+		re = new RegExp( "^[A-Za-z][A-Za-z0-9\\_]*\\.js$"),
 		jss = _.filter( files, function(f){
 			return re.test(f);
 		});
-
+		console.log( jss );
 	return _.map( jss, function(f){
 		return f.substring(0, f.length-3);
 	});
@@ -214,7 +217,7 @@ var controllers = loadControllers();
 /*register routes*/
 _.each(controllers, function(ctrl, filename){
 	_.each( ctrl, function(fn, path){
-		var ss, method, route;
+		var ss, method, route, docs;
 		ss = path.split(' ', 2);
 		if( ss.length !== 2 ){
 			console.log( "Invalid route definition: " + path );

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:snippet="http://www.snippet-fibula.com/" {{ __website__.xmlns|safe }}>
+<head>
+	<meta charset="utf-8"/>
+	<title>{% block title %} ??? {% endblock %} - {{ __website__.name }}</title>
+	<meta name="viewport" content="width=device-width"/>
+	<meta name="keywords" content="{{ __website__.keywords }}"/>
+	<meta name="description" content="{{ __website__.description }}"/>
+	{% block meta %} <!-- meta here --> {% endblock %}
+	<!-- BEGIN CSS COMPRESS -->
+	<!-- ENDCSS COMPRESS -->
+	{% block css %}<!-- css -->{% endblock %}
+	<link rel="stylesheet" href="/static/css/theme/{{ __theme__ }}.css"/>
+	{% if __production__ %}
+	<script src="/static/themes/{{ __theme__ }}/js/all.js"></script>
+	{% else %}
+	<!-- BEGIN JAVASCRIPT COMPRESS -->
+	<script src="/static/js/jquery.js"></script>
+	<script src="/static/js/uikit.js"></script>
+	<!-- END JAVASCRIPT COMPRESS -->
+	{% endif %}
+
+	{% block head %}<!-- head  -->{% endblock %}
+</head>
+<body>
+	<div id="header" class="uk-navbar uk-navbar-attached">
+		<ul class="uk-navbar-nav">
+        <li class="uk-active"><a href="">ddd</a></li>
+        <li><a href="">ccc</a></li>
+        <li class="uk-parent"><a href="">fff</a></li>
+    </ul>
+	</div>
+	<div id="main">
+	</div>
+	<div id="footer">
+	</div>
+</body>
+</html>

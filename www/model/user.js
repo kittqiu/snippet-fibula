@@ -12,7 +12,7 @@ module.exports = function(warp){
 		base.column_varchar_100( 'email', { unique: true, validate:{ isEmail: true, isLowerCase: true}}),
 		base.column_boolean( 'verified'),
 		base.column_varchar_1000( 'image_url' ),
-		base.column_bigint( 'locked_util')
+		base.column_bigint( 'locked_until')
 		], {
 			table: 'users'
 		})
