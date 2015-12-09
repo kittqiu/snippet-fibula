@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:snippet="http://www.snippet-fibula.com/" {{ __website__.xmlns|safe }}>
+<head>
+	<meta charset="utf-8"/>
+	<title>{% block title %} ??? {% endblock %} - {{ __website__.name }}</title>
+	<meta name="viewport" content="width=device-width"/>
+	<meta name="keywords" content="{{ __website__.keywords }}"/>
+	<meta name="description" content="{{ __website__.description }}"/>
+	{% block meta %} <!-- meta here --> {% endblock %}
+	<!-- BEGIN CSS COMPRESS -->
+	<!-- ENDCSS COMPRESS -->
+	{% block css %}<!-- css -->{% endblock %}
+	<link rel="stylesheet" href="/static/css/theme/{{ __theme__ }}.css"/>
+	{% if __production__ %}
+	<script src="/static/themes/{{ __theme__ }}/js/all.js"></script>
+	{% else %}
+	<!-- BEGIN JAVASCRIPT COMPRESS -->
+	<script src="/static/js/jquery.js"></script>
+	<script src="/static/js/uikit/uikit.js"></script>
+	<!-- END JAVASCRIPT COMPRESS -->
+	{% endif %}
+
+	{% block head %}<!-- head  -->{% endblock %}
+</head>
+<body>
+	<div id="header" class="uk-navbar uk-navbar-attached">
+		<div class="uk-grid">
+			<div class="uk-width-1-2">
+				<div class="uk-navbar">
+					<div class="uk-navbar-content uk-navbar-center">
+						<a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a>
+					</div>
+				</div>
+			</div>
+			<div class="uk-width-1-2">
+				<div class="uk-navbar uk-navbar-attached">
+					<ul class="uk-navbar-nav">
+				        <li class="uk-active"><a href="">snippet</a></li>
+				        <li><a href="">project</a></li>
+				        <li class="uk-parent"><a href="">documentations</a></li>
+			    	</ul>
+	    		</div>
+			</div>
+    	</div>
+	</div>
+	<div id="main">
+		<div id="content-header" class="uk-grid">
+			<div class="uk-width-1-1 uk-block uk-block-muted uk-flex x-toolbar" >
+				<div class="uk-flex-item-auto x-panel">{% block toolbar %}{% endblock %}</div>
+				<div class="uk-flex-item-none x-panel" style="padding-top:10px;padding-bottom:10px;">
+				{% if __user__ %}
+				{% else %}
+					<a href="/login" class="x-text-attention ">{{ _('Login') }}</a> {{ _('or') }} <a href="/signup" class="x-text-attention">{{ _('SignUp') }}</a>
+				{% endif %}
+				</div>			
+			</div>
+		</div>
+	</div>
+	<div id="footer">
+		<div class="uk-width-medium-1-2 uk-container-center uk-text-center">
+			<a href="" id="devohub-loves-you">devohub-loves-you</a>
+		</div>
+	</div>
+</body>
+</html>

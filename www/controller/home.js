@@ -20,7 +20,7 @@ var
 
 
 function getView(view){
-	return 'theme/default/' + view;
+	return '' + view;
 }
 
 function* $getModel(model){

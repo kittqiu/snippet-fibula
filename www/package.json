@@ -33,6 +33,8 @@
     "memcached": "^2.2.1",
     "mysql-warp": "^0.2.9",
     "node-uuid": "^1.4.7",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
     "swig": "^1.4.2",
     "thunkify": "^2.1.2"
   },

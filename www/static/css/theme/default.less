@@ -1,8 +1,98 @@
 @import "../uikit/themes/default/uikit.less";
 
+/*block*/
+@block-padding-vertical-large:                  20px;
+@block-muted-background:                        #ebebeb;
+
+/*icon*/
+@icon-font-path:                                "/static/font";
+
+/*navbar*/
 @navbar-background:                             #cb3837;
 @navbar-nav-color:                              #E5BAD3;
 @navbar-nav-hover-background:                   #a42b2b;
 @navbar-nav-hover-color:                        #ffffff;
 @navbar-nav-active-background:                  #a42b2b;
 @navbar-nav-active-color:                       #ffffff;
+@navbar-link-color:                             #E5BAD3;
+@navbar-link-hover-color:                       #ffffff;
+
+.uk-navbar-content > a:hover { text-decoration: none; }
+
+/*panel*/
+.x-panel {
+	padding-right: 20px;
+	padding-left: 20px;
+}
+
+.x-toolbar {
+	padding-top:10px;
+	padding-bottom:10px;
+	height:60px;
+}
+
+.x-toolbar-form-item {
+	height:40px;
+}
+
+.x-search{
+	width:60px;
+	height:40px;
+	background:#fff;
+	border: 1px solid #ccc;
+}
+.x-search:hover{
+	color:#fff;
+	background:@navbar-background;
+	border-color: #ccc;
+	border: 1px;
+}
+
+/*text*/
+.x-text-attention {
+	color:#CC525E;
+	text-decoration: none;
+}
+.x-text-attention:hover {
+	color:#CC525E;
+}
+
+
+
+/*heart animation*/
+#devohub-loves-you {
+  margin-top: 80px;
+  display: inline-block;
+  color: rgba(0,0,0,0.4);
+  text-decoration: none;
+  position: relative;
+}
+#devohub-loves-you:before,
+#devohub-loves-you:after {
+  content: "\2665";
+  color: rgba(46, 210, 83, 0);
+  font-size: 20px;
+  transition: all 0.3s;
+  transform: translate3d(0, 0, 0);
+  position: absolute;
+  top: 1px;
+}
+#devohub-loves-you:before {
+  left: -10px;
+}
+#devohub-loves-you:after {
+  right: -10px;
+}
+#devohub-loves-you:hover {
+  color: #cb3837;
+}
+#devohub-loves-you:hover:before,
+#devohub-loves-you:hover:after {
+  color: #cb3837;
+}
+#devohub-loves-you:hover:before {
+  left: -15px;
+}
+#devohub-loves-you:hover:after {
+  right: -15px;
+}

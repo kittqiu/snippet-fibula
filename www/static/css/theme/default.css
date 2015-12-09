@@ -1384,8 +1384,8 @@ iframe {
 /* Phone landscape and bigger */
 @media (min-width: 768px) {
   .uk-block {
-    padding-top: 50px;
-    padding-bottom: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
   }
 }
 /*
@@ -1417,8 +1417,8 @@ iframe {
 /* Tablets and bigger */
 @media (min-width: 768px) {
   .uk-block-large {
-    padding-top: 50px;
-    padding-bottom: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
   }
 }
 /* Desktop and bigger */
@@ -1440,7 +1440,7 @@ iframe {
  * Muted
  */
 .uk-block-muted {
-  background: #f9f9f9;
+  background: #ebebeb;
 }
 /*
  * Primary
@@ -2022,10 +2022,10 @@ html:not(.uk-touch) .uk-nav-offcanvas ul a:hover {
  * Link colors
  */
 .uk-navbar-content > a:not([class]) {
-  color: #07D;
+  color: #E5BAD3;
 }
 .uk-navbar-content > a:not([class]):hover {
-  color: #059;
+  color: #ffffff;
 }
 /* Sub-objects: `uk-navbar-brand`
  ========================================================================== */
@@ -3599,7 +3599,7 @@ select.uk-form-width-mini {
  ========================================================================== */
 @font-face {
   font-family: 'FontAwesome';
-  src: url("../fonts/fontawesome-webfont.woff2") format('woff2'), url("../fonts/fontawesome-webfont.woff") format("woff"), url("../fonts/fontawesome-webfont.ttf") format("truetype");
+  src: url("/static/font/fontawesome-webfont.woff2") format('woff2'), url("/static/font/fontawesome-webfont.woff") format("woff"), url("/static/font/fontawesome-webfont.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
@@ -8583,4 +8583,80 @@ a.uk-thumbnail:focus {
   h3 {
     page-break-after: avoid;
   }
+}
+/*block*/
+/*icon*/
+/*navbar*/
+.uk-navbar-content > a:hover {
+  text-decoration: none;
+}
+/*panel*/
+.x-panel {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+.x-toolbar {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 60px;
+}
+.x-toolbar-form-item {
+  height: 40px;
+}
+.x-search {
+  width: 60px;
+  height: 40px;
+  background: #fff;
+  border: 1px solid #ccc;
+}
+.x-search:hover {
+  color: #fff;
+  background: #cb3837;
+  border-color: #ccc;
+  border: 1px;
+}
+/*text*/
+.x-text-attention {
+  color: #CC525E;
+  text-decoration: none;
+}
+.x-text-attention:hover {
+  color: #CC525E;
+}
+/*heart animation*/
+#devohub-loves-you {
+  margin-top: 80px;
+  display: inline-block;
+  color: rgba(0, 0, 0, 0.4);
+  text-decoration: none;
+  position: relative;
+}
+#devohub-loves-you:before,
+#devohub-loves-you:after {
+  content: "\2665";
+  color: rgba(46, 210, 83, 0);
+  font-size: 20px;
+  transition: all 0.3s;
+  transform: translate3d(0, 0, 0);
+  position: absolute;
+  top: 1px;
+}
+#devohub-loves-you:before {
+  left: -10px;
+}
+#devohub-loves-you:after {
+  right: -10px;
+}
+#devohub-loves-you:hover {
+  color: #cb3837;
+}
+#devohub-loves-you:hover:before,
+#devohub-loves-you:hover:after {
+  color: #cb3837;
+}
+#devohub-loves-you:hover:before {
+  left: -15px;
+}
+#devohub-loves-you:hover:after {
+  right: -15px;
 }

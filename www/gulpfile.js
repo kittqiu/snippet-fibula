@@ -36,7 +36,7 @@ function getJavaScriptFiles(file) {
     });
 }
 
-console.log(getJavaScriptFiles('./view/theme/' + theme + '/_base.html'));
+//console.log(getJavaScriptFiles('./view/theme/' + theme + '/_base.html'));
 
 gulp.task('jslint', function () {
     return gulp.src([
