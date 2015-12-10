@@ -109,6 +109,7 @@ app.use( function* theMiddleWare(next){
         }
     }
 
+    this.translate = i18n.createI18N( request.get('Accept-Language') || 'en', i18nT );
     if( isApi ){
     	if( isDevelopment ){
     		console.log('[API Request]');

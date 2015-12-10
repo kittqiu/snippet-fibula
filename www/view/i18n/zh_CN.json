@@ -18,6 +18,7 @@
 	"SignUp": "注册",
 	"sign up": "注册",
 	"sign up so": "立即注册",
+	"submit your request": "正在提交您的请求",
 
 	"User": "用户",
 	"User name":"用户名",
@@ -25,10 +26,12 @@
 
 	"verify password": "确认密码",
 
+	"Email has been signed up by another user.": "该邮箱已经被其他用户注册过了，更换一个吧",	
 	"invalid user name": "用户名为空或者包含非法的字符",
 	"must be lowercase, capital letters, number and _.": "必须为小写和大写英文字符，或数字及下划线_",
 	"Passwords is not the same": "两次输入的密码不一致",
 	"should not be empty": "不可为空",
+	"User name has been signed up by another user.": "用户名已经被注册过了，更换一个吧",
 	"valid email for account verify, notice etc.":"有效的邮箱将用于帐户验证、邮件通知和找回密码等功能",
 
 	"END": "END"

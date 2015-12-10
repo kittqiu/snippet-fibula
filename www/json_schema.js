@@ -178,6 +178,12 @@ var PROPERTY = {
         type: 'string',
         minLength: 1,
         maxLength: 1400000 // 1MB before base64, 1.33M after base64
+    },
+    USERNAME:{
+        type: 'string',
+        minLength: 3,
+        maxLength: 50,
+        pattern: '^[a-z0-9\\_\\-]{3,50}$'
     }
 };
 
@@ -189,6 +195,16 @@ var schemas = {
             passwd: PROPERTY.PASSWD
         },
         required: ['email', 'passwd']
+    },
+    createAccount:{
+        type: 'object',
+        properties: {
+            username: PROPERTY.USERNAME,            
+            password: PROPERTY.PASSWD,
+            email: PROPERTY.EMAIL,
+            name: PROPERTY.NAME
+        },
+        required: ['username', 'password', 'email', 'name']
     },
     createCategory: {
         type: 'object',

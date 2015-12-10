@@ -14,6 +14,15 @@
     domain: 'www.example.com',
     // the theme used, default to 'default':
     theme: 'default',
+    session: {
+        cookie: 'isession',
+        // used to generate secure session cookie, can be set to any random string:
+        salt: 'rCZNC2S2ZN7FIkFBMzZL',
+        // signin expires in N seconds:
+        expires: 7 * 24 * 3600,
+        // use https for management:
+        httpsForManagement: false
+    },
 	db: {
         // host or ip address of mysql, e.g. '192.168.1.123':
         host: 'localhost',

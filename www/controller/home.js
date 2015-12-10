@@ -39,7 +39,7 @@ module.exports = {
 		this.render( getView('index.html'), yield $getModel.apply(this, [model]) );
 	},
 	'GET /signup': function* (){
-		var model = {};
+		var model = { __salt__:  config.session.salt };
 		this.render( getView('signup.html'), yield $getModel.apply(this, [{model}]) );
 	}
 };

@@ -3449,7 +3449,7 @@ select.uk-form-width-mini {
 /* Hover */
 .uk-button-primary:hover,
 .uk-button-primary:focus {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(203, 56, 55, 0.8);
   color: #fff;
 }
 /* Active */
@@ -8508,7 +8508,7 @@ a.uk-thumbnail:focus {
 }
 .uk-contrast .uk-button-primary:hover,
 .uk-contrast .uk-button-primary:focus {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(203, 56, 55, 0.8);
   color: #fff;
 }
 .uk-contrast .uk-button-primary:active,

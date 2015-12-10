@@ -29,20 +29,16 @@
 	<div id="header" class="uk-navbar uk-navbar-attached">
 		<div class="uk-grid">
 			<div class="uk-width-1-2">
-				<div class="uk-navbar">
-					<div class="uk-navbar-content uk-navbar-center">
-						<a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a>
-					</div>
+				<div class="uk-navbar-content uk-navbar-center">
+					<a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a>
 				</div>
 			</div>
 			<div class="uk-width-1-2">
-				<div class="uk-navbar uk-navbar-attached">
-					<ul class="uk-navbar-nav">
-				        <li class="uk-active"><a href="">snippet</a></li>
-				        <li><a href="">project</a></li>
-				        <li class="uk-parent"><a href="">documentations</a></li>
-			    	</ul>
-	    		</div>
+				<ul class="uk-navbar-nav">
+			        <li class="uk-active"><a href="">snippet</a></li>
+			        <li><a href="">project</a></li>
+			        <li class="uk-parent"><a href="">documentations</a></li>
+		    	</ul>
 			</div>
     	</div>
 	</div>
@@ -70,6 +66,13 @@
 		<div id="main-content">
 			{% block content %}
 			{% endblock %}
+		</div>
+		<div id="main-helper">
+			<div id="dialog-submiting" class="uk-modal">
+			    <div class="uk-modal-dialog">
+			        <div class="uk-modal-spinner">{{ _('submit your request') }}</div>
+			    </div>
+			</div>
 		</div>
 	</div>
 	<div id="footer">

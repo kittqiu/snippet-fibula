@@ -1,6 +1,7 @@
 {% extends '_base.html' %}
 
 {% block head %}
+<script src="/static/js/sha1.min.js"></script>
 <script type="text/javascript">
 $(function () {
 	var vm = new Vue({
@@ -24,7 +25,10 @@ $(function () {
 				if(validateJsonObj('signup', data)){
 					if( this.password !== this.verifypassword ){
 						throw  { error:'invalid parameter', data:'verifypassword', message:"{{ _('Passwords is not the same') }}"}; 
-					}					
+					}
+					//salt password
+					delete(data['verifypassword']);
+					data.password = CryptoJS.SHA1( this.password + '{{ __salt__ }}' ).toString();
 					return data;
 				}				
 			},
@@ -37,8 +41,18 @@ $(function () {
 				}catch(e){
 					form.showFormError(e);
 					return;
-				}
+				}				
 
+				form.postJSON( '/api/signup', data, function(err, result){
+					if( !err ){
+						var alertdlg = UIkit.modal.alert('用户创建成功，请稍后登录您的邮箱完成认证，之后您便可正常登录系统。\n稍后页面将自动跳转到主页...');
+						setTimeout( function(){
+						 alertdlg.hide();
+						 location.assign('/');
+						}, 5000 );
+						
+					}
+				});
 			}
 		}
 	});
