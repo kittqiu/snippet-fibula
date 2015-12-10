@@ -17,9 +17,12 @@
 	<!-- BEGIN JAVASCRIPT COMPRESS -->
 	<script src="/static/js/jquery.js"></script>
 	<script src="/static/js/uikit/uikit.js"></script>
+	<script src="/static/js/vendor.js"></script>
+	<script src="/static/js/vue.js"></script>
+	<script src="/static/js/jjv.js"></script>
+	<script src="/static/js/form_schema.js"></script>
 	<!-- END JAVASCRIPT COMPRESS -->
 	{% endif %}
-
 	{% block head %}<!-- head  -->{% endblock %}
 </head>
 <body>
@@ -44,16 +47,29 @@
     	</div>
 	</div>
 	<div id="main">
-		<div id="content-header" class="uk-grid">
+		<div id="main-header" class="uk-grid">
 			<div class="uk-width-1-1 uk-block uk-block-muted uk-flex x-toolbar" >
-				<div class="uk-flex-item-auto x-panel">{% block toolbar %}{% endblock %}</div>
+				<div class="uk-flex-item-auto x-panel">
+				{% block toolbar %}
+					<form class="uk-form">
+						<div style="margin-right:60px;">
+				    		<input type="input" placeholder="find snippet"  class="uk-width-* x-toolbar-form-item" >
+				    	</div>		
+				    	<button class="uk-button uk-icon-search x-search uk-float-right" style="margin-top:-40px;"></button>
+					</form>
+				{% endblock %}
+				</div>
 				<div class="uk-flex-item-none x-panel" style="padding-top:10px;padding-bottom:10px;">
 				{% if __user__ %}
 				{% else %}
-					<a href="/login" class="x-text-attention ">{{ _('Login') }}</a> {{ _('or') }} <a href="/signup" class="x-text-attention">{{ _('SignUp') }}</a>
+					<a href="/login" class="x-text-attention ">{{ _('log in') }}</a> {{ _('or') }} <a href="/signup" class="x-text-attention">{{ _('sign up') }}</a>
 				{% endif %}
 				</div>			
 			</div>
+		</div>
+		<div id="main-content">
+			{% block content %}
+			{% endblock %}
 		</div>
 	</div>
 	<div id="footer">
@@ -61,5 +77,6 @@
 			<a href="" id="devohub-loves-you">devohub-loves-you</a>
 		</div>
 	</div>
+	{% block readyscript %} {% endblock %}
 </body>
 </html>

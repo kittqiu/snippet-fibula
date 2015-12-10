@@ -1,0 +1,110 @@
+{% extends '_base.html' %}
+
+{% block head %}
+<script type="text/javascript">
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: '',
+			username: '',
+			password: '',
+			verifypassword: '',
+			email: ''
+		},
+		methods:{
+			getPostData: function(){
+				var data = {
+					name: this.name,
+					username: this.username,
+					password: this.password,
+					verifypassword: this.verifypassword,
+					email: this.email
+				};
+				if(validateJsonObj('signup', data)){
+					if( this.password !== this.verifypassword ){
+						throw  { error:'invalid parameter', data:'verifypassword', message:"{{ _('Passwords is not the same') }}"}; 
+					}					
+					return data;
+				}				
+			},
+			submit: function(){
+				var data,
+					form = $('#vm').find('form');
+				try{
+					data = this.getPostData();
+					form.showFormError();//clear error tip
+				}catch(e){
+					form.showFormError(e);
+					return;
+				}
+
+			}
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block title %} {{ _('sign up')}} {% endblock %}
+
+{% block content %}
+<div class="x-container x-content">
+	<div id="vm" class="x-container x-narrow">
+		<h2 class="x-title">{{ _('sign up') }}</h2>
+		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
+			<fieldset>
+				<div class="uk-alert uk-alert-danger uk-hidden"></div>
+			    <div class="uk-form-row">
+			        <label class="uk-form-label">{{ _('User name') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="username" name="username"  type="text" placeholder="{{ _('user name input')}}" class="x-controls">
+			        </div>
+			        <p class="help-text">3-50字符，必须是小写字母、数字、-连字线或_下划线字符</p>
+			    </div>
+			    <div class="uk-form-row">
+			        <label class="uk-form-label">{{ _('Chinese or English name') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="name" name="name" type="text" class="x-controls">
+			        </div>
+			        <p class="help-text">1-100字符</p>
+			    </div>
+				<div class="uk-form-row">
+			        <label class="uk-form-label">{{ _('password') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="password" name="password" type="password" class="x-controls">
+			        </div>
+			        <p class="help-text">6-20位，允许小写字母、大写字母和数字</p>
+			    </div>
+			    <div class="uk-form-row">
+			        <label class="uk-form-label">{{ _('verify password') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="verifypassword" name="verifypassword" type="password" class="x-controls">
+			        </div>
+			        <p class="help-text">6-20位，允许小写字母、大写字母和数字</p>
+			    </div>
+			    <div class="uk-form-row">
+			        <label class="uk-form-label">{{ _('email') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="email" name="email" type="text" class="x-controls">
+			        </div>
+			        <p class="help-text">{{ _('valid email for account verify, notice etc.') }}</p>
+			    </div>
+
+			    <div class="uk-form-row">
+			    	<div class="uk-form-controls">
+			        	<button  type="submit" class="uk-button-primary uk-button-large x-controls"><i class="uk-icon-check"></i>{{ _('sign up so') }}</button>
+			    	</div>
+			    </div>
+	    </fieldset>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block readyscript %}
+<script type="text/javascript">
+</script>
+{% endblock %}

@@ -37,5 +37,9 @@ module.exports = {
 	'GET /': function* (){
 		var model = {};
 		this.render( getView('index.html'), yield $getModel.apply(this, [model]) );
+	},
+	'GET /signup': function* (){
+		var model = {};
+		this.render( getView('signup.html'), yield $getModel.apply(this, [{model}]) );
 	}
 };
