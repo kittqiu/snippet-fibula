@@ -57,6 +57,7 @@
 				</div>
 				<div class="uk-flex-item-none x-panel" style="padding-top:10px;padding-bottom:10px;">
 				{% if __user__ %}
+				{{ __request__.user.name }}
 				{% else %}
 					<a href="/login" class="x-text-attention ">{{ _('log in') }}</a> {{ _('or') }} <a href="/signup" class="x-text-attention">{{ _('sign up') }}</a>
 				{% endif %}

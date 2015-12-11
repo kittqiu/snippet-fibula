@@ -1,0 +1,88 @@
+{% extends '_base.html' %}
+
+{% block head %}
+<script src="/static/js/sha1.min.js"></script>
+<script type="text/javascript">
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			username: '',
+			password: ''
+		},
+		methods:{
+			getPostData: function(){
+				var data = {
+					username: this.username,
+					password: this.password
+				};
+				if(validateJsonObj('login', data)){
+					//salt password
+					data.password = CryptoJS.SHA1( this.password + '{{ __salt__ }}' ).toString();
+					return data;
+				}				
+			},
+			submit: function(){
+				var data,
+					form = $('#vm').find('form');
+				try{
+					data = this.getPostData();
+					//form.showFormError();//clear error tip
+				}catch(e){
+					form.showFormError(e);
+					return;
+				}				
+
+				form.postJSON( '/api/authenticate', data, function(err, result){
+					if( !err ){
+						var alertdlg = UIkit.modal.blockUI('用户创建成功，请稍后登录您的邮箱完成认证，之后您便可正常登录系统。\n稍后页面将自动跳转到主页...');
+						setTimeout( function(){
+						 alertdlg.hide();
+						 location.assign('/');
+						}, 3000 );
+						
+					}
+				});
+			}
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block title %} {{ _('log in')}} {% endblock %}
+
+{% block content %}
+<div class="x-container x-content">
+	<div id="vm" class="x-container x-narrow">
+		<h2 class="x-title">{{ _('log in') }}</h2>
+		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
+			<fieldset>
+				<div class="uk-alert uk-alert-danger uk-hidden"></div>
+			    <div class="uk-form-row">
+			        <label class="uk-form-label">{{ _('User name') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="username" name="username"  type="text" placeholder="{{ _('user name input')}}" class="x-controls">
+			        </div>
+			        <p class="help-text">允许用户名或邮箱</p>
+			    </div>
+				<div class="uk-form-row">
+			        <label class="uk-form-label">{{ _('password') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="password" name="password" type="password" class="x-controls">
+			        </div>
+			        <p class="help-text"></p>
+			    </div>
+			    <div class="uk-form-row">
+			    	<div class="uk-form-controls">
+			        	<button  type="submit" class="uk-button-primary uk-button-large x-controls"><i class="uk-icon-check"></i>{{ _('log in') }}</button>
+			    	</div>
+			    </div>
+	    </fieldset>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+

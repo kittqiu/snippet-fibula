@@ -47,7 +47,9 @@ $(function () {
 					if( !err ){
 						var alertdlg = UIkit.modal.alert('用户创建成功，请稍后登录您的邮箱完成认证，之后您便可正常登录系统。\n稍后页面将自动跳转到主页...');
 						setTimeout( function(){
-						 alertdlg.hide();
+						 if(alertdlg.isActive()){
+						 	alertdlg.ide();
+						 }
 						 location.assign('/');
 						}, 5000 );
 						
@@ -117,8 +119,3 @@ $(function () {
 </div>
 {% endblock %}
 
-
-{% block readyscript %}
-<script type="text/javascript">
-</script>
-{% endblock %}

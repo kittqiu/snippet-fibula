@@ -18,6 +18,8 @@ var
 	LocalUser = db.localuser, 
 	next_id = db.next_id;
 
+var LOCAL_SIGNIN_EXPIRES_IN_MS = 1000 * config.session.expires;
+
 function* $getUserByEmail(email) {
     return yield User.$find({
         where: '`email`=?',
@@ -82,5 +84,64 @@ module.exports = {
         this.body = {
         	id: user.id
         };
-	}
+	},
+
+    'POST /api/authenticate': function* () {
+        /**
+         * Authenticate user by email or user name and password, for local user only.
+         * 
+         * @param {string} username: user name or Email address, in lower case.
+         * @param {string} passwd: The password, 40-chars SHA1 string, in lower case.
+         */
+        var
+            username,
+            email, 
+            passwd,
+            user,
+            localuser,
+            data = this.request.body;
+        json_schema.validate('authenticate', data);
+
+        email = username = data.username;
+        passwd = data.password;
+        user = yield $getUserByName(username);
+        if( user === null ){
+            user = yield $getUserByEmail(email);
+        }
+        if (user === null) {
+            throw api.authFailed('username', this.translate('User name or password invalid'));
+        }
+        if (user.locked_until > Date.now()) {
+            throw api.authFailed('locked', this.translate('User is locked.'));
+        }
+
+        //reset 
+        email = user.email;
+        username = user.username;
+
+        localuser = yield LocalUser.$find({
+            where:'`user_id`=?',
+            params: [user.id]
+        })
+        if( localuser === null ){
+            throw api.authFailed('password', this.translate('User name or password invalid'));
+        }
+
+        //check password
+        if(!auth.verifyPassword(email, passwd, localuser.passwd )){
+            throw api.authFailed('password', this.translate('User name or password invalid'));
+        }
+
+        // make session cookie:
+        var 
+            expires = Date.now() + LOCAL_SIGNIN_EXPIRES_IN_MS,
+            cookieStr = auth.makeSessionCookie(constants.signin.LOCAL, localuser.id, localuser.passwd, expires);
+        this.cookies.set( config.session.cookie, cookieStr, {
+            path: '/',
+            httpOnly: true,
+            expires: new Date(expires)
+        });
+        console.log('set session cookie for user: ' + user.email);
+        this.body = user;
+    }
 };

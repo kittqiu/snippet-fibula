@@ -47,6 +47,7 @@ function processApiDoc(group, method, url, doclines) {
         if (value.indexOf('@name') === 0) {
             doc.name = value.substring(5).trim();
         } else if (value.indexOf('@param') === 0) {
+            /*@param {format} [options] name: desc*/
             m = value.match(/^\@param\s+\{(\w+)\}\s*(\[?)(\w+)\=?(\w*)(\]?)\s*\:?\s*([\w\W]*)$/);
             if (m) {
                 param = {

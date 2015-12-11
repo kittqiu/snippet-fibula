@@ -11,6 +11,11 @@ module.exports = {
 		GUEST:       100000000
 	},
 
+	signin: {
+        LOCAL: 'local'
+    },
+
+
 	//cache keys:
 	cache:{
 		NAVIGATIONS: '__navigations__',

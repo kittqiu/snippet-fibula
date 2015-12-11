@@ -13,7 +13,8 @@ var
 	i18n = require('./i18n'),
 	cache = require( './cache'),
 	api_console = require('./api_console'),
-	app = koa();//global app
+	app = koa(),//global app
+	auth = require('./auth');
 
 var 
 	db = require('./db');
@@ -71,6 +72,8 @@ function logJSON(data){
 		console.log('(EMPTY)');
 	}
 }
+
+app.use( auth.$userIdentityParser );
 
 /*try to parse body to be a json object or a form object*/
 app.use( bodyParser());
@@ -240,7 +243,7 @@ _.each(controllers, function(ctrl, filename){
 		if (route.indexOf('/api/') === 0) {
             docs = fn.toString().match(/[\w\W]*\/\*\*?([\d\D]*)\*?\*\/[\w\W]*/);
             if (docs) {
-                api_console.processApiDoc(fname, verb, route, docs[1]);
+                api_console.processApiDoc(filename, method, route, docs[1]);
             } else {
                 console.log('WARNING: no api docs found for api: ' + route);
             }

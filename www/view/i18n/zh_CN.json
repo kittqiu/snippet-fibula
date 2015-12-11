@@ -32,6 +32,9 @@
 	"Passwords is not the same": "两次输入的密码不一致",
 	"should not be empty": "不可为空",
 	"User name has been signed up by another user.": "用户名已经被注册过了，更换一个吧",
+	"User name or password invalid": "用户名或密码无效",
+	"User is locked.": "用户被锁定，暂时无法操作",
+	"User not found.": "指定的用户不存在.",	
 	"valid email for account verify, notice etc.":"有效的邮箱将用于帐户验证、邮件通知和找回密码等功能",
 
 	"END": "END"

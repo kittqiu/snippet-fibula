@@ -184,6 +184,12 @@ var PROPERTY = {
         minLength: 3,
         maxLength: 50,
         pattern: '^[a-z0-9\\_\\-]{3,50}$'
+    },
+    USERNAMEOREMAIL:{
+        type: 'string',
+        minLength: 3,
+        maxLength: 50,
+        pattern: '^((?:[a-z0-9\\_\\-]{3,50})|(?:(?:[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+\\.)*[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+@(?:(?:(?:[a-z0-9](?:[a-z0-9\\-](?!\\.)){0,61}[a-z0-9]?\\.)+[a-z0-9](?:[a-z0-9\\-](?!$)){0,61}[a-z0-9]?)|(?:\\[(?:(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\.){3}(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\]))))$'
     }
 };
 
@@ -191,10 +197,10 @@ var schemas = {
     authenticate: {
         type: 'object',
         properties: {
-            email: PROPERTY.EMAIL,
-            passwd: PROPERTY.PASSWD
+            username: PROPERTY.USERNAMEOREMAIL,
+            password: PROPERTY.PASSWD
         },
-        required: ['email', 'passwd']
+        required: ['username', 'password']
     },
     createAccount:{
         type: 'object',

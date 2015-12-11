@@ -33,6 +33,13 @@ var SCHEMA_PROPERTY = {
 		maxLength: 50,
 		pattern: '^[a-z0-9\\_\\-]{3,50}$',
 		desc: '用户名'
+	},
+	USERNAMEOREMAIL:{
+		type: 'string',
+		minLength: 3,
+		maxLength: 50,
+		pattern: '^((?:[a-z0-9\\_\\-]{3,50})|(?:(?:[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+\\.)*[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+@(?:(?:(?:[a-z0-9](?:[a-z0-9\\-](?!\\.)){0,61}[a-z0-9]?\\.)+[a-z0-9](?:[a-z0-9\\-](?!$)){0,61}[a-z0-9]?)|(?:\\[(?:(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\.){3}(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\]))))$',
+		desc: '用户名或邮箱'
 	}
 };
 
@@ -47,6 +54,14 @@ var SCHEMAS = {
 			email: SCHEMA_PROPERTY.EMAIL,
 		},
 		required:['name', 'username', 'password', 'email']
+	},
+	login: {
+		type: 'object',
+		properties: {
+			username: SCHEMA_PROPERTY.USERNAMEOREMAIL,
+			password: SCHEMA_PROPERTY.PASSWORD
+		},
+		required:['username', 'password']
 	}
 };
 

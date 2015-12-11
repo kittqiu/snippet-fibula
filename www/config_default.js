@@ -14,10 +14,14 @@
     domain: 'www.example.com',
     // the theme used, default to 'default':
     theme: 'default',
+    security: {
+        //password salt
+        salt: 'rCZNC2S2ZN7FIkFBMzZL'
+    },
     session: {
-        cookie: 'isession',
+        cookie: 'devnosession',
         // used to generate secure session cookie, can be set to any random string:
-        salt: 'rCZNC2S2ZN7FIkFBMzZL',
+        salt: 'XqnzCREjPFQdpO5eftVc',
         // signin expires in N seconds:
         expires: 7 * 24 * 3600,
         // use https for management:
