@@ -18,7 +18,9 @@ var
 	LocalUser = db.localuser, 
 	next_id = db.next_id;
 
-var LOCAL_SIGNIN_EXPIRES_IN_MS = 1000 * config.session.expires;
+var 
+    COOKIE_NAME = config.session.cookie,
+    LOCAL_SIGNIN_EXPIRES_IN_MS = 1000 * config.session.expires;
 
 function* $getUserByEmail(email) {
     return yield User.$find({
@@ -34,6 +36,14 @@ function* $getUserByName(name) {
         params: [name],
         limit: 1
     });
+}
+
+function getReferer(request) {
+    var url = request.get('referer') || '/';
+    if (url.indexOf('/auth/') >= 0 || url.indexOf('/manage/') >= 0) {
+        url = '/';
+    }
+    return url;
 }
 
 module.exports = {
@@ -136,12 +146,23 @@ module.exports = {
         var 
             expires = Date.now() + LOCAL_SIGNIN_EXPIRES_IN_MS,
             cookieStr = auth.makeSessionCookie(constants.signin.LOCAL, localuser.id, localuser.passwd, expires);
-        this.cookies.set( config.session.cookie, cookieStr, {
+        this.cookies.set( COOKIE_NAME, cookieStr, {
             path: '/',
             httpOnly: true,
             expires: new Date(expires)
         });
         console.log('set session cookie for user: ' + user.email);
         this.body = user;
-    }
+    },
+
+    'GET /auth/signout': function* () {
+        this.cookies.set(COOKIE_NAME, 'deleted', {
+            path: '/',
+            httpOnly: true,
+            expires: new Date(0)
+        });
+        var redirect = getReferer(this.request);
+        console.log('Signout, goodbye!');
+        this.response.redirect(redirect);
+    },
 };
