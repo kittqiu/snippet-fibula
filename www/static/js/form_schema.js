@@ -62,6 +62,15 @@ var SCHEMAS = {
 			password: SCHEMA_PROPERTY.PASSWORD
 		},
 		required:['username', 'password']
+	},
+	changepsd: {
+		type: 'object',
+		properties: {
+			oldpassword: SCHEMA_PROPERTY.PASSWORD,
+			newpassword: SCHEMA_PROPERTY.PASSWORD,
+			verifypassword:SCHEMA_PROPERTY.PASSWORDVERIFY
+		},
+		required:['oldpassword', 'newpassword', 'verifypassword']
 	}
 };
 

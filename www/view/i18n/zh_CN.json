@@ -1,4 +1,6 @@
 {
+	"Change": "修改",
+	"change password": "修改密码",
 	"Chinese name": "中文名",
 	"Chinese or English name": "中文名或英文名",
 
@@ -11,8 +13,9 @@
 	"Home": "首页",
 
 
-
+	"new password":"新密码",
 	"or": "或",
+	"old password":"原始密码",
 
 	"password": "密码",
 
@@ -31,6 +34,9 @@
 	"invalid user name": "用户名为空或者包含非法的字符",
 	"must be lowercase, capital letters, number and _.": "必须为小写和大写英文字符，或数字及下划线_",
 	"Passwords is not the same": "两次输入的密码不一致",
+	"Passwords has not been changed": "新密码与原始密码一致，请更换新密码",
+	"Please log in first": "请先登录",
+	"Old password invalid.": "原始密码不正确",
 	"should not be empty": "不可为空",
 	"User name has been signed up by another user.": "用户名已经被注册过了，更换一个吧",
 	"User name or password invalid": "用户名或密码无效",

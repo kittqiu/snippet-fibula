@@ -40,10 +40,14 @@ module.exports = {
 	},
 	'GET /signup': function* (){
 		var model = { __salt__:  config.security.salt };
-		this.render( getView('signup.html'), yield $getModel.apply(this, [{model}]) );
+		this.render( getView('system/signup.html'), yield $getModel.apply(this, [{model}]) );
 	},
 	'GET /login': function* (){
 		var model = { __salt__:  config.security.salt };
-		this.render( getView('login.html'), yield $getModel.apply(this, [{model}]) );
+		this.render( getView('system/login.html'), yield $getModel.apply(this, [{model}]) );
+	},
+	'GET /user/changepassword': function* (){
+		var model = { __salt__:  config.security.salt };
+		this.render( getView('system/changepassword.html'), yield $getModel.apply(this, [{model}]) );
 	}
 };

@@ -1,4 +1,4 @@
-{% extends '_base.html' %}
+{% extends '../_base.html' %}
 
 {% block head %}
 <script src="/static/js/sha1.min.js"></script>
@@ -48,7 +48,7 @@ $(function () {
 						var alertdlg = UIkit.modal.alert('用户创建成功，请稍后登录您的邮箱完成认证，之后您便可正常登录系统。\n稍后页面将自动跳转到主页...');
 						setTimeout( function(){
 						 if(alertdlg.isActive()){
-						 	alertdlg.ide();
+						 	alertdlg.hide();
 						 }
 						 location.assign('/');
 						}, 5000 );
@@ -64,6 +64,7 @@ $(function () {
 {% endblock %}
 
 {% block title %} {{ _('sign up')}} {% endblock %}
+{% block jump-title  %}用户创建成功{% endblock %}
 
 {% block content %}
 <div class="x-container x-content">

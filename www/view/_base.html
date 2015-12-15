@@ -61,9 +61,10 @@
 					<li class="uk-parent" data-uk-dropdown="{pos:'left-bottom'}">
                             {{ __request__.user.name }}<i class="uk-icon-caret-down"></i>
                             <div class="uk-dropdown uk-dropdown-navbar" style="top: 30px; left: -160px;">
-                                <ul class="uk-nav uk-nav-navbar">
+                                <ul class="uk-nav uk-nav-navbar uk-subnav-pill">
+                                	<li><a href="/user/changepassword">{{ _('change password')}}</a></li>
                                     <li class="uk-nav-divider"></li>
-                                    <li><a href="/auth/signout">{{ _('logout')}}</a></li>
+                                    <li class="uk-active"><a href="/auth/signout">{{ _('logout')}}</a></li>
                                 </ul>
                             </div>
                     </li>
@@ -75,6 +76,12 @@
 			</div>
 		</div>
 		<div id="main-content">
+			<div id="jump-block" class="x-container x-content uk-hidden">
+				<div class="uk-alert uk-alert-success uk-alert-large">
+					<h2>{% block jump-title  %}成功{% endblock %}</h2>
+					<p><b id="jump-timeout" class="uk-text-danger">5</b> 秒后页面将自动跳转到<a id="jump-href"></a>......</p>
+				</div>
+			</div>
 			{% block content %}
 			{% endblock %}
 		</div>
@@ -91,6 +98,27 @@
 			<a href="" id="devohub-loves-you">devohub-loves-you</a>
 		</div>
 	</div>
+	<script type="text/javascript">
+	function jumpTo(url,addrdesc,timeout){		
+		$('#jump-href').attr('href', url);
+		$('#jump-href').text(addrdesc);
+		if(!timeout){
+			timeout = 5;
+		}
+		$('#jump-timeout').text(''+ timeout);
+		$('#jump-block').removeClass('uk-hidden');
+		setInterval( function(){
+			var n = parseInt($('#jump-timeout').text());
+			n--;
+			if( n === 0 ){
+				clearInterval(this);
+				location.assign(url);
+			}else{
+				$('#jump-timeout').text(''+ n);
+			}
+		}, 1000 );		
+	}
+	</script>
 	{% block readyscript %} {% endblock %}
 </body>
 </html>

@@ -202,6 +202,14 @@ var schemas = {
         },
         required: ['username', 'password']
     },
+    changePassword:{
+        type: 'object',
+        properties: {
+            oldpassword: PROPERTY.PASSWD,
+            newpassword: PROPERTY.PASSWD
+        },
+        required:['oldpassword', 'newpassword']
+    },
     createAccount:{
         type: 'object',
         properties: {

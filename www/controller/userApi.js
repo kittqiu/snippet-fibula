@@ -46,6 +46,18 @@ function getReferer(request) {
     return url;
 }
 
+function _makeSessionCooike(localuser, cookies){
+    // make session cookie:
+    var 
+        expires = Date.now() + LOCAL_SIGNIN_EXPIRES_IN_MS,
+        cookieStr = auth.makeSessionCookie(constants.signin.LOCAL, localuser.id, localuser.passwd, expires);
+        cookies.set( COOKIE_NAME, cookieStr, {
+        path: '/',
+        httpOnly: true,
+        expires: new Date(expires)
+    });
+}
+
 module.exports = {
 
 	'POST /api/signup': function* (){
@@ -165,4 +177,56 @@ module.exports = {
         console.log('Signout, goodbye!');
         this.response.redirect(redirect);
     },
+    'POST /api/user/changepwd': function* (){
+        var 
+            user,
+            localuser,
+            email, 
+            oldpassword, 
+            newpassword,
+            data = this.request.body;
+
+        //validate data
+        json_schema.validate('changePassword', data);
+
+        if( !this.request.user ){
+            throw api.authRequired('oldpassword', this.translate('Please log in first'));
+        }
+        user = this.request.user;
+        oldpassword = data.oldpassword;
+        newpassword = data.newpassword;
+        email = user.email;
+
+        localuser = yield LocalUser.$find({
+            where:'`user_id`=?',
+            params: [user.id]
+        })
+        if( localuser === null ){
+            throw api.authFailed('oldpassword', this.translate('Please log in first'));
+        }
+
+        if( !auth.verifyPassword(email, oldpassword, localuser.passwd )){
+            throw api.authFailed('oldpassword', this.translate('Old password invalid.'));
+        }
+
+        //modify password
+        localuser.passwd = auth.generatePassword(email, newpassword);
+        yield localuser.$update(['passwd']);
+
+        // make session cookie:
+        _makeSessionCooike( localuser, this.cookies );
+        /*
+        var 
+            expires = Date.now() + LOCAL_SIGNIN_EXPIRES_IN_MS,
+            cookieStr = auth.makeSessionCookie(constants.signin.LOCAL, localuser.id, localuser.passwd, expires);
+        this.cookies.set( COOKIE_NAME, cookieStr, {
+            path: '/',
+            httpOnly: true,
+            expires: new Date(expires)
+        });*/
+        console.log('set session cookie for user: ' + user.email);
+        this.body = {
+            id: user.id
+        };
+    }, 
 };

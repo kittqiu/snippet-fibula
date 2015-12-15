@@ -155,3 +155,7 @@ function postJSON(url, data, callback){
 function isValidUserName(name){
     return  /^[a-zA-Z\\_][a-zA-Z0-9\\_]*$/.test(name);
 }
+
+function saltpassword(psd,salt){
+    return CryptoJS.SHA1( psd + salt ).toString();
+}
