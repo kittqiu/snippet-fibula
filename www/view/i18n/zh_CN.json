@@ -3,21 +3,34 @@
 	"change password": "修改密码",
 	"Chinese name": "中文名",
 	"Chinese or English name": "中文名或英文名",
+	"Code snippet": "代码块",
+	"Create": "创建",
+	"Create snippet module": "创建模块",
+
+	"depend on": "依赖于",
+	"dependence": "依赖",
+	"description": "简述",
+	"develop environment": "开发环境",
 
 	"email": "邮箱",
+
 
 	"Login": "登录",
 	"log in": "登录",
 	"logout": "退出",
 
+	"Help": "帮助",
 	"Home": "首页",
 
+	"Keywords": "关键字",
 
+	"Name": "名称",
 	"new password":"新密码",
 	"or": "或",
 	"old password":"原始密码",
 
 	"password": "密码",
+	"Program language": "编程语言",
 
 	"SignUp": "注册",
 	"sign up": "注册",

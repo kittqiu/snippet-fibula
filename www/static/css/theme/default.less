@@ -1,21 +1,21 @@
-@import "../uikit/themes/default/uikit.less";
-@import "../uikit/themes/default/uikit-customizer.less";
+@import "../uikit/themes/gradient/uikit.less";
+@import "../uikit/themes/gradient/uikit-customizer.less";
 
 /*block*/
 @block-padding-vertical-large:                  20px;
 @block-muted-background:                        #ebebeb;
 
 /*button*/
-@button-primary-background:                     #cb3837;
+/*@button-primary-background:                     #cb3837;
 @button-primary-hover-background:               rgba(203, 56, 55, 0.8);
-@button-primary-active-background:              #cb3837;
+@button-primary-active-background:              #cb3837;*/
 
 
 /*icon*/
 @icon-font-path:                                "/static/font";
 
 /*navbar*/
-@navbar-background:                             #cb3837;
+/*@navbar-background:                             #cb3837;
 @navbar-nav-color:                              #E5BAD3;
 @navbar-nav-hover-background:                   #a42b2b;
 @navbar-nav-hover-color:                        #ffffff;
@@ -25,20 +25,46 @@
 @navbar-link-hover-color:                       #ffffff;
 
 .uk-navbar-content > a:hover { text-decoration: none; }
+*/
 
-/*panel*/
-.x-panel {
-	padding-right: 20px;
-	padding-left: 20px;
+#header{
+  background: #000;
+  color: #fff;
+  height: 41px;
 }
 
+.dv-navbar-nav > li > a {
+  color: #cccccc;
+  text-shadow: none;
+}
 
-.x-container {
+.dv-navbar-nav > li:hover > a,
+.dv-navbar-nav > li > a:focus,
+.dv-navbar-nav > li.uk-open > a {
+  background-color: #a42b2b;
+  color: #fff;
+  text-shadow: none;
+}
+
+/* Active */
+.dv-navbar-nav > li.uk-active > a {
+  background: #000;
+  color: #fff;
+  border-top: 3px solid #dd4b39;
+}
+
+.dv-navbar-nav > li.uk-active:hover > a{
+  background-color: #a42b2b;
+  color: #fff;
+  text-shadow: none;
+}
+
+.dv-container {
     position: relative;
     float: none;
     clear: both;
     overflow: visible;
-    max-width: 1180px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -56,29 +82,27 @@
 	height:60px;
 }
 
-.x-toolbar-form-item {
-	height:40px;
-}
-
-.x-search{
+.dv-button-search{
 	width:60px;
 	height:40px;
 	background:#fff;
 	border: 1px solid #ccc;
+  margin-top:-40px;
 }
-.x-search:hover{
+
+.dv-button-search:hover{
 	color:#fff;
-	background:@navbar-background;
+	background:#a42b2b;
 	border-color: #ccc;
-	border: 1px;
+	border:1px;
 }
 
 /*text*/
-.x-text-attention {
+.dv-link {
 	color:#CC525E;
 	text-decoration: none;
 }
-.x-text-attention:hover {
+.dv-link:hover {
 	color:#CC525E;
 }
 
@@ -92,10 +116,6 @@
 }
 
 /*form*/
-.x-controls{
-  width: 100%;
-}
-
 form p.help-text {
     margin: 5px 0 22px;
     text-align: left;
@@ -107,6 +127,31 @@ form p.help-text {
     line-height: 18px;
     margin: 5px 0 22px;
     padding-left: 8px;
+}
+
+.dv-snippet {
+  padding: 10px;
+  border: 2px solid #CC525E;
+  background: #fff;
+}
+.dv-params, .dv-returns {
+  border-spacing: 10px 2px;
+}
+.dv-paramname, .dv-retval {
+  font-weight: bold;
+}
+
+.dv-snippet dd {
+    display: block;
+    -webkit-margin-start: 40px;
+}
+
+.dv-snippet dt {
+    font-weight: bold;
+}
+
+.dv-snippet pre {    
+    border: 0px;
 }
 
 /*heart animation*/

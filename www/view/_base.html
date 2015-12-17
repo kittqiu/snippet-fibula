@@ -8,9 +8,9 @@
 	<meta name="description" content="{{ __website__.description }}"/>
 	{% block meta %} <!-- meta here --> {% endblock %}
 	<!-- BEGIN CSS COMPRESS -->
-	<!-- ENDCSS COMPRESS -->
-	{% block css %}<!-- css -->{% endblock %}
+	<!-- ENDCSS COMPRESS -->	
 	<link rel="stylesheet" href="/static/css/theme/{{ __theme__ }}.css"/>
+	{% block css %}<!-- css -->{% endblock %}
 	{% if __production__ %}
 	<script src="/static/themes/{{ __theme__ }}/js/all.js"></script>
 	{% else %}
@@ -21,62 +21,60 @@
 	<script src="/static/js/vue.js"></script>
 	<script src="/static/js/jjv.js"></script>
 	<script src="/static/js/form_schema.js"></script>
+	<script src="/static/js/lodash.min.js"></script>
 	<!-- END JAVASCRIPT COMPRESS -->
 	{% endif %}
 	{% block head %}<!-- head  -->{% endblock %}
 </head>
 <body>
-	<div id="header" class="uk-navbar uk-navbar-attached">
-		<div class="uk-grid">
-			<div class="uk-width-1-2">
-				<div class="uk-navbar-content uk-navbar-center">
-					<a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a>
-				</div>
-			</div>
-			<div class="uk-width-1-2">
-				<ul class="uk-navbar-nav">
-			        <li class="uk-active"><a href="">snippet</a></li>
-			        <li><a href="">project</a></li>
-			        <li class="uk-parent"><a href="">documentations</a></li>
-		    	</ul>
-			</div>
-    	</div>
+	<div id="header">
+		<ul class="dv-navbar-nav uk-navbar-nav">
+			<li><a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a></li>
+	        <li class="uk-active"><a href="" >snippet</a></li>
+	        <li><a href="">project</a></li>
+	        <li><a href="">documentations</a></li>
+    	</ul>    					
+		<ul class="dv-navbar-nav uk-navbar-nav" style="float:right;">
+			{% if __user__ %}
+			<li class="" data-uk-dropdown="{pos:'left-bottom'}" style="padding-top:10px;margin-right:20px;">
+                    {{ __request__.user.name }}<i class="uk-icon-caret-down"></i>
+                    <div class="uk-dropdown uk-dropdown-navbar" style="top: 30px; left: -170px;">
+                        <ul class="uk-nav uk-nav-navbar uk-subnav-pill">
+                        	<li><a href="/user/changepassword">{{ _('change password')}}</a></li>
+                            <li class="uk-nav-divider"></li>
+                            <li class="uk-active"><a href="/auth/signout">{{ _('logout')}}</a></li>
+                        </ul>
+                    </div>
+            </li>
+            {% else %}
+			<li><a href="/login" class="">{{ _('log in') }}</a></li>
+			<li><a href="/signup" class="">{{ _('sign up') }}</a></li>
+		{% endif %}
+		</ul>
 	</div>
 	<div id="main">
 		<div id="main-header" class="uk-grid">
 			<div class="uk-width-1-1 uk-block uk-block-muted uk-flex x-toolbar" >
-				<div class="uk-flex-item-auto x-panel">
+				<div class="uk-flex-item-auto " style="padding-right:20px;padding-left:20px;">
 				{% block toolbar %}
 					<form class="uk-form">
 						<div style="margin-right:60px;">
-				    		<input type="input" placeholder="find snippet"  class="uk-width-* x-toolbar-form-item" >
+				    		<input type="input" placeholder="find snippet"  class="uk-width-*" style="height:40px" >
 				    	</div>		
-				    	<button class="uk-button uk-icon-search x-search uk-float-right" style="margin-top:-40px;"></button>
+				    	<button class="uk-button uk-icon-search dv-button-search uk-float-right"></button>
 					</form>
 				{% endblock %}
 				</div>
-				<div class="uk-flex-item-none x-panel" style="padding-top:10px;padding-bottom:10px;">
-				{% if __user__ %}				
-				<ul class="uk-navbar-nav">
-					<li class="uk-parent" data-uk-dropdown="{pos:'left-bottom'}">
-                            {{ __request__.user.name }}<i class="uk-icon-caret-down"></i>
-                            <div class="uk-dropdown uk-dropdown-navbar" style="top: 30px; left: -160px;">
-                                <ul class="uk-nav uk-nav-navbar uk-subnav-pill">
-                                	<li><a href="/user/changepassword">{{ _('change password')}}</a></li>
-                                    <li class="uk-nav-divider"></li>
-                                    <li class="uk-active"><a href="/auth/signout">{{ _('logout')}}</a></li>
-                                </ul>
-                            </div>
-                    </li>
-				</ul>				
-				{% else %}
-					<a href="/login" class="x-text-attention ">{{ _('log in') }}</a> {{ _('or') }} <a href="/signup" class="x-text-attention">{{ _('sign up') }}</a>
+				<div class="uk-flex-item-none " style="padding:10px 20px;">
+				{% if __user__ %}	
+				<a href="/snippet/create" class="dv-link" style="margin-right:20px">{{ _('Create') }}</a>				
+				{% else %}					
 				{% endif %}
 				</div>			
 			</div>
 		</div>
 		<div id="main-content">
-			<div id="jump-block" class="x-container x-content uk-hidden">
+			<div id="jump-block" class="dv-container x-content uk-hidden">
 				<div class="uk-alert uk-alert-success uk-alert-large">
 					<h2>{% block jump-title  %}成功{% endblock %}</h2>
 					<p><b id="jump-timeout" class="uk-text-danger">5</b> 秒后页面将自动跳转到<a id="jump-href"></a>......</p>

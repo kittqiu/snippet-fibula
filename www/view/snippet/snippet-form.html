@@ -1,0 +1,206 @@
+{% extends '../_base.html' %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/css/codemirror.css"/>
+{% endblock %}
+
+{% block head %}
+<script src="/static/js/codemirror.js"></script>
+<script src="/static/js/marked.js"></script>
+<script src="/static/js/uikit/components/htmleditor.js"></script>
+<script type="text/javascript">
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: '',
+			description: '',
+			language: '0',
+			environment: '0',			
+			keywords: '',
+			snippet: '',
+			help:''
+		},
+		methods:{
+			gendoc: function(){
+				var html = '';
+				if( this.snippet )
+					html = codeToHtml(this.snippet);
+				$('#codeAnddoc').html(html);
+			},
+			getPostData: function(){
+				/*var data = {
+					oldpassword: this.oldpassword,
+					newpassword: this.newpassword,
+					verifypassword: this.verifypassword
+				};
+				if(validateJsonObj('changepsd', data)){
+					if( this.newpassword !== this.verifypassword ){
+						throw  { error:'invalid parameter', data:'verifypassword', message:"{{ _('Passwords is not the same') }}"}; 
+					}
+					if( this.newpassword === this.oldpassword ){
+						throw  { error:'invalid parameter', data:'newpassword', message:"{{ _('Passwords has not been changed') }}"}; 
+					}
+
+					//salt password
+					delete(data['verifypassword']);
+					data.oldpassword = saltpassword(this.oldpassword, '{{ __salt__ }}' );
+					data.newpassword = saltpassword(this.newpassword, '{{ __salt__ }}' );
+					return data;
+
+				}	*/
+				console.log( this.language );			
+			},
+			submit: function(){
+				var data,
+					form = $('#vm').find('form');
+				try{
+					data = this.getPostData();
+					form.showFormError();//clear error tip
+				}catch(e){
+					form.showFormError(e);
+					return;
+				}				
+
+				form.postJSON( '/api/user/changepwd', data, function(err, result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
+						jumpTo( '/', "{{ _('Home')}}", 3 );
+					}
+				});
+			}
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block jump-title  %}密码修改成功{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container">
+		<h2 class="x-title">{{ _('Create') }}</h2>
+		<div style="text-align:right"><a href="" class="dv-link">{{ _('Create snippet module') }}</a></div>
+		<hr style="margin-top:2px">
+		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
+			<fieldset>
+				<div class="uk-alert uk-alert-danger uk-hidden"></div>
+			    <div class="uk-form-row uk-grid" style="margin-top:10px">
+			    	<div class="uk-width-1-4">
+				        <label class="uk-form-label">{{ _('Name') }}</label>
+				        <div class="uk-form-controls">
+				        	<input v-model="name" name="name"  type="text" class="uk-width-1-1">
+				        </div>
+			        </div>
+			        <div style="margin-left:0px;margin-right:0px;">
+				        <div class="uk-form-label" style="padding-top:30px">--</div>
+			        </div>
+			        <div class="uk-width-1-2">
+				        <label class="uk-form-label">{{ _('description') }}</label>
+				        <div class="uk-form-controls">
+				        	<input v-model="description" name="description"  type="text" class="uk-width-1-1">
+				        </div>
+			        </div>
+			        <div>
+			        	<p class="help-text">函数名或模块名，3-50字符，必须是小写字母、数字、-连字线或_下划线字符。</p>
+			    	</div>
+			    </div>
+			    <div class="uk-form-row uk-grid" style="margin-top:20px">
+			    	<div class="uk-width-1-4">
+				        <label class="uk-form-label">{{ _('Program language') }}</label>
+				        <div class="uk-form-controls">
+				        	<select v-model="language" name="language" class="uk-width-1-1">
+				        		{% for lang in __languages %}
+				        			{% if loop.first %}
+				        			<option value="{{ loop.key }}" selected>{{ lang }}</option>
+				        			{% else %}
+				        			<option value="{{ loop.key }}">{{ lang }}</option>
+				        			{% endif %}
+				        		{% endfor %}
+				        	</select>
+				        </div>
+			        </div>
+			        <div style="margin-left:0px;margin-right:0px;">
+				        <div class="uk-form-label" style="padding-top:30px">--</div>
+			        </div>
+			        <div class="uk-width-1-2">
+				        <label class="uk-form-label">{{ _('develop environment') }}</label>
+				        <div class="uk-form-controls">
+				        	<select v-model="environment" name="environment" class="uk-width-1-1">
+				        		{% for x in __environments %}
+				        			{% if loop.first %}
+				        			<option value="{{ loop.key }}" selected>{{ x }}</option>
+				        			{% else %}
+				        			<option value="{{ loop.key }}">{{ x }}</option>
+				        			{% endif %}
+				        		{% endfor %}
+				        	</select>
+				        </div>
+			        </div>
+			        <div>
+			        	<p class="help-text"></p>
+			    	</div>
+			    </div>
+			    <div class="uk-form-row" style="margin-top:20px">
+			        <label class="uk-form-label">{{ _('Keywords') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="keywords" name="keywords" type="password" class="uk-width-1-1">
+			        </div>
+			        <p class="help-text">3-100字符，最多10个关键词</p>
+			    </div>
+			    <div class="uk-form-row" style="margin-top:20px">
+			    	<label class="uk-form-label">{{ _('Code snippet') }}</label>
+			    	<div class="uk-form-controls">
+			        	<textarea v-model="snippet" v-on:change="gendoc" cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:300px" ></textarea>
+			        </div>
+			        <p class="help-text"></p>
+			        <div id="codeAnddoc">
+			        </div>
+			    	<!--div class="uk-grid">	    	
+				    	<div class="uk-width-1-2">
+					        <textarea cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:400px"></textarea>
+				        </div>
+				        <div class="uk-width-1-10">
+				        <div class="uk-vertical-align" style="margin-left:0px;margin-right:0px;height:400px;" >				        
+					        <div class="uk-vertical-align-middle">
+					        	<b class="uk-icon-arrow-right uk-icon-medium"></b>
+						        <p> 转换</p>
+					        </div>
+				        </div>
+				    </div>
+				        <div class="uk-width-4-10">
+					        <textarea cols="" rows="" placeholder="" class="uk-width-1-1" style="height:400px" disabled></textarea>
+				        </div>
+				        <div>
+				        	<p class="help-text"></p>
+				    	</div>
+				    </div-->
+			    </div>
+			    <!--div class="uk-form-row" style="margin-top:20px">
+			        <label class="uk-form-label">{{ _('dependence') }}</label>
+			        <div class="uk-form-controls">
+			        	<textarea cols="" rows="" placeholder="需要包含何种头文件等，markdown格式" class="uk-width-1-1" style="height:100px" data-uk-htmleditor="{maxsplitsize:600, markdown:true}"></textarea>
+			        </div>
+			        <p class="help-text">markdown格式，填写执行时依赖的环境等</p>
+			    </div-->
+			    <div class="uk-form-row" style="margin-top:20px">
+			        <label class="uk-form-label">{{ _('Help') }}</label>
+			        <div class="uk-form-controls">
+			        	<textarea v-model="help" cols="" rows="" placeholder="需要包含何种头文件 、使用示例等，markdown格式" class="uk-width-1-1" style="height:100px" data-uk-htmleditor="{maxsplitsize:600, markdown:true}"></textarea>
+			        </div>
+			        <p class="help-text">markdown格式，填写帮助信息</p>
+			    </div>
+			    <div class="uk-form-row uk-clearfix">
+			        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
+			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _('Create') }}
+			        </button>
+			    </div>
+	    </fieldset>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+

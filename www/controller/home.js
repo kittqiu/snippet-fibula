@@ -33,6 +33,7 @@ function* $getModel(model){
 
 
 module.exports = {
+	$getModel: $getModel,
 
 	'GET /': function* (){
 		var model = {};
