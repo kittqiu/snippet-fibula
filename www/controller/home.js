@@ -24,7 +24,6 @@ function getView(view){
 }
 
 function* $getModel(model){
-	console.log( PRODUCTION );
 	model.__production__ = PRODUCTION;
 	//model.__navigations__ = yield
 	model.__website__ = yield settingApi.$getWebsiteSettings();

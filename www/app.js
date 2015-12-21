@@ -133,7 +133,12 @@ app.use( function* theMiddleWare(next){
     }
 
     try{
-    	yield next;//action now
+    	if(auth.loginRequired(this)){//GET method and require login
+    		return;
+    	}else{
+    		yield next;//action now
+    	}
+    	
     	execTime = String(Date.now() - start);
     	response.set('X-Cluster-Node', hostname);
     	response.set( 'X-Execution-Time', execTime );    	
@@ -222,6 +227,12 @@ var controllers = loadControllers();
 _.each(controllers, function(ctrl, filename){
 	_.each( ctrl, function(fn, path){
 		var ss, method, route, docs;
+
+		if( path === 'LoginRequired'){
+			auth.registerAuthPaths(fn);
+			return;
+		}
+
 		ss = path.split(' ', 2);
 		if( ss.length !== 2 ){
 			console.log( "Invalid route definition: " + path );

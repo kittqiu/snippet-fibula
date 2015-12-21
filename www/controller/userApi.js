@@ -189,9 +189,9 @@ module.exports = {
         //validate data
         json_schema.validate('changePassword', data);
 
-        if( !this.request.user ){
+        /*if( !this.request.user ){
             throw api.authRequired('oldpassword', this.translate('Please log in first'));
-        }
+        }*/
         user = this.request.user;
         oldpassword = data.oldpassword;
         newpassword = data.newpassword;
@@ -228,5 +228,6 @@ module.exports = {
         this.body = {
             id: user.id
         };
-    }, 
+    },
+    'LoginRequired': [ '/api/user/changepwd'] 
 };

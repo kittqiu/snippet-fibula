@@ -1,10 +1,44 @@
 
 var SCHEMA_PROPERTY = {
+	BRIEF:{
+		type: 'string',
+		minLength: 1,
+		maxLength: 100,
+		desc: '简述'
+	},
 	EMAIL:{
 		type: 'string',
         maxLength: 100,
         pattern: '^(?:[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+\\.)*[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+@(?:(?:(?:[a-z0-9](?:[a-z0-9\\-](?!\\.)){0,61}[a-z0-9]?\\.)+[a-z0-9](?:[a-z0-9\\-](?!$)){0,61}[a-z0-9]?)|(?:\\[(?:(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\.){3}(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\]))$',
         desc: '邮箱'
+	},
+	ENVIRONMENT:{
+		type: 'string',
+		pattern:'^[0-9]{1,2}$',
+		desc: '开发环境'
+	},
+	FUNCTIONNAME:{
+		type: 'string',
+		minLength: 3,
+		maxLength: 50,
+		pattern:'^[a-z0-9A-Z\\_\\-\\$]{3,50}$',
+		desc: '函数或模板名'
+	},
+	HELP:{
+		type: 'string',
+		minLength: 1,
+		desc: '帮助'
+	},
+	KEYWORD:{
+		type: 'string',
+		minLength: 3,
+		maxLength: 100,
+		desc: '关键字'
+	},
+	LANGUAGE:{
+		type: 'string',
+		pattern:'^[0-9]{1,2}$',
+		desc: '编程语言'
 	},
 	NAME:{
 		type: 'string',
@@ -26,6 +60,11 @@ var SCHEMA_PROPERTY = {
 		maxLength: 20,
 		pattern: '^[a-f0-9A-Z]{6,20}$',
 		desc: '确认密码'
+	},
+	SNIPPET:{
+		type: 'string',
+		minLength: 1,
+		desc: '源代码'
 	},
 	USERNAME:{
 		type: 'string',
@@ -71,6 +110,19 @@ var SCHEMAS = {
 			verifypassword:SCHEMA_PROPERTY.PASSWORDVERIFY
 		},
 		required:['oldpassword', 'newpassword', 'verifypassword']
+	},
+	createSnippet:{
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.FUNCTIONNAME,
+			brief: SCHEMA_PROPERTY.BRIEF,
+			language:SCHEMA_PROPERTY.LANGUAGE,
+			environment:SCHEMA_PROPERTY.ENVIRONMENT,
+			keywords:SCHEMA_PROPERTY.KEYWORD,
+			snippet:SCHEMA_PROPERTY.SNIPPET,
+			help:SCHEMA_PROPERTY.HELP
+		},
+		required:['name', 'brief', 'language', 'environment', 'keywords', 'snippet', 'help']
 	}
 };
 

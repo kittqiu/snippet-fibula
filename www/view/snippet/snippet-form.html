@@ -14,7 +14,7 @@ $(function () {
 		el: '#vm',
 		data:{
 			name: '',
-			description: '',
+			brief: '',
 			language: '0',
 			environment: '0',			
 			keywords: '',
@@ -29,27 +29,19 @@ $(function () {
 				$('#codeAnddoc').html(html);
 			},
 			getPostData: function(){
-				/*var data = {
-					oldpassword: this.oldpassword,
-					newpassword: this.newpassword,
-					verifypassword: this.verifypassword
+				var data = {
+					name: this.name,
+					brief: this.brief,
+					language: this.language,
+					environment: this.environment,
+					keywords: this.keywords,
+					snippet: this.snippet,
+					help: this.help
 				};
-				if(validateJsonObj('changepsd', data)){
-					if( this.newpassword !== this.verifypassword ){
-						throw  { error:'invalid parameter', data:'verifypassword', message:"{{ _('Passwords is not the same') }}"}; 
-					}
-					if( this.newpassword === this.oldpassword ){
-						throw  { error:'invalid parameter', data:'newpassword', message:"{{ _('Passwords has not been changed') }}"}; 
-					}
-
-					//salt password
-					delete(data['verifypassword']);
-					data.oldpassword = saltpassword(this.oldpassword, '{{ __salt__ }}' );
-					data.newpassword = saltpassword(this.newpassword, '{{ __salt__ }}' );
+				console.log(data);
+				if(validateJsonObj('createSnippet', data)){
 					return data;
-
-				}	*/
-				console.log( this.language );			
+				}	
 			},
 			submit: function(){
 				var data,
@@ -62,7 +54,7 @@ $(function () {
 					return;
 				}				
 
-				form.postJSON( '/api/user/changepwd', data, function(err, result){
+				form.postJSON( '/api/snippet/create', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
 						jumpTo( '/', "{{ _('Home')}}", 3 );
@@ -76,7 +68,7 @@ $(function () {
 </script>
 {% endblock %}
 
-{% block jump-title  %}密码修改成功{% endblock %}
+{% block jump-title  %}snippet创建成功{% endblock %}
 
 {% block content %}
 <div id="content-block" class="dv-container x-content">
@@ -100,7 +92,7 @@ $(function () {
 			        <div class="uk-width-1-2">
 				        <label class="uk-form-label">{{ _('description') }}</label>
 				        <div class="uk-form-controls">
-				        	<input v-model="description" name="description"  type="text" class="uk-width-1-1">
+				        	<input v-model="brief" name="brief"  type="text" class="uk-width-1-1">
 				        </div>
 			        </div>
 			        <div>
@@ -146,7 +138,7 @@ $(function () {
 			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Keywords') }}</label>
 			        <div class="uk-form-controls">
-			        	<input v-model="keywords" name="keywords" type="password" class="uk-width-1-1">
+			        	<input v-model="keywords" name="keywords" type="text" class="uk-width-1-1">
 			        </div>
 			        <p class="help-text">3-100字符，最多10个关键词</p>
 			    </div>
@@ -188,9 +180,9 @@ $(function () {
 			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Help') }}</label>
 			        <div class="uk-form-controls">
-			        	<textarea v-model="help" cols="" rows="" placeholder="需要包含何种头文件 、使用示例等，markdown格式" class="uk-width-1-1" style="height:100px" data-uk-htmleditor="{maxsplitsize:600, markdown:true}"></textarea>
+			        	<textarea v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" data-uk-htmleditor="{maxsplitsize:600, markdown:true}"></textarea>
 			        </div>
-			        <p class="help-text">markdown格式，填写帮助信息</p>
+			        <p class="help-text">markdown格式，填写帮助信息，如需要包含何种头文件 、使用示例等</p>
 			    </div>
 			    <div class="uk-form-row uk-clearfix">
 			        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >

@@ -23,7 +23,9 @@ var
     crypto = require('crypto'),
     config = require('./config'),
     constants = require('./constants'), 
-    db = require('./db');
+    db = require('./db'),
+    _ = require('lodash'),
+    api = require('./api');
 
 var 
     User = db.user,
@@ -186,6 +188,26 @@ function* $userIdentityParser(next){
     yield next;
 }
 
+var authPaths = [];
+function registerAuthPaths(paths){
+    authPaths = authPaths.concat(paths);
+}
+function loginRequired(context){
+    var path = context.request.path;
+
+    if( _.indexOf(authPaths, path) !== -1 ){
+        if( !context.request.user ){
+            if( context.request.method === 'GET'){
+                context.response.redirect('/login');
+                return true;
+            }else{
+                throw api.authRequired();
+            }
+        }
+    }
+    return false;
+}
+
  module.exports = {
 
  	generatePassword: _generatePassword,
@@ -194,5 +216,9 @@ function* $userIdentityParser(next){
 
     makeSessionCookie: makeSessionCookie,
 
- 	$userIdentityParser: $userIdentityParser
+ 	$userIdentityParser: $userIdentityParser,
+
+    registerAuthPaths: registerAuthPaths,
+
+    loginRequired: loginRequired
  };

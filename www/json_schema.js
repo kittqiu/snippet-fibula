@@ -58,6 +58,25 @@ var createApiError = function (errors) {
 
 var PROPERTY = {
 
+    BRIEF:{
+        type: 'string',
+        minLength: 1,
+        maxLength: 100
+    },
+    ENVIRONMENT:{
+        type: 'string',
+        pattern:'^[0-9]{1,2}$'
+    },
+    FUNCTIONNAME:{
+        type: 'string',
+        minLength: 3,
+        maxLength: 50,
+        pattern:'^[a-z0-9A-Z\\_\\-\\$]{3,50}$'
+    },
+    HELP:{
+        type: 'string',
+        minLength: 1
+    },  
     ID: {
         type: 'string',
         pattern: '^[0-9a-f]{50}$'
@@ -67,7 +86,15 @@ var PROPERTY = {
         type: 'string',
         pattern: '^([0-9a-f]{50})?$'
     },
-
+    KEYWORD:{
+        type: 'string',
+        minLength: 3,
+        maxLength: 100
+    },
+    LANGUAGE:{
+        type: 'string',
+        pattern:'^[0-9]{1,2}$'
+    },
     EMAIL: {
         type: 'string',
         maxLength: 100,
@@ -84,6 +111,11 @@ var PROPERTY = {
     PASSWD: {
         type: 'string',
         pattern: '^[a-f0-9]{40}$'
+    },
+    SNIPPET:{
+        type: 'string',
+        minLength: 1,
+        desc: '源代码'
     },
 
     NAME: {
@@ -220,6 +252,20 @@ var schemas = {
         },
         required: ['username', 'password', 'email', 'name']
     },
+    createSnippet:{
+        type: 'object',
+        properties: {
+            name: PROPERTY.FUNCTIONNAME,
+            brief: PROPERTY.BRIEF,
+            language:PROPERTY.LANGUAGE,
+            environment:PROPERTY.ENVIRONMENT,
+            keywords:PROPERTY.KEYWORD,
+            snippet:PROPERTY.SNIPPET,
+            help:PROPERTY.HELP
+        },
+        required:['name', 'brief', 'language', 'environment', 'keywords', 'snippet', 'help']
+    },
+
     createCategory: {
         type: 'object',
         properties: {
