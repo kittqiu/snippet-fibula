@@ -1,14 +1,13 @@
-{
-	"0": "C",
-	"1": "C++",
-	"2": "Java",
-	"3": "Javascript",
-	"4": "C#",
-	"5": "HTML",
-	"6": "Python",
-	"7": "PHP",
-	"8": "shell",
-	"9": "Ruby",
-
-	"99": "Unknown"
-}
+[
+	"C",
+	"C++",
+	"Java",
+	"Javascript",
+	"C#",
+	"HTML",
+	"Python",
+	"PHP",
+	"shell",
+	"Ruby",
+	"不确定"
+]

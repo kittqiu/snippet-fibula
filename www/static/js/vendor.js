@@ -64,8 +64,9 @@ $(function () {
                     console.error('Cannot call showFormLoading() on non-form object.');
                     return;
                 }
-                if (!iconClass || iconClass.indexOf('uk-icon') < 0) {
-                    console.warn('Icon <i class="uk-icon-*>" not found.');
+                console.log($form.find('button[type=submit]'));
+                if ($i && (!iconClass || iconClass.indexOf('uk-icon') < 0)) {
+                    console.warn('Icon <i class="uk-icon-*"> not found.');
                     return;
                 }
                 if (isLoading) {
@@ -148,7 +149,7 @@ function postJSON(url, data, callback){
 		callback = data;
 		data = {};
 	}
-	_httpJSON( url, data, callback );
+	_httpJSON( 'POST', url, data, callback );
 }
 
 /*form validate*/
@@ -262,9 +263,9 @@ function getCommentDoc(src){
     return codeobj;
 }
 
-function codeToHtml( src ){
+function codeToHtml( src, cls ){
     var codeobj = getCommentDoc(src);
-    var html = '<div class="dv-snippet">';
+    var html = cls ? '<div class="' + cls + '">' : '<div class="dv-snippet">';
     if( codeobj.doc ){
         var doc = codeobj.doc;
         if( doc.name ){
@@ -303,4 +304,9 @@ function codeToHtml( src ){
     html += '<div><dl><dt>代码:</dt><dd><pre>' + codeobj.code.trim()  +'</dd></dl></pre></div>';
     html += '</div>';
     return html;
+}
+
+function fatal(err) {
+    console.error( err );
+    //_display_error($('#loading'), err);
 }

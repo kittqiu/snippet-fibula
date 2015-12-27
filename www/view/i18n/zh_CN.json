@@ -1,6 +1,9 @@
 {
+	"Advice": "修改建议",
+
 	"Change": "修改",
 	"change password": "修改密码",
+	"Check": "审核",
 	"Chinese name": "中文名",
 	"Chinese or English name": "中文名或英文名",
 	"Code snippet": "代码块",
@@ -11,26 +14,37 @@
 	"dependence": "依赖",
 	"description": "简述",
 	"develop environment": "开发环境",
+	"Discard": "丢弃",
 
 	"email": "邮箱",
 
+	"go back to the last page": "返回前一页",
+
+	"Help": "帮助",
+	"History Page": "历史页面",
+	"Home": "首页",
+
+	"Keywords": "关键字",
 
 	"Login": "登录",
 	"log in": "登录",
 	"logout": "退出",
 
-	"Help": "帮助",
-	"Home": "首页",
-
-	"Keywords": "关键字",
+	"More": "查看更多",
 
 	"Name": "名称",
 	"new password":"新密码",
+	"No record": "无记录",
+
 	"or": "或",
 	"old password":"原始密码",
-
+	
+	"Pass": "通过",
 	"password": "密码",
+	"Pending to check": "待审核",
 	"Program language": "编程语言",
+
+	"Record not found": "未找到对应的数据记录，可能数据已经被转移",
 
 	"SignUp": "注册",
 	"sign up": "注册",

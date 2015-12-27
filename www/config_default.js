@@ -48,7 +48,7 @@
         queueLimit: 10
     },
     cache:{
-        prefix: 'snippet-fibula/',
+        prefix: 'fibula/',
         // host or ip address of memcached:
         host: '127.0.0.1',
         // port of memcached, default to 11211:
@@ -61,6 +61,11 @@
     // NOT USED NOW:
     cdn: {
         static_prefix: ''
+    },
+
+    snippet: {
+        page_size: 10,
+        score_delta: 34
     },
 
     // END:

@@ -10905,6 +10905,13 @@ a.uk-datepicker-table-muted {
   margin-bottom: 30px;
   text-align: center;
 }
+.dv-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 0px;
+  text-align: left;
+  color: #CC525E;
+}
 /*form*/
 form p.help-text {
   margin: 5px 0 22px;
@@ -10920,6 +10927,11 @@ form p.help-text {
 .dv-snippet {
   padding: 10px;
   border: 2px solid #CC525E;
+  background: #fff;
+}
+.dv-snippet-view {
+  padding: 10px;
+  border: 1px solid #ccc;
   background: #fff;
 }
 .dv-params,

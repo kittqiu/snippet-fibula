@@ -80,6 +80,13 @@ module.exports = {
         }, options || {});
     },
 
+    column_varchar_20: function (name, options) {
+        return _.merge({
+            name: name,
+            type: 'varchar(20)'
+        }, options || {});
+    },
+
     column_varchar_50: function (name, options) {
         return _.merge({
             name: name,

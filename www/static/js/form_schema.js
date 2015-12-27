@@ -14,7 +14,8 @@ var SCHEMA_PROPERTY = {
 	},
 	ENVIRONMENT:{
 		type: 'string',
-		pattern:'^[0-9]{1,2}$',
+		minLength: 1,
+		maxLength: 20,
 		desc: '开发环境'
 	},
 	FUNCTIONNAME:{
@@ -37,7 +38,8 @@ var SCHEMA_PROPERTY = {
 	},
 	LANGUAGE:{
 		type: 'string',
-		pattern:'^[0-9]{1,2}$',
+		minLength: 1,
+		maxLength: 20,
 		desc: '编程语言'
 	},
 	NAME:{
@@ -119,10 +121,10 @@ var SCHEMAS = {
 			language:SCHEMA_PROPERTY.LANGUAGE,
 			environment:SCHEMA_PROPERTY.ENVIRONMENT,
 			keywords:SCHEMA_PROPERTY.KEYWORD,
-			snippet:SCHEMA_PROPERTY.SNIPPET,
+			code:SCHEMA_PROPERTY.SNIPPET,
 			help:SCHEMA_PROPERTY.HELP
 		},
-		required:['name', 'brief', 'language', 'environment', 'keywords', 'snippet', 'help']
+		required:['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help']
 	}
 };
 

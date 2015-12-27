@@ -8,7 +8,6 @@
 <script src="/static/js/codemirror.js"></script>
 <script src="/static/js/marked.js"></script>
 <script src="/static/js/uikit/components/htmleditor.js"></script>
-<script src="/static/js/base64.min.js"></script>
 <script type="text/javascript">
 
 function initVM( data ){
@@ -21,14 +20,14 @@ function initVM( data ){
 			environment: data.environment ||'{{ __environments[0]}}',			
 			keywords: data.keywords ||'',
 			code: data.code ||'',
-			help:data.help ||''
+			help:data.help ||'',
+			advice:''
 		},
 		methods:{
 			gendoc: function(){
 				var html = '';
-				if( this.code ){
+				if( this.code )
 					html = codeToHtml(this.code);
-				}
 				$('#codeAnddoc').html(html);
 			},
 			getPostData: function(){
@@ -45,74 +44,59 @@ function initVM( data ){
 					return data;
 				}	
 			},
-			submit: function(){
+			submit: function(){},
+			pass: function(){
 				var data,
 					form = $('#vm').find('form');
-				try{
-					data = this.getPostData();
-					form.showFormError();//clear error tip
-				}catch(e){
-					form.showFormError(e);
-					return;
-				}				
+				var data = {
+					id: '{{ __id }}',
+					type: 'pass',
+					advice: this.advice
+				};
 
-				form.postJSON( '{{ __form.action }}', data, function(err, result){
+				form.postJSON( '/api/snippet/pending/check', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
-						{% if __id %}
+						//jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
+					}
+				});
+			},
+			discard: function(){
+				postJSON( '/api/snippet/pending/check', {id:'{{ __id }}',type:'discard'}, function(err,result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
 						jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
-						{% else %}
-						jumpTo( '/', "{{ _('Home')}}", 3 );
-						{% endif %}	
 					}
 				});
 			}
 		}
 	});
 	
-	var htmleditor = UIkit.htmleditor($('#help').get(0), {
+	/*var htmleditor = UIkit.htmleditor($('#help').get(0), {
     markdown: true,
     maxsplitsize: 600
-    });
+    });*/
+	$('#help').html( marked(data.help));
 
-    var html = codeToHtml(data.code);
+    var html = codeToHtml(data.code, 'dv-snippet-view');
 	$('#codeAnddoc').html(html);
 }
 
 $(function () {
-	{% if __id %}
 	getJSON( '/api/snippet/pending/entity/{{ __id }}', function(err, snippet){
 		if(err){
 			fatal(err);
 		}else{
 			initVM( snippet );
 		}
-	});
-	/*var snippet = {
-		name: '{{ __record.name }}',
-		brief: '{{ __record.brief }}',
-		language: '{{ __record.language }}',
-		environment: '{{ __record.environment }}',	
-		keywords: '{{ __record.keywords }}',
-		snippet: Base64.decode('{{ __record.snippet }}'),
-		help:Base64.decode('{{ __record.help }}')
-		};*/
-	{% else %}
-	var data = {};
-	initVM( data );
-	{% endif %}
-	
+	});	
 });
 
 </script>
 {% endblock %}
 
 {% block jump-title  %}
-{% if ! __id %}
-snippet创建成功
-{% else %}
-snippet修改成功
-{% endif %}
+操作成功
 {% endblock %}
 
 {% block content %}
@@ -130,7 +114,7 @@ snippet修改成功
 			    	<div class="uk-width-1-4">
 				        <label class="uk-form-label">{{ _('Name') }}</label>
 				        <div class="uk-form-controls">
-				        	<input v-model="name" name="name"  type="text" class="uk-width-1-1">
+				        	<input v-model="name" name="name"  type="text" class="uk-width-1-1" disabled>
 				        </div>
 			        </div>
 			        <div style="margin-left:0px;margin-right:0px;">
@@ -139,18 +123,18 @@ snippet修改成功
 			        <div class="uk-width-1-2">
 				        <label class="uk-form-label">{{ _('description') }}</label>
 				        <div class="uk-form-controls">
-				        	<input v-model="brief" name="brief"  type="text" class="uk-width-1-1">
+				        	<input v-model="brief" name="brief"  type="text" class="uk-width-1-1" disabled>
 				        </div>
 			        </div>
 			        <div>
-			        	<p class="help-text">函数名或模块名，3-50字符，必须是小写字母、数字、-连字线或_下划线字符。</p>
+			        	<p class="help-text"></p>
 			    	</div>
 			    </div>
 			    <div class="uk-form-row uk-grid" style="margin-top:20px">
 			    	<div class="uk-width-1-4">
 				        <label class="uk-form-label">{{ _('Program language') }}</label>
 				        <div class="uk-form-controls">
-				        	<select id="language" v-model="language" name="language" class="uk-width-1-1">
+				        	<select id="language" v-model="language" name="language" class="uk-width-1-1" disabled>
 				        		{% for n,lang in __languages %}
 				        			{% if loop.first %}
 				        			<option>{{ lang }}</option>
@@ -167,7 +151,7 @@ snippet修改成功
 			        <div class="uk-width-1-2">
 				        <label class="uk-form-label">{{ _('develop environment') }}</label>
 				        <div class="uk-form-controls">
-				        	<select v-model="environment" name="environment" class="uk-width-1-1">
+				        	<select v-model="environment" name="environment" class="uk-width-1-1" disabled>
 				        		{% for n, x in __environments %}
 				        			{% if loop.first %}
 				        			<option>{{ x }}</option>
@@ -185,55 +169,38 @@ snippet修改成功
 			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Keywords') }}</label>
 			        <div class="uk-form-controls">
-			        	<input v-model="keywords" name="keywords" type="text" class="uk-width-1-1">
+			        	<input v-model="keywords" name="keywords" type="text" class="uk-width-1-1" disabled>
 			        </div>
-			        <p class="help-text">3-100字符，最多10个关键词</p>
+			        <p class="help-text"></p>
 			    </div>
 			    <div class="uk-form-row" style="margin-top:20px">
 			    	<label class="uk-form-label">{{ _('Code snippet') }}</label>
-			    	<div class="uk-form-controls">
-			        	<textarea v-model="code" v-on:change="gendoc" cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:300px" ></textarea>
+			    	<div class="uk-form-controls uk-hidden">
+			        	<textarea v-model="code" v-on:change="gendoc" cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:300px" disabled ></textarea>
 			        </div>
-			        <p class="help-text"></p>
 			        <div id="codeAnddoc">
 			        </div>
-			    	<!--div class="uk-grid">	    	
-				    	<div class="uk-width-1-2">
-					        <textarea cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:400px"></textarea>
-				        </div>
-				        <div class="uk-width-1-10">
-				        <div class="uk-vertical-align" style="margin-left:0px;margin-right:0px;height:400px;" >				        
-					        <div class="uk-vertical-align-middle">
-					        	<b class="uk-icon-arrow-right uk-icon-medium"></b>
-						        <p> 转换</p>
-					        </div>
-				        </div>
-				    </div>
-				        <div class="uk-width-4-10">
-					        <textarea cols="" rows="" placeholder="" class="uk-width-1-1" style="height:400px" disabled></textarea>
-				        </div>
-				        <div>
-				        	<p class="help-text"></p>
-				    	</div>
-				    </div-->
 			    </div>
-			    <!--div class="uk-form-row" style="margin-top:20px">
-			        <label class="uk-form-label">{{ _('dependence') }}</label>
-			        <div class="uk-form-controls">
-			        	<textarea cols="" rows="" placeholder="需要包含何种头文件等，markdown格式" class="uk-width-1-1" style="height:100px" data-uk-htmleditor="{maxsplitsize:600, markdown:true}"></textarea>
-			        </div>
-			        <p class="help-text">markdown格式，填写执行时依赖的环境等data-uk-htmleditor="{maxsplitsize:600, markdown:true}"</p>
-			    </div-->
 			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Help') }}</label>
-			        <div class="uk-form-controls">
-			        	<textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" ></textarea>
+			        <div class="uk-form-controls dv-snippet-view" id="help" >
+			        	<!--textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" disabled></textarea-->
 			        </div>
-			        <p class="help-text">markdown格式，填写帮助信息，如需要包含何种头文件 、使用示例等</p>
+			        <p class="help-text"></p>
+			    </div>
+			    <div class="uk-form-row" style="margin-top:20px">
+			        <label class="uk-form-label">{{ _('Advice') }}</label>
+			        <div class="uk-form-controls" id="help" >
+			        	<input id="advice" v-model="advice" type="text" placeholder="" class="uk-width-1-1">
+			        </div>
+			        <p class="help-text">将以列表项方式被追加到帮助信息栏</p>
 			    </div>
 			    <div class="uk-form-row uk-clearfix">
-			        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
-			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.name) }}
+			    	<button  v-on:click="discard" class="uk-button-success uk-button-large" style="width:240px;" >
+			        	<i class="uk-icon-close uk-icon-medium"></i> {{ _('Discard') }}
+			        </button>
+			        <button  v-on:click="pass" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
+			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _('Pass') }}
 			        </button>
 			    </div>
 	    </fieldset>
@@ -241,5 +208,3 @@ snippet修改成功
 	</div>
 </div>
 {% endblock %}
-
-

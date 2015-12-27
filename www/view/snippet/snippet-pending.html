@@ -1,0 +1,86 @@
+{% extends '../_base.html' %}
+
+{% block head %}
+<script type="text/javascript">
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: '',
+			brief: '',
+			language: '0',
+			environment: '0',			
+			keywords: '',
+			snippet: '',
+			help:''
+		},
+		methods:{
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container">
+		<h2 class="x-title">{{ _('Pending to check') }}</h2>
+		{% for n, lang in __languages %}
+		<div style="margin-bottom: 50px">
+			<h3 class="dv-title">{{ lang }}</h3>
+			<div style="text-align:right"><a href="/snippet/pending/list/{{ lang }}?page=1" class="dv-link">{{ _('More') }}({{ __counts[n] }})</a></div>			
+			<hr style="margin-top:2px;border-top:2px solid #888;">
+			{% if __counts[n] > 0 %}
+			<table class="uk-table uk-table-striped">
+				{% for m, record in __records[n] %}
+				<tr>
+					{% if __user__.id == record.user_id %}				
+					<td><a href="/snippet/pending/edit?id={{ record.id }}&amp;redirect=/snippet/pending" class="dv-link"><b>{{ record.name }}</b></a></td>
+					<td>{{ record.brief }}</td>
+					<td><a href="/snippet/pending/edit?id={{ record.id }}&amp;redirect=/snippet/pending" class="dv-link">{{ _('Change') }}</a></td>
+					{% else %}
+					<td><a href="/snippet/pending/check?id={{ record.id }}" class="dv-link"><b>{{ record.name }}</b></a></td>
+					<td>{{ record.brief }}</td>
+					<td><a href="/snippet/pending/check?id={{ record.id }}&amp;redirect=/snippet/pending" class="dv-link">{{ _('Check') }}{{ record.score }}%</a></td>
+					{% endif %}
+					
+				</tr>
+				{% endfor %}
+			</table>
+			{% set page = __pages[n] %}
+			{% if page.pages > 1 %}
+			<div style="text-align:center">
+				<ul class="uk-pagination">
+					{% if page.index == 1 %}
+						<li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+					{% else %}
+						<li><a href="/snippet/pending/{{ lang }}?page={{ page.index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
+					{% endif %}
+					{% for index in page.list %}
+						{% if index == '...' %}
+						<li class="uk-disabled"><span>...</span></li>
+						{% elseif index == page.index %}
+						<li class="uk-active"><span>{{ index }}</span></li>
+						{% else %}
+						<li><a href="/snippet/pending/{{ lang }}?page={{ index }}">{{ index }}</a></li>
+						{% endif %}
+					{% endfor %}
+					{% if page.index == page.total %}
+						<li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
+					{% else %}
+						<li><a href="/snippet/pending/{{ lang }}?page={{ page.index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
+					{% endif %}
+	            </ul>
+	        </div>
+            {% endif %}
+			{% else %}
+			<p>{{ _('No record')}}</p>
+			{% endif %}
+		</div>
+		{% endfor %}
+	</div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,68 @@
+{% extends '../_base.html' %}
+
+{% block head %}
+<script type="text/javascript">
+function initVM( data ){
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			snippets: data.snippets || [],
+			page: data.page || {}
+		},
+		methods:{
+		}
+	});	
+}
+
+$(function () {
+	getJSON( '/api/snippet/pending/lang/{{ __language }}', { page: {{ __page }}}, function(err, data){
+		if(err){
+			fatal(err);
+		}else{
+			initVM( data );
+			$('#vm').show();
+		}
+	});	
+});
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container" style="display:none">
+		<h2 class="x-title">{{ _('Pending to check') }}: {{ __language }}</h2>
+		<div>
+			
+			<table class="uk-table uk-table-striped">				
+				<tr v-for="a in snippets">
+					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/edit?id=' + a.id" class="dv-link"><b v-text="a.name"></b></a></td>
+					<td v-else><a v-bind:href="'/snippet/pending/' + a.id +'/check'" class="dv-link"><b v-text="a.name"></b></a></td>
+					<td v-text="a.brief"></td>
+					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/edit?id=' + a.id" class="dv-link">{{ _('Change') }}</a></td>					
+					<td v-else><a v-bind:href="'/snippet/pending/check?id=' + a.id " class="dv-link" >{{ _('Check') }}{{a.score}}(<span v-text="a.score"></span>%)</a></td>					
+				</tr>
+				<tr v-if="page.total===0">
+					<td>{{ _('No record')}}</td>
+				</tr>
+			</table>
+
+			<div v-if="page.pages > 1" style="text-align:center">
+				<ul class="uk-pagination" >
+					<li v-if="page.index === 1" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+					<li v-else><a v-bind:href="'/snippet/pending/list/{{ __language }}?page=' + (page.index -1)"><i class="uk-icon-angle-double-left"></i></a></li>
+					<template v-for="p in page.list">
+						<li v-if="p === '...'" ><span >...</span></li>
+						<li v-if="p === page.index" class="uk-active"><span  v-text="p" ></span></li>
+						<li v-if="p !== '...' && p !== page.index"><a v-bind:href="'/snippet/pending/list/{{ __language }}?page=' + p" v-text="p"></a></li>						
+					</template>
+					<li v-if="page.index === page.pages" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
+					<li v-else><a v-bind:href="'/snippet/pending/list/{{ __language }}?page=' + (page.index +1)"><i class="uk-icon-angle-double-right"></i></a></li>
+	            </ul>
+	        </div>			
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+

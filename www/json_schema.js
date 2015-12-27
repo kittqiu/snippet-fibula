@@ -65,7 +65,8 @@ var PROPERTY = {
     },
     ENVIRONMENT:{
         type: 'string',
-        pattern:'^[0-9]{1,2}$'
+        minLength: 1,
+        maxLength: 20
     },
     FUNCTIONNAME:{
         type: 'string',
@@ -93,7 +94,8 @@ var PROPERTY = {
     },
     LANGUAGE:{
         type: 'string',
-        pattern:'^[0-9]{1,2}$'
+        minLength: 1,
+        maxLength: 20
     },
     EMAIL: {
         type: 'string',
@@ -260,10 +262,10 @@ var schemas = {
             language:PROPERTY.LANGUAGE,
             environment:PROPERTY.ENVIRONMENT,
             keywords:PROPERTY.KEYWORD,
-            snippet:PROPERTY.SNIPPET,
+            code:PROPERTY.SNIPPET,
             help:PROPERTY.HELP
         },
-        required:['name', 'brief', 'language', 'environment', 'keywords', 'snippet', 'help']
+        required:['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help']
     },
 
     createCategory: {

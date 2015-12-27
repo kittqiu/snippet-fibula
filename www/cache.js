@@ -19,6 +19,7 @@ var
 	}),
 	$m_incr = thunkify( function(key,inc, callback){
 		memcached.incr( key, inc, callback );
+
 	}),
 	$m_get = thunkify( function(key,callback){
 		memcached.get( key, callback);
@@ -38,8 +39,9 @@ module.exports = {
 	/* inc the key's value*/
 	$incr: function* (key, initial){
 		var 
-			k = CACHE_PREFIX + key;
-			data = yield $m_incr( key, 1);
+			k = CACHE_PREFIX + key,
+			data = yield $m_incr( k, 1);
+			console.log( data );
 		if( data === false ){
 			if( initial === undefined ){
 				initial = 0;
@@ -53,7 +55,7 @@ module.exports = {
 	/* get number value for key*/
 	$count: function* (key){
 		var 
-			k = CACHE_PREFIX + key;
+			k = CACHE_PREFIX + key,
 			num = yield $m_get( k );
 		return num === false ? 0 : num;
 	},
@@ -84,8 +86,8 @@ module.exports = {
         var
             k = CACHE_PREFIX + key,
             data = yield $m_get(k);
-        if (data) {
-            // console.log('[cache] hit: ' + key);
+        if (data !== undefined ) {
+            console.log('[cache] hit: ' + key);
             return data;
         }
         console.log('[Cache] NOT hit: ' + key);
@@ -126,18 +128,32 @@ module.exports = {
 			}),
 			data = yield $m_getMulti( multiKeys );
 		return _.map( multiKeys, function(key){
-			return data[key] || null;
+			return data[key] === undefined ? null : data[key];
 		});
 	}, 
 
 	$set: function* (key, value, lifetime){
 		var k = CACHE_PREFIX + key;
-		yield $m_set(key, value, lifetime || DEFAULT_LIFETIME );
+		yield $m_set(k, value, lifetime || DEFAULT_LIFETIME );
+		console.log('[cache] cache set for key: ' + key);
 	},
 
 	$remove: function* (key){
 		var k = CACHE_PREFIX + key;
 		yield $m_del(k);
-	}
+	},
+
+	set: function (key, value, lifetime){
+		var k = CACHE_PREFIX + key;
+		var retval = false;
+		memcached.set( k, value, lifetime || DEFAULT_LIFETIME, function(err){
+			if( !err )
+				retval = true;
+		})
+		console.log( retval );
+		console.log('[cache] cache set for key: ' + key);
+	},
+
+	service: memcached
 
 };
