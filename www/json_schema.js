@@ -63,6 +63,13 @@ var PROPERTY = {
         minLength: 1,
         maxLength: 100
     },
+    CHECKACTION:{
+        type: 'string',
+        minLength: 1
+    },
+    EMPTYSTRING:{
+        type: 'string'
+    },
     ENVIRONMENT:{
         type: 'string',
         minLength: 1,
@@ -244,6 +251,16 @@ var schemas = {
         },
         required:['oldpassword', 'newpassword']
     },
+    checkSnippet:{
+        type: 'object',
+        properties: {
+            id: PROPERTY.ID,
+            type: PROPERTY.CHECKACTION,
+            advice: PROPERTY.EMPTYSTRING,
+            timeused: PROPERTY.TIMESTAMP
+        },
+        required:['id', 'type', 'advice','timeused']
+    },
     createAccount:{
         type: 'object',
         properties: {
@@ -268,201 +285,6 @@ var schemas = {
         required:['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help']
     },
 
-    createCategory: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            tag: PROPERTY.TAG,
-            description: PROPERTY.DESCRIPTION_OPTIONAL
-        },
-        required: ['name', 'tag']
-    },
-    updateCategory: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            tag: PROPERTY.TAG,
-            description: PROPERTY.DESCRIPTION_OPTIONAL
-        }
-    },
-    sortCategories: {
-        type: 'object',
-        properties: {
-            ids: PROPERTY.ID_LIST
-        },
-        required: ['ids']
-    },
-    createNavigation: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            url: PROPERTY.URL
-        },
-        required: ['name', 'url']
-    },
-    sortNavigations: {
-        type: 'object',
-        properties: {
-            ids: PROPERTY.ID_LIST
-        },
-        required: ['ids']
-    },
-    updateNavigation: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            url: PROPERTY.URL
-        }
-    },
-    createWebpage: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            tags: PROPERTY.TAGS,
-            content: PROPERTY.TEXT,
-            alias: PROPERTY.ALIAS,
-            draft: {
-                type: 'boolean',
-                default: false
-            }
-        },
-        required: ['name', 'alias', 'content']
-    },
-    updateWebpage: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            tags: PROPERTY.TAGS,
-            content: PROPERTY.TEXT,
-            alias: PROPERTY.ALIAS,
-            draft: {
-                type: 'boolean'
-            }
-        }
-    },
-    createAttachment: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            description: PROPERTY.DESCRIPTION_OPTIONAL,
-            mime: PROPERTY.MIME,
-            data: PROPERTY.FILE
-        },
-        required: ['name', 'data']
-    },
-    createArticle: {
-        type: 'object',
-        properties: {
-            category_id: PROPERTY.ID,
-            name: PROPERTY.NAME,
-            description: PROPERTY.DESCRIPTION,
-            tags: PROPERTY.TAGS,
-            publish_at: PROPERTY.TIMESTAMP,
-            content: PROPERTY.TEXT,
-            image: PROPERTY.FILE
-        },
-        required: ['category_id', 'name', 'description', 'content', 'image']
-    },
-    updateArticle: {
-        type: 'object',
-        properties: {
-            category_id: PROPERTY.ID,
-            name: PROPERTY.NAME,
-            description: PROPERTY.DESCRIPTION,
-            tags: PROPERTY.TAGS,
-            publish_at: PROPERTY.TIMESTAMP,
-            content: PROPERTY.TEXT,
-            image: PROPERTY.FILE
-        }
-    },
-    createWiki: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            description: PROPERTY.DESCRIPTION,
-            tag: PROPERTY.TAG,
-            content: PROPERTY.TEXT,
-            image: PROPERTY.FILE
-        },
-        required: ['name', 'description', 'tag', 'content', 'image']
-    },
-    updateWiki: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            description: PROPERTY.DESCRIPTION,
-            tag: PROPERTY.TAG,
-            content: PROPERTY.TEXT,
-            image: PROPERTY.FILE
-        }
-    },
-    createWikiPage: {
-        type: 'object',
-        properties: {
-            parent_id: PROPERTY.ID_EMPTY,
-            name: PROPERTY.NAME,
-            content: PROPERTY.TEXT
-        },
-        required: ['parent_id', 'name', 'content']
-    },
-    updateWikiPage: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            content: PROPERTY.TEXT
-        },
-    },
-    moveWikiPage: {
-        type: 'object',
-        properties: {
-            parent_id: PROPERTY.ID_EMPTY,
-            index: {
-                type: 'integer',
-                minimum: 0
-            }
-        },
-        required: ['parent_id', 'index']
-    },
-    createBoard: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            description: PROPERTY.DESCRIPTION,
-            tag: PROPERTY.TAG
-        },
-        required: ['name', 'description', 'tag']
-    },
-    updateBoard: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            description: PROPERTY.DESCRIPTION,
-            tag: PROPERTY.TAG
-        }
-    },
-    sortBoards: {
-        type: 'object',
-        properties: {
-            ids: PROPERTY.ID_LIST
-        },
-        required: ['ids']
-    },
-    createTopic: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            tags: PROPERTY.TAGS,
-            content: PROPERTY.TEXT
-        },
-        required: ['name', 'content']
-    },
-    createReply: {
-        type: 'object',
-        properties: {
-            content: PROPERTY.TEXT
-        },
-        required: ['content']
-    },
     updateWebsiteSettings: {
         type: 'object',
         properties: {
@@ -484,17 +306,8 @@ var schemas = {
             sidebar_right_top: PROPERTY.SETTING,
             sidebar_right_bottom: PROPERTY.SETTING,
             content_top: PROPERTY.SETTING,
-            content_bottom: PROPERTY.SETTING,
+            content_bottom: PROPERTY.SETTING
         }
-    },
-    createComment: {
-        type: 'object',
-        properties: {
-            name: PROPERTY.NAME,
-            tag: PROPERTY.TAG,
-            content: PROPERTY.TEXT
-        },
-        required: ['name', 'tag', 'content']
     }
 }
 

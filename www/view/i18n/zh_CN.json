@@ -35,6 +35,8 @@
 	"Name": "名称",
 	"new password":"新密码",
 	"No record": "无记录",
+	"Not Allowed": "不允许该操作",
+	"Not Repeat.": "不允许重复该操作，你可能已对当前记录做过相关的操作",
 
 	"or": "或",
 	"old password":"原始密码",

@@ -8,7 +8,8 @@ var
     cache = require('../cache'), 
     helper = require('../helper'),
     Page = require('../page'),
-    config = require('../config');
+    config = require('../config'),
+    api = require('../api');
 
 var 
     modelDict = {},
@@ -17,6 +18,7 @@ var
     modelHistory = db.snippet_history,
     modelRefer = db.snippet_refer,
     modelFlow = db.snippet_flow,
+    modelFlowHistory = db.snippet_flow_history,
     next_id = db.next_id,
     warp = db.warp;
 
@@ -102,8 +104,8 @@ function* $__getPendingCount(lang){
     return yield cache.$get( keyLangCount(lang), function*(){
         return yield modelFlow.$findNumber( {
             select: 'count(*)',
-            where: '`flow_type`=? and `language`=?',
-            params: ['create', lang]
+            where: '`flow_type`=?  and `result`=? and `language`=?',
+            params: ['create', 'processing', lang]
         });
     } );
 }
@@ -122,8 +124,8 @@ function* $__getPendingFirstPage(lang){
     return yield cache.$get( keyLangFirstPage(lang), function*(){
         return yield modelFlow.$findAll( {
             select: ['id', 'snippet_id', 'user_id', 'name', 'brief', 'score'],
-            where: '`flow_type`=? and `language`=?',
-            params: ['create', lang], 
+            where: '`flow_type`=?  and `result`=? and `language`=?',
+            params: ['create', 'processing', lang], 
             order: '`created_at` desc',
             limit: PAGE_SIZE,
             offset: 0
@@ -148,13 +150,14 @@ function* $_getAllPending(lang,page) {
     }
     return yield modelFlow.$findAll( {
             select: ['id', 'snippet_id', 'user_id', 'name', 'brief', 'score'],
-            where: '`flow_type`=? and `language`=?',
-            params: ['create', lang], 
+            where: '`flow_type`=? and `result`=? and `language`=?',
+            params: ['create', 'processing', lang], 
             order: '`created_at` desc',
             offset: page.offset,
             limit: page.limit
         });
 }
+
 
 function* $_removeLangCache(lang){
     yield cache.$remove(keyLangCount(lang) );
@@ -270,8 +273,37 @@ module.exports = {
 
     'GET /api/snippet/pending/lang/:lang': function* (lang){
         var
+            ids = "", contribs, i,
+            user = this.request.user,
             page = helper.getPage(this.request,PAGE_SIZE), 
             snippets = yield $_getAllPending(lang, page);
+
+        for(i = 0; i < snippets.length; i++ ){
+            if( i !== 0 )
+                ids += ','
+            ids += "'" + snippets[i].id + "'";
+        }
+        if( ids.length > 0 ){
+            contribs = yield modelFlowHistory.$findAll({
+                select: ['flow_id'],
+                where: '`user_id`=?  and `flow_id` in (' + ids + ') group by `flow_id`',
+                params: [user.id ]
+            });
+            if( contribs !== null && contribs.length > 0 ){
+                ids = [];
+                for( i = 0; i < contribs.length; i++)
+                    ids.push( contribs[i].flow_id);
+
+                console.log(ids);
+                for( i = 0; i < snippets.length; i++  ){
+                    if( _.indexOf(ids,snippets[i].id) !== -1 ){
+                        snippets[i].pass = true;
+                    }
+                }
+            }
+        }
+        //console.log(snippets);
+
         this.body = {
             page: page,
             snippets: snippets
@@ -279,7 +311,7 @@ module.exports = {
     },
 
     'GET /snippet/pending/list/:lang': function* (lang){
-        var model = {'__language':lang, '__page': this.request.query.page};
+        var model = {'__language':lang, '__page': this.request.query.page||1};
         yield $_render( this, model, 'snippet-pending-list.html' );
         
     },
@@ -350,21 +382,34 @@ module.exports = {
             redirect: this.request.query.redirect
             } };
         yield $_render( this, model, 'snippet-check.html');
-        console.log(model);
     },
 
     'POST /api/snippet/pending/check': function* (){
-        var contrib,
+        var 
+            contrib, r, history, num,
+            columns = ['score'],
             user = this.request.user,
             data = this.request.body;
 
-        var r = yield modelFlow.$find(data.id);
+        //validate data
+        json_schema.validate('checkSnippet', data);
+        r = yield modelFlow.$find(data.id);
         if( r === null ){
             throw api.notFound('snippet', this.translate('Record not found'));
         }
 
+        /* user should not be the creator and check secondly*/
         if( r.user_id === user.id ){
-            throw api.notAllowed();
+            throw api.notAllowed(this.translate('Not Allowed'));
+        }
+        console.log(data);
+        num = yield modelFlowHistory.$findNumber( {
+            select: 'count(*)',
+            where: '`flow_id`=? and `user_id`=?',
+            params: [data.id, user.id]
+        });
+        if( num > 0 ){
+            throw api.notAllowed( this.translate('Not Repeat.'));
         }
 
         /*record the contribution*/
@@ -385,6 +430,16 @@ module.exports = {
             yield modelContribute.$create(contrib);
         } 
 
+        /* save the action history*/ 
+        history = {
+            flow_id: r.id,
+            user_id: user.id,
+            action: data.type, 
+            advice: data.advice || '',
+            timeused: data.timeused
+        };
+        yield modelFlowHistory.$create(history);
+
         if( data.type === 'pass' ){
             r.score = r.score + SCORE_DELTA > 100 ? 100 : r.score + SCORE_DELTA;
             if( r.score === 100 ){
@@ -403,18 +458,21 @@ module.exports = {
                     help: r.help,
                     version: 0,
                     created_at: r.created_at 
-                };                                 
-                                
-                yield modelSnippet.$create(snippet);
-                yield r.$destroy();
-            }else{
-                yield r.$update(['score']);  
-            }
+                }; 
 
+                r.result('pass');
+                columns.push('result');
+                yield modelSnippet.$create(snippet);
+            }//else update score only
         }else if( data.type === 'discard' ){
-            r.score = r.score - SCORE_DELTA < 0 ? 0 : r.score - SCORE_DELTA;
-            yield r.$update(['score']);
-        }       
+            r.score = r.score - SCORE_DELTA < -100? -100 : r.score - SCORE_DELTA;
+            if( r.score === -100 ){
+                r.result('discard');
+                columns.push('result');
+            }
+        }
+        yield r.$update(columns);
+
         yield $_removeLangCache(r.language);
         this.body = {
             id: r.snippet_id

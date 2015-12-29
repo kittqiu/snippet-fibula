@@ -37,10 +37,13 @@ $(function () {
 			<table class="uk-table uk-table-striped">				
 				<tr v-for="a in snippets">
 					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/edit?id=' + a.id" class="dv-link"><b v-text="a.name"></b></a></td>
-					<td v-else><a v-bind:href="'/snippet/pending/' + a.id +'/check'" class="dv-link"><b v-text="a.name"></b></a></td>
+					<td v-else><a v-bind:href="'/snippet/pending/check?id=' + a.id +'&redirect=' + '{{ __request__.path}}'" class="dv-link"><b v-text="a.name"></b></a></td>
 					<td v-text="a.brief"></td>
 					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/edit?id=' + a.id" class="dv-link">{{ _('Change') }}</a></td>					
-					<td v-else><a v-bind:href="'/snippet/pending/check?id=' + a.id " class="dv-link" >{{ _('Check') }}{{a.score}}(<span v-text="a.score"></span>%)</a></td>					
+					<td v-else>
+						<span v-if="a.pass">已审核(<span v-text="a.score"></span>%)</span>
+						<a v-else v-bind:href="'/snippet/pending/check?id=' + a.id +'&redirect=' + '{{ __request__.path}}'" class="dv-link" >{{ _('Check') }}{{a.score}}(<span v-text="a.score"></span>%)</a>
+					</td>					
 				</tr>
 				<tr v-if="page.total===0">
 					<td>{{ _('No record')}}</td>

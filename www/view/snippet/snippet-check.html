@@ -9,7 +9,7 @@
 <script src="/static/js/marked.js"></script>
 <script src="/static/js/uikit/components/htmleditor.js"></script>
 <script type="text/javascript">
-
+var start_time;
 function initVM( data ){
 	var vm = new Vue({
 		el: '#vm',
@@ -45,24 +45,18 @@ function initVM( data ){
 				}	
 			},
 			submit: function(){},
-			pass: function(){
+			do:function(type){
 				var data,
-					form = $('#vm').find('form');
-				var data = {
+					form = $('#vm').find('form'),
+					use_time = Date.now() - start_time;
+				data = {
 					id: '{{ __id }}',
-					type: 'pass',
-					advice: this.advice
+					type: type,
+					advice: this.advice,
+					timeused: use_time
 				};
 
 				form.postJSON( '/api/snippet/pending/check', data, function(err, result){
-					if( !err ){
-						$('#content-block').addClass('uk-hidden');
-						//jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
-					}
-				});
-			},
-			discard: function(){
-				postJSON( '/api/snippet/pending/check', {id:'{{ __id }}',type:'discard'}, function(err,result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
 						jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
@@ -83,6 +77,7 @@ function initVM( data ){
 }
 
 $(function () {
+	start_time = Date.now();
 	getJSON( '/api/snippet/pending/entity/{{ __id }}', function(err, snippet){
 		if(err){
 			fatal(err);
@@ -96,7 +91,7 @@ $(function () {
 {% endblock %}
 
 {% block jump-title  %}
-操作成功
+操作成功。您的努力推动了我们团队效率的提升，感谢有你！
 {% endblock %}
 
 {% block content %}
@@ -193,13 +188,13 @@ $(function () {
 			        <div class="uk-form-controls" id="help" >
 			        	<input id="advice" v-model="advice" type="text" placeholder="" class="uk-width-1-1">
 			        </div>
-			        <p class="help-text">将以列表项方式被追加到帮助信息栏</p>
+			        <p class="help-text"></p>
 			    </div>
 			    <div class="uk-form-row uk-clearfix">
-			    	<button  v-on:click="discard" class="uk-button-success uk-button-large" style="width:240px;" >
+			    	<button  v-on:click="do('discard')" class="uk-button-success uk-button-large" style="width:240px;" >
 			        	<i class="uk-icon-close uk-icon-medium"></i> {{ _('Discard') }}
 			        </button>
-			        <button  v-on:click="pass" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
+			        <button  v-on:click="do('pass')" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
 			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _('Pass') }}
 			        </button>
 			    </div>
