@@ -42,7 +42,13 @@ $(function () {
 					{% else %}
 					<td><a href="/snippet/pending/check?id={{ record.id }}" class="dv-link"><b>{{ record.name }}</b></a></td>
 					<td>{{ record.brief }}</td>
-					<td><a href="/snippet/pending/check?id={{ record.id }}&amp;redirect=/snippet/pending" class="dv-link">{{ _('Check') }}{{ record.score }}%</a></td>
+					<td>
+						{% if record.contributor && record.contributor|find(__user__.id) %}
+						<span>已审核({{ record.score }}%)</span>
+						{% else %}
+						<a href="/snippet/pending/check?id={{ record.id }}&amp;redirect=/snippet/pending" class="dv-link">{{ _('Check') }}({{ record.score }}%)</a>
+						{% endif %}
+					</td>
 					{% endif %}
 					
 				</tr>

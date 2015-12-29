@@ -88,6 +88,8 @@ var
 swig.setDefaults({
     cache: process.productionMode ? 'memory' : false
 });
+function swFind(input,str) { return input.indexOf(str) !== -1; }
+swig.setFilter('find', swFind);
 
 /*define template render function, log execution time and catch the exception*/
 app.use( function* theMiddleWare(next){

@@ -5,6 +5,7 @@
 function initVM( data ){
 	var vm = new Vue({
 		el: '#vm',
+		debug:true,
 		data:{
 			snippets: data.snippets || [],
 			page: data.page || {}
@@ -22,7 +23,9 @@ $(function () {
 			initVM( data );
 			$('#vm').show();
 		}
-	});	
+	});
+	Vue.config.debug = true;	
+
 });
 
 </script>
@@ -41,7 +44,7 @@ $(function () {
 					<td v-text="a.brief"></td>
 					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/edit?id=' + a.id" class="dv-link">{{ _('Change') }}</a></td>					
 					<td v-else>
-						<span v-if="a.pass">已审核(<span v-text="a.score"></span>%)</span>
+						<span v-if="a.contributor && a.contributor.indexOf('{{ __user__.id }}')!==-1">已审核(<span v-text="a.score"></span>%)</span>
 						<a v-else v-bind:href="'/snippet/pending/check?id=' + a.id +'&redirect=' + '{{ __request__.path}}'" class="dv-link" >{{ _('Check') }}{{a.score}}(<span v-text="a.score"></span>%)</a>
 					</td>					
 				</tr>

@@ -123,7 +123,7 @@ function* $_getAllPendingCount(){
 function* $__getPendingFirstPage(lang){
     return yield cache.$get( keyLangFirstPage(lang), function*(){
         return yield modelFlow.$findAll( {
-            select: ['id', 'snippet_id', 'user_id', 'name', 'brief', 'score'],
+            select: ['id', 'snippet_id', 'user_id', 'name', 'brief', 'score', 'contributor'],
             where: '`flow_type`=?  and `result`=? and `language`=?',
             params: ['create', 'processing', lang], 
             order: '`created_at` desc',
@@ -149,7 +149,7 @@ function* $_getAllPending(lang,page) {
         return [];
     }
     return yield modelFlow.$findAll( {
-            select: ['id', 'snippet_id', 'user_id', 'name', 'brief', 'score'],
+            select: ['id', 'snippet_id', 'user_id', 'name', 'brief', 'score', 'contributor'],
             where: '`flow_type`=? and `result`=? and `language`=?',
             params: ['create', 'processing', lang], 
             order: '`created_at` desc',
@@ -251,7 +251,8 @@ module.exports = {
             code: data.code,
             help: data.help,
             newversion: 0,
-            score:0
+            score:0,
+            contributor:''
         };
         contrib = {
             id: next_id(),
@@ -273,37 +274,9 @@ module.exports = {
 
     'GET /api/snippet/pending/lang/:lang': function* (lang){
         var
-            ids = "", contribs, i,
-            user = this.request.user,
             page = helper.getPage(this.request,PAGE_SIZE), 
             snippets = yield $_getAllPending(lang, page);
-
-        for(i = 0; i < snippets.length; i++ ){
-            if( i !== 0 )
-                ids += ','
-            ids += "'" + snippets[i].id + "'";
-        }
-        if( ids.length > 0 ){
-            contribs = yield modelFlowHistory.$findAll({
-                select: ['flow_id'],
-                where: '`user_id`=?  and `flow_id` in (' + ids + ') group by `flow_id`',
-                params: [user.id ]
-            });
-            if( contribs !== null && contribs.length > 0 ){
-                ids = [];
-                for( i = 0; i < contribs.length; i++)
-                    ids.push( contribs[i].flow_id);
-
-                console.log(ids);
-                for( i = 0; i < snippets.length; i++  ){
-                    if( _.indexOf(ids,snippets[i].id) !== -1 ){
-                        snippets[i].pass = true;
-                    }
-                }
-            }
-        }
-        //console.log(snippets);
-
+            
         this.body = {
             page: page,
             snippets: snippets
@@ -387,7 +360,7 @@ module.exports = {
     'POST /api/snippet/pending/check': function* (){
         var 
             contrib, r, history, num,
-            columns = ['score'],
+            columns = ['score', 'contributor'],
             user = this.request.user,
             data = this.request.body;
 
@@ -470,6 +443,12 @@ module.exports = {
                 r.result('discard');
                 columns.push('result');
             }
+        }
+
+        if( r.contributor && r.contributor .length > 0 ){
+            r.contributor += ',' + user.id;
+        }else{
+            r.contributor = user.id;
         }
         yield r.$update(columns);
 

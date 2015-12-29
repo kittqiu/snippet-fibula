@@ -16,7 +16,8 @@ module.exports = function(warp){
 		base.column_text('help'),
 		base.column_bigint('newversion'),
 		base.column_bigint('score'),
-		base.column_varchar_20('result', {defaultValue:'processing'})
+		base.column_varchar_20('result', {defaultValue:'processing'}),
+		base.column_text('contributor') //id1,id2,id3,...
 		], {
 			table: 'snippet_flow'
 		});
