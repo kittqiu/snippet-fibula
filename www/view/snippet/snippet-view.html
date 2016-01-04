@@ -1,0 +1,177 @@
+{% extends '../_base.html' %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/css/codemirror.css"/>
+{% endblock %}
+
+{% block head %}
+<script src="/static/js/codemirror.js"></script>
+<script src="/static/js/marked.js"></script>
+<script src="/static/js/clipboard.min.js"></script>
+<script type="text/javascript">
+var start_time;
+function initVM( data ){
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: data.name || '',
+			brief: data.brief || '',
+			language: data.language || '{{ __languages[0]}}',
+			environment: data.environment ||'{{ __environments[0]}}',			
+			keywords: data.keywords ||'',
+			code: data.code ||'',
+			help:data.help ||'',
+			advice:'',
+			created_at: formatDate(data.created_at),
+			creator: data.creator || '',
+			master: data.master || '',
+			version: data.version || 0,
+			id: data.id || '',
+			next_version: data.next_version || {newversion:21, score:20,contributor:'def'}
+		},
+		methods:{
+			gendoc: function(){
+				var html = '';
+				if( this.code )
+					html = codeToHtml(this.code);
+				$('#codeAnddoc').html(html);
+			},
+			getPostData: function(){
+				var data = {
+					name: this.name,
+					brief: this.brief,
+					language: this.language,
+					environment: this.environment,
+					keywords: this.keywords,
+					code: this.code,
+					help: this.help
+				};
+				if(validateJsonObj('createSnippet', data)){
+					return data;
+				}	
+			},
+			submit: function(){},
+			do:function(type){
+				var data,
+					form = $('#vm').find('form');
+				data = {
+					id: '{{ __id }}',
+					type: type,
+					advice: this.advice,
+					timeused: use_time
+				};
+
+				form.postJSON( '/api/snippet/pending/check', data, function(err, result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
+						jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
+					}
+				});
+			}
+		}
+	});
+	
+	$('#help').html( marked(data.help));
+
+    var html = codeToHtml(data.code, 'dv-snippet-view');
+	$('#codeAnddoc').html(html);	
+	
+	$('#orgcode').hide();
+	var btn = document.getElementById('btn_copy');
+	var clipboard = new Clipboard(btn);
+	clipboard.on('success', function(e) {
+	    e.clearSelection();
+	    $('#orgcode').hide();
+	});	 
+	clipboard.on('error', function(e) {
+	    $('#orgcode').hide();
+	});
+}
+
+$(function () {
+	getJSON( '/api/snippet/view/entity/{{ __id }}', function(err, snippet){
+		if(err){
+			fatal(err);
+		}else{
+			initVM( snippet );
+		}
+	});	
+});
+
+function copyToClipboard(){
+	$('#orgcode').show();//show the element for copying to clipboard. On completed, hide it again		
+}
+
+
+</script>
+{% endblock %}
+
+{% block jump-title  %}
+操作成功。您的努力推动了我们团队效率的提升，感谢有你！
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content"  style="max-width:1180px;">
+	<div id="vm" class="uk-grid">
+		<div class="uk-width-2-3" style="padding:20px;">
+			<div >
+				<h2  v-text="name"class="uk-width-2-3"></h2>
+				<p class="uk-text-muted" style="margin-bottom:5px" v-text="brief"></p>
+				<hr style="margin-top:2px">
+				<div style="margin-left:30px;">
+					<p><span>{{ _('Program language') }}: <span v-text="language"></span></span>
+						<span style="margin-left:40px;">{{ _('develop environment') }}: <span v-text="environment"></span></span>
+					</p>
+					<p>{{ _('Keywords') }}: <span v-text="keywords"></span></p>
+				</div>
+				<div style="margin-top:40px">
+					<h3><b>{{ _('Code snippet') }}</b></h3>
+					<div class="uk-float-right" style="text-align:right;margin-top:-40px;"><button id="btn_copy" onclick="copyToClipboard()"  data-clipboard-target="#orgcode"><span class="uk-icon-clipboard"></span> {{ _('Copy') }}</button></div>
+					<div id="codeAnddoc" class="uk-block-muted"></div>
+					<div class=""><textarea id="orgcode" v-text="code" class="uk-width-1-1" ></textarea></div>
+				</div>
+				<div style="margin-top:40px">
+					<h3><b>{{ _('Help') }}</b></h3>
+					<div id="help"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="uk-width-1-3">
+			<ul class="dv-box" style="margin-top:60px">
+				<li><span v-text="creator + '创建于' + created_at + ', Master: ' + master"></span></li>
+				<li>版次：<span v-text="version"></span><a v-bind:href="'/snippet/pending/edit?id=' + id" class="dv-link uk-float-right" style="">{{ _('Edit') }}</a></li>
+				<li>下版次：
+					<span v-if="next_version">
+						<span v-text="next_version.newversion"></span>
+						<a v-if="next_version.contributor && next_version.contributor.indexOf('{{ __user__.id }}')===-1" class="dv-link uk-float-right" v-bind:href="'/snippet/pending/check?id=' + id +'&redirect=' + '{{ __request__.path}}'">审核/放弃(<span v-text="next_version.score"></span>%)</a>
+					</span>
+					<span v-else>无</span>
+				</li>
+			</ul>
+			<h3 class="dv-box-title">统计信息</h3>
+			<ul class="dv-box" >
+				<li><span>共被引用n次</span></li>
+				<li><span>本周被引用n次</span></li>
+				<li><span>本月被引用n次</span></li>
+				<li><span>本年度被引用n次</span></li>
+			</ul>
+
+			<h3 class="dv-box-title">贡献</h3>
+			<ul class="dv-box" >
+				<li><span>张三(3)、李四(2)、王五编辑</span></li>
+				<li><span>张三(2)、李四审核</span></li>
+				<li><span>王五(9)、李四(8)引用</span></li>
+			</ul>
+
+			<h3 class="dv-box-title">修改历史</h3>
+			<ul class="dv-box" >
+				<li><span>版次19：张三</span></li>
+				<li><span>版次18：张三</span></li>
+				<li><span>版次17：张三</span></li>
+				<li><span>版次16：张三</span><a v-bind:href="'/snippet/pending/edit?id=' + id" class="dv-link uk-float-right" style="">{{ _('Any More') }}</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}

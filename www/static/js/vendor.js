@@ -2,7 +2,6 @@
 // extends jQuery.form:
 
 $(function () {
-    console.log('Extends $form...');
     $.fn.extend({
         showFormError: function (err) {
             return this.each(function () {
@@ -309,4 +308,9 @@ function codeToHtml( src, cls ){
 function fatal(err) {
     console.error( err );
     //_display_error($('#loading'), err);
+}
+
+function formatDate(second){
+    var date = new Date(second);
+    return date.getFullYear() + '-' + date.getMonth() + '-' + date.getDay();
 }

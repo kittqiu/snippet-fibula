@@ -1,12 +1,15 @@
 {
 	"Advice": "修改建议",
+	"Any More": "更多",
 
+	"Code": "代码",
 	"Change": "修改",
 	"change password": "修改密码",
 	"Check": "审核",
 	"Chinese name": "中文名",
 	"Chinese or English name": "中文名或英文名",
 	"Code snippet": "代码块",
+	"Copy": "复制",
 	"Create": "创建",
 	"Create snippet module": "创建模块",
 
@@ -16,6 +19,7 @@
 	"develop environment": "开发环境",
 	"Discard": "丢弃",
 
+	"Edit": "编辑",
 	"email": "邮箱",
 
 	"go back to the last page": "返回前一页",
@@ -31,6 +35,7 @@
 	"logout": "退出",
 
 	"More": "查看更多",
+
 
 	"Name": "名称",
 	"new password":"新密码",
@@ -58,6 +63,7 @@
 	"user name input":"输入用户名",
 
 	"verify password": "确认密码",
+	"View": "查看",
 
 	"Email has been signed up by another user.": "该邮箱已经被其他用户注册过了，更换一个吧",	
 	"invalid user name": "用户名为空或者包含非法的字符",

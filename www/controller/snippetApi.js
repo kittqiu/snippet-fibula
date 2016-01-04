@@ -19,6 +19,7 @@ var
     modelRefer = db.snippet_refer,
     modelFlow = db.snippet_flow,
     modelFlowHistory = db.snippet_flow_history,
+    modelUser = db.user,
     next_id = db.next_id,
     warp = db.warp;
 
@@ -183,10 +184,12 @@ function* $_render( context, model, view ){
 /*
 GET:
 /snippet/create
+/snippet/entity/view
 /snippet/pending
 /snippet/pending/check?id=id
-/snippet/pending/edit
+/snippet/pending/edit?id=id
 /snippet/pending/list/:lang
+/api/snippet/view/entity/:id
 /api/snippet/pending/entity/:id
 /api/snippet/pending/lang/:lang
 
@@ -201,6 +204,11 @@ module.exports = {
 	'GET /snippet/create':function* (){
         var model = {'__languages':modelDict['language'], '__environments':modelDict['environment'], '__form': {action: '/api/snippet/create', name: 'Create'}};
         yield $_render( this, model, 'snippet-form.html' );
+    },
+    'GET /snippet/entity/view': function* (id){
+        var id = getId(this.request),
+            model = {'__id': id };
+        yield $_render( this, model, 'snippet-view.html');
     },
     'GET /snippet/pending': function* (){
         var
@@ -457,7 +465,37 @@ module.exports = {
             id: r.snippet_id
         };
     },
-    
+
+    'GET /api/snippet/view/entity/:id': function* (id){
+        var 
+            param = this.request.body || {},
+            record = yield modelSnippet.$find(id);
+        if( record && param){
+            if( param.idToName ){
+                var master,
+                    user = yield modelUser.$find(record.creator_id);
+                if( record.creator_id === record.own_id ){
+                    master = user;
+                }else{
+                    master = yield modelUser.$find(record.own_id);
+                }
+                record.creator = user.name;
+                record.master = master.name;
+            }
+            if( param.nextVersion ){
+                var next_version = record.version + 1;;
+                    new_version = modelFlow.$find({
+                    select: ['score', 'contributor', 'newversion'],
+                    where: '`snippet_id`=? and `newversion`=?',
+                    params: [record.id, next_version]
+                    });
+                if( new_version !== null){
+                    record.next_version = new_version;
+                }
+            }
+        }
+        this.body = record || {};
+    },    
 
     'LoginRequired': [ '/snippet/create', '/api/snippet/create', '/snippet/pending']
 };

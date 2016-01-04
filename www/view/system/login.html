@@ -35,11 +35,8 @@ $(function () {
 
 				form.postJSON( '/api/authenticate', data, function(err, result){
 					if( !err ){
-						var alertdlg = UIkit.modal.blockUI('用户创建成功，请稍后登录您的邮箱完成认证，之后您便可正常登录系统。\n稍后页面将自动跳转到主页...');
-						setTimeout( function(){
-						 alertdlg.hide();
-						 location.assign('/');
-						}, 3000 );
+						$('#content-block').addClass('uk-hidden');
+						jumpTo( '/', "{{ _('Home')}}", 3 );
 						
 					}
 				});
@@ -53,8 +50,12 @@ $(function () {
 
 {% block title %} {{ _('log in')}} {% endblock %}
 
+{% block jump-title  %}
+登录成功。
+{% endblock %}
+
 {% block content %}
-<div class="dv-container x-content">
+<div id="content-block" class="dv-container x-content">
 	<div id="vm" class="dv-container x-narrow">
 		<h2 class="x-title">{{ _('log in') }}</h2>
 		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
