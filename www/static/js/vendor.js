@@ -314,3 +314,21 @@ function formatDate(second){
     var date = new Date(second);
     return date.getFullYear() + '-' + date.getMonth() + '-' + date.getDay();
 }
+
+function arrayToMatrix(array, columns){
+    var matrix = [],
+        set = array || [],
+        cols = columns || 3;
+    for(var i = 0; i < set.length; i+= cols){
+        var row = [];
+        for( var j = 0; j < cols; j++ ){
+            if( i + j < set.length)
+                row.push( set[i+j]);
+            else
+                row.push( '' );
+        }
+        matrix.push(row);
+    }
+    console.log(matrix);
+    return matrix;
+}

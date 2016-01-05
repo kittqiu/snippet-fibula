@@ -1,4 +1,4 @@
-{% extends '../_base.html' %}
+{% extends './snippet_base.html' %}
 
 {% block css %}
 <link rel="stylesheet" href="/static/css/codemirror.css"/>
@@ -8,6 +8,7 @@
 <script src="/static/js/codemirror.js"></script>
 <script src="/static/js/marked.js"></script>
 <script src="/static/js/uikit/components/htmleditor.js"></script>
+<script src="/static/js/uikit/components/accordion.js"></script>
 <script type="text/javascript">
 var start_time;
 function initVM( data ){
@@ -24,26 +25,6 @@ function initVM( data ){
 			advice:''
 		},
 		methods:{
-			gendoc: function(){
-				var html = '';
-				if( this.code )
-					html = codeToHtml(this.code);
-				$('#codeAnddoc').html(html);
-			},
-			getPostData: function(){
-				var data = {
-					name: this.name,
-					brief: this.brief,
-					language: this.language,
-					environment: this.environment,
-					keywords: this.keywords,
-					code: this.code,
-					help: this.help
-				};
-				if(validateJsonObj('createSnippet', data)){
-					return data;
-				}	
-			},
 			submit: function(){},
 			do:function(type){
 				var data,
@@ -74,6 +55,7 @@ function initVM( data ){
 
     var html = codeToHtml(data.code, 'dv-snippet-view');
 	$('#codeAnddoc').html(html);
+	$('#rawcode').text(data.code);
 }
 
 $(function () {
@@ -171,16 +153,20 @@ $(function () {
 			    <div class="uk-form-row" style="margin-top:20px">
 			    	<label class="uk-form-label">{{ _('Code snippet') }}</label>
 			    	<div class="uk-form-controls uk-hidden">
-			        	<textarea v-model="code" v-on:change="gendoc" cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:300px" disabled ></textarea>
+			        	<textarea v-model="code" cols="" rows="" placeholder="{{ _('Paste the code') }}" class="uk-width-1-1" style="height:300px" disabled ></textarea>
 			        </div>
-			        <div id="codeAnddoc">
-			        </div>
+			        <div id="codeAnddoc"></div>
+			        <div class="uk-accordion" data-uk-accordion="{showfirst:false}">
+					    <label class="uk-accordion-title uk-form-label uk-text-muted" style="font-size: 14px;" >{{ _('Raw Code')}} <i class="uk-icon-caret-square-o-down"></i></label>
+						<pre id="rawcode" class="uk-accordion-content"></pre>
+					</div>
 			    </div>
 			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Help') }}</label>
 			        <div class="uk-form-controls dv-snippet-view" id="help" >
 			        	<!--textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" disabled></textarea-->
 			        </div>
+			        
 			        <p class="help-text"></p>
 			    </div>
 			    <div class="uk-form-row" style="margin-top:20px">

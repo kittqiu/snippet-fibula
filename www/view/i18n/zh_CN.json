@@ -6,12 +6,14 @@
 	"Change": "修改",
 	"change password": "修改密码",
 	"Check": "审核",
+	"Check or Discard": "审核/放弃",
 	"Chinese name": "中文名",
 	"Chinese or English name": "中文名或英文名",
 	"Code snippet": "代码块",
 	"Copy": "复制",
-	"Create": "创建",
+	"Create": "创建",	
 	"Create snippet module": "创建模块",
+	"Created at": "创建于",
 
 	"depend on": "依赖于",
 	"dependence": "依赖",
@@ -39,7 +41,9 @@
 
 	"Name": "名称",
 	"new password":"新密码",
+	"Next revision": "下版次",
 	"No record": "无记录",
+	"None": "无",
 	"Not Allowed": "不允许该操作",
 	"Not Repeat.": "不允许重复该操作，你可能已对当前记录做过相关的操作",
 
@@ -48,10 +52,13 @@
 	
 	"Pass": "通过",
 	"password": "密码",
+	"Paste the code": "粘贴代码块",
 	"Pending to check": "待审核",
 	"Program language": "编程语言",
 
+	"Raw Code": "原始代码",
 	"Record not found": "未找到对应的数据记录，可能数据已经被转移",
+	"Revision": "版次",
 
 	"SignUp": "注册",
 	"sign up": "注册",

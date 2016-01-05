@@ -1,0 +1,65 @@
+{% extends './snippet_base.html' %}
+
+{% block head %}
+<script type="text/javascript">
+function initVM( data ){
+	var vm = new Vue({
+		el: '#vm',
+		debug:true,
+		data:{
+			lastest: data || []
+		},
+		methods:{
+		}
+	});	
+}
+
+$(function () {
+	var param = { limit: 15 };
+	getJSON( '/api/snippet/list/lastest', param, function(err, data){
+		if(err){
+			fatal(err);
+		}else{			
+			initVM( arrayToMatrix(data) );
+			$('#vm').show();
+		}
+	});
+	Vue.config.debug = true;	
+
+});
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content" style="max-width:1024px;">
+	<div id="vm" class="dv-container" style="max-width:1024px;display:none;">
+		<h2 style="font-size:24px;text-align:center;">{{ _('snippet-fibula is a snippet manager for multi-languages') }}</h2>
+		<div>统计
+		</div>
+		<div style="margin-top:40px;">
+			<h3 class="dv-text-caution" style="margin-bottom:5px;text-align:center;" >使用最多的代码段</h3>
+			<hr style="margin:0px;">
+			test
+		</div>
+		<div style="margin-top:40px;">
+			<h3 class="dv-text-caution" style="margin-bottom:5px;text-align:center;">最近更新的代码段</h3>
+			<hr style="margin-top:0px;margin-bottom:10px;">
+			<table>
+				<tr v-for="row in lastest">
+					<td v-for="(col,item) in row" track-by="$index">
+						<div class="uk-float-left " style="height:40px;">
+							<span v-if="item" class="dv-link uk-text-middle" v-text="item.language" style="font-size:20px;"></span>
+						</div>
+						<div v-if="item" style="margin-left:20px"><a v-bind:href="'/snippet/entity/view?id=' + item.id" style="color:#333"><b v-text="item.name"></b></a>
+							<p v-text="item.brief" class="uk-text-muted" style="margin-top:0"></p>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+

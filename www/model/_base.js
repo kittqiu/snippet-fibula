@@ -35,7 +35,8 @@ function defineModel(warp, name, cols, opts) {
     });
     columns.push({
         name: 'updated_at',
-        type: 'bigint'
+        type: 'bigint',
+        index: true
     });
     columns.push({
         name: 'version',

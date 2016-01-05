@@ -1,0 +1,34 @@
+{% extends '../_base.html' %}
+{% block header %}
+<ul class="dv-navbar-nav uk-navbar-nav">
+	<li><a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a></li>
+    <li class="uk-active"><a href="" >snippet</a></li>
+    <li><a href="">project</a></li>
+    <li><a href="">documentations</a></li>
+</ul> 
+{% endblock %}
+
+
+{% block mainheader %}
+<div id="main-header" class="uk-grid">
+	<div class="uk-width-1-1 uk-block uk-block-muted uk-flex x-toolbar" >
+		<div class="uk-flex-item-auto " style="padding-right:20px;padding-left:20px;">
+		{% block toolbar %}
+			<form class="uk-form">
+				<div style="margin-right:60px;">
+		    		<input type="input" placeholder="find snippet"  class="uk-width-*" style="height:40px" >
+		    	</div>		
+		    	<button class="uk-button uk-icon-search dv-button-search uk-float-right"></button>
+			</form>
+		{% endblock %}
+		</div>
+		<div class="uk-flex-item-none " style="padding:10px 20px;">
+		{% if __user__ %}	
+		<a href="/snippet/create" class="dv-link" style="margin-right:20px">{{ _('Create') }}</a>
+		<a href="/snippet/pending" class="dv-link" style="margin-right:20px">{{ _('Pending to check') }}</a>
+		{% else %}					
+		{% endif %}
+		</div>			
+	</div>
+</div>
+{% endblock %}

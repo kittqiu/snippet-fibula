@@ -159,7 +159,6 @@ function* $_getAllPending(lang,page) {
         });
 }
 
-
 function* $_removeLangCache(lang){
     yield cache.$remove(keyLangCount(lang) );
     yield cache.$remove(keyLangFirstPage(lang) );
@@ -183,15 +182,17 @@ function* $_render( context, model, view ){
 
 /*
 GET:
+/snippet
 /snippet/create
-/snippet/entity/view
+/snippet/entity/view?id=id
 /snippet/pending
 /snippet/pending/check?id=id
 /snippet/pending/edit?id=id
 /snippet/pending/list/:lang
-/api/snippet/view/entity/:id
+/api/snippet/list/lastest?limit=limit
 /api/snippet/pending/entity/:id
 /api/snippet/pending/lang/:lang
+/api/snippet/view/entity/:id
 
 POST:
 /api/snippet/create
@@ -200,7 +201,11 @@ POST:
 */
 
 
-module.exports = {    
+module.exports = {
+    'GET /snippet':function* (){
+        var model = {};
+        yield $_render( this, model, 'snippet-index.html' );
+    },
 	'GET /snippet/create':function* (){
         var model = {'__languages':modelDict['language'], '__environments':modelDict['environment'], '__form': {action: '/api/snippet/create', name: 'Create'}};
         yield $_render( this, model, 'snippet-form.html' );
@@ -468,7 +473,7 @@ module.exports = {
 
     'GET /api/snippet/view/entity/:id': function* (id){
         var 
-            param = this.request.body || {},
+            param = this.query || {},
             record = yield modelSnippet.$find(id);
         if( record && param){
             if( param.idToName ){
@@ -483,7 +488,7 @@ module.exports = {
                 record.master = master.name;
             }
             if( param.nextVersion ){
-                var next_version = record.version + 1;;
+                var next_version = record.version + 1,
                     new_version = modelFlow.$find({
                     select: ['score', 'contributor', 'newversion'],
                     where: '`snippet_id`=? and `newversion`=?',
@@ -495,7 +500,24 @@ module.exports = {
             }
         }
         this.body = record || {};
-    },    
+    }, 
+
+    'GET /api/snippet/list/lastest': function* (id){
+        var 
+            limit = this.query.limit || 15,
+            record;
+
+        record = yield cache.$get( this.request.path, function*(){
+            return yield modelSnippet.$findAll( {
+                select: ['id', 'name', 'brief', 'language'],
+                order: '`updated_at` desc',
+                limit: limit,
+                offset: 0
+            });
+        } );
+        
+        this.body = record || {};
+    },
 
     'LoginRequired': [ '/snippet/create', '/api/snippet/create', '/snippet/pending']
 };

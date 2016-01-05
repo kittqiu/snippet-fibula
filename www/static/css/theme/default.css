@@ -10897,6 +10897,11 @@ a.uk-datepicker-table-muted {
 .dv-link:hover {
   color: #CC525E;
 }
+.dv-text-caution {
+  color: #CC525E;
+  text-decoration: none;
+  font-weight: bold;
+}
 .x-title {
   font-size: 36px;
   line-height: 42px;
@@ -10970,7 +10975,7 @@ form p.help-text {
 }
 .dv-box-title {
   margin-top: 40px;
-  padding-left: 30px;
+  padding-left: 25px;
   margin-bottom: 0px;
   color: #CC525E;
   text-decoration: none;

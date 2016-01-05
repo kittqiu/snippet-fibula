@@ -1,4 +1,4 @@
-{% extends '../_base.html' %}
+{% extends './snippet_base.html' %}
 
 {% block css %}
 <link rel="stylesheet" href="/static/css/codemirror.css"/>
@@ -8,8 +8,9 @@
 <script src="/static/js/codemirror.js"></script>
 <script src="/static/js/marked.js"></script>
 <script src="/static/js/clipboard.min.js"></script>
+<script src="/static/js/uikit/components/accordion.js"></script>
 <script type="text/javascript">
-var start_time;
+var start_time, ishidden = true;
 function initVM( data ){
 	var vm = new Vue({
 		el: '#vm',
@@ -30,44 +31,6 @@ function initVM( data ){
 			next_version: data.next_version || {newversion:21, score:20,contributor:'def'}
 		},
 		methods:{
-			gendoc: function(){
-				var html = '';
-				if( this.code )
-					html = codeToHtml(this.code);
-				$('#codeAnddoc').html(html);
-			},
-			getPostData: function(){
-				var data = {
-					name: this.name,
-					brief: this.brief,
-					language: this.language,
-					environment: this.environment,
-					keywords: this.keywords,
-					code: this.code,
-					help: this.help
-				};
-				if(validateJsonObj('createSnippet', data)){
-					return data;
-				}	
-			},
-			submit: function(){},
-			do:function(type){
-				var data,
-					form = $('#vm').find('form');
-				data = {
-					id: '{{ __id }}',
-					type: type,
-					advice: this.advice,
-					timeused: use_time
-				};
-
-				form.postJSON( '/api/snippet/pending/check', data, function(err, result){
-					if( !err ){
-						$('#content-block').addClass('uk-hidden');
-						jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
-					}
-				});
-			}
 		}
 	});
 	
@@ -76,20 +39,20 @@ function initVM( data ){
     var html = codeToHtml(data.code, 'dv-snippet-view');
 	$('#codeAnddoc').html(html);	
 	
-	$('#orgcode').hide();
 	var btn = document.getElementById('btn_copy');
 	var clipboard = new Clipboard(btn);
 	clipboard.on('success', function(e) {
 	    e.clearSelection();
-	    $('#orgcode').hide();
+	    showCode(!ishidden);
 	});	 
 	clipboard.on('error', function(e) {
-	    $('#orgcode').hide();
+		showCode(ishidden);
 	});
 }
 
 $(function () {
-	getJSON( '/api/snippet/view/entity/{{ __id }}', function(err, snippet){
+	var param = { idToName: true, nextVersion: true};
+	getJSON( '/api/snippet/view/entity/{{ __id }}', param, function(err, snippet){
 		if(err){
 			fatal(err);
 		}else{
@@ -98,16 +61,22 @@ $(function () {
 	});	
 });
 
+function showCode(shown){
+	$('#orgcode').parent().attr('style', shown? 'height: auto; position: relative;' :'overflow:hidden;height:0;position:relative;');
+}
+
 function copyToClipboard(){
-	$('#orgcode').show();//show the element for copying to clipboard. On completed, hide it again		
+	var orgStyle = $('#orgcode').parent().attr('style');
+	if( orgStyle.indexOf('hidden') !== -1){
+		ishidden = true;
+	}else{
+		ishidden = false;
+	}
+	showCode(true);//show the element for copying to clipboard. On completed, hide it again
 }
 
 
 </script>
-{% endblock %}
-
-{% block jump-title  %}
-操作成功。您的努力推动了我们团队效率的提升，感谢有你！
 {% endblock %}
 
 {% block content %}
@@ -126,9 +95,13 @@ function copyToClipboard(){
 				</div>
 				<div style="margin-top:40px">
 					<h3><b>{{ _('Code snippet') }}</b></h3>
-					<div class="uk-float-right" style="text-align:right;margin-top:-40px;"><button id="btn_copy" onclick="copyToClipboard()"  data-clipboard-target="#orgcode"><span class="uk-icon-clipboard"></span> {{ _('Copy') }}</button></div>
+					<div class="uk-float-right" style="text-align:right;margin-top:-30px;"><button id="btn_copy" onclick="copyToClipboard()"  data-clipboard-target="#orgcode"><span class="uk-icon-clipboard"></span> {{ _('Copy') }}</button></div>
 					<div id="codeAnddoc" class="uk-block-muted"></div>
-					<div class=""><textarea id="orgcode" v-text="code" class="uk-width-1-1" ></textarea></div>
+					<!--div class=""><textarea id="orgcode" v-text="code" class="uk-width-1-1" ></textarea></div-->
+					<div class="uk-accordion" data-uk-accordion="{showfirst:false}">
+					    <label class="uk-accordion-title uk-form-label uk-text-muted" style="font-size: 14px;" >{{ _('Raw Code')}} <i class="uk-icon-caret-square-o-down"></i></label>
+						<textarea id="orgcode" v-text="code" class="uk-accordion-content uk-width-1-1" style="height:240px;"></textarea>
+					</div>
 				</div>
 				<div style="margin-top:40px">
 					<h3><b>{{ _('Help') }}</b></h3>
@@ -139,14 +112,14 @@ function copyToClipboard(){
 
 		<div class="uk-width-1-3">
 			<ul class="dv-box" style="margin-top:60px">
-				<li><span v-text="creator + '创建于' + created_at + ', Master: ' + master"></span></li>
-				<li>版次：<span v-text="version"></span><a v-bind:href="'/snippet/pending/edit?id=' + id" class="dv-link uk-float-right" style="">{{ _('Edit') }}</a></li>
-				<li>下版次：
+				<li><span v-text="creator + '{{_('Created at')}}' + created_at + ', Master: ' + master"></span></li>
+				<li>{{ _('Revision')}}: <span v-text="version"></span><a v-bind:href="'/snippet/pending/edit?id=' + id" class="dv-link uk-float-right" style="">{{ _('Edit') }}</a></li>
+				<li>{{ _('Next revision')}}: 
 					<span v-if="next_version">
 						<span v-text="next_version.newversion"></span>
-						<a v-if="next_version.contributor && next_version.contributor.indexOf('{{ __user__.id }}')===-1" class="dv-link uk-float-right" v-bind:href="'/snippet/pending/check?id=' + id +'&redirect=' + '{{ __request__.path}}'">审核/放弃(<span v-text="next_version.score"></span>%)</a>
+						<a v-if="next_version.contributor && next_version.contributor.indexOf('{{ __user__.id }}')===-1" class="dv-link uk-float-right" v-bind:href="'/snippet/pending/check?id=' + id +'&redirect=' + '{{ __request__.path}}'">{{ _('Check or Discard')}}(<span v-text="next_version.score"></span>%)</a>
 					</span>
-					<span v-else>无</span>
+					<span v-else>{{ _('None')}}</span>
 				</li>
 			</ul>
 			<h3 class="dv-box-title">统计信息</h3>

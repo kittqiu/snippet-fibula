@@ -28,12 +28,14 @@
 </head>
 <body>
 	<div id="header">
+		{% block header %}
 		<ul class="dv-navbar-nav uk-navbar-nav">
 			<li><a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a></li>
 	        <li class="uk-active"><a href="" >snippet</a></li>
 	        <li><a href="">project</a></li>
 	        <li><a href="">documentations</a></li>
-    	</ul>    					
+    	</ul> 
+    	{% endblock %}   					
 		<ul class="dv-navbar-nav uk-navbar-nav" style="float:right;">
 			{% if __user__ %}
 			<li class="" data-uk-dropdown="{pos:'left-bottom'}" style="padding-top:10px;margin-right:20px;">
@@ -53,6 +55,7 @@
 		</ul>
 	</div>
 	<div id="main">
+		{% block mainheader %}
 		<div id="main-header" class="uk-grid">
 			<div class="uk-width-1-1 uk-block uk-block-muted uk-flex x-toolbar" >
 				<div class="uk-flex-item-auto " style="padding-right:20px;padding-left:20px;">
@@ -74,6 +77,7 @@
 				</div>			
 			</div>
 		</div>
+		{% endblock %}
 		<div id="main-content">
 			<div id="jump-block" class="dv-container x-content uk-hidden">
 				<div class="uk-alert uk-alert-success uk-alert-large">
