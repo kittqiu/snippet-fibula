@@ -66,7 +66,8 @@ $(function () {
 		}else{
 			initVM( snippet );
 		}
-	});	
+	});
+	setDefButton('passbutton');
 });
 
 </script>
@@ -172,7 +173,7 @@ $(function () {
 			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Advice') }}</label>
 			        <div class="uk-form-controls" id="help" >
-			        	<input id="advice" v-model="advice" type="text" placeholder="" class="uk-width-1-1">
+			        	<input id="advice" v-model="advice" type="text" placeholder="" class="uk-width-1-1" autofocus>
 			        </div>
 			        <p class="help-text"></p>
 			    </div>
@@ -180,7 +181,7 @@ $(function () {
 			    	<button  v-on:click="do('discard')" class="uk-button-success uk-button-large" style="width:240px;" >
 			        	<i class="uk-icon-close uk-icon-medium"></i> {{ _('Discard') }}
 			        </button>
-			        <button  v-on:click="do('pass')" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
+			        <button  v-on:click="do('pass')" id="passbutton" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
 			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _('Pass') }}
 			        </button>
 			    </div>

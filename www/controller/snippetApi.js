@@ -26,7 +26,10 @@ var
 var 
     CACHE_PREFIX = 'snippet/',
     PAGE_SIZE = config.snippet.page_size,
-    SCORE_DELTA = config.snippet.score_delta;
+    SCORE_DELTA = config.snippet.score_delta,
+    CONTRIB_EDIT = 'edit',
+    CONTRIB_CHECK = 'check',
+    CONTRIB_REFER = 'refer';
 
 function loadFixedModels(){
     var files = fs.readdirSync( __dirname + '/../model/snippet');
@@ -71,6 +74,7 @@ function keyLangFirstPage(lang){
 var
     FlowType = [],
     FLOW_CREATE = 'create',
+    FLOW_EDIT = 'edit',
     Languages =  [], // [  'C', 'C++' ....]
     pendingCountKeys = [],// ['pending/language/0', 'pending/language/1'...]
     pendingFirstPageKeys= [];
@@ -105,8 +109,8 @@ function* $__getPendingCount(lang){
     return yield cache.$get( keyLangCount(lang), function*(){
         return yield modelFlow.$findNumber( {
             select: 'count(*)',
-            where: '`flow_type`=?  and `result`=? and `language`=?',
-            params: ['create', 'processing', lang]
+            where: '`result`=? and `language`=?',
+            params: ['processing', lang]
         });
     } );
 }
@@ -125,8 +129,8 @@ function* $__getPendingFirstPage(lang){
     return yield cache.$get( keyLangFirstPage(lang), function*(){
         return yield modelFlow.$findAll( {
             select: ['id', 'snippet_id', 'user_id', 'name', 'brief', 'score', 'contributor'],
-            where: '`flow_type`=?  and `result`=? and `language`=?',
-            params: ['create', 'processing', lang], 
+            where: '`result`=? and `language`=?',
+            params: ['processing', lang], 
             order: '`created_at` desc',
             limit: PAGE_SIZE,
             offset: 0
@@ -151,17 +155,65 @@ function* $_getAllPending(lang,page) {
     }
     return yield modelFlow.$findAll( {
             select: ['id', 'snippet_id', 'user_id', 'name', 'brief', 'score', 'contributor'],
-            where: '`flow_type`=? and `result`=? and `language`=?',
-            params: ['create', 'processing', lang], 
+            where: '`result`=? and `language`=?',
+            params: ['processing', lang], 
             order: '`created_at` desc',
             offset: page.offset,
             limit: page.limit
         });
 }
 
+function* addContribution( snippet_id, user_id, type ){
+    var contrib = yield modelContribute.$find({
+                    where: '`snippet_id`=? and `user_id`=?',
+                    params: [snippet_id, user_id ], 
+                    limit: 1
+                });
+    if( contrib ){
+        if( type === CONTRIB_CHECK ){
+            contrib.check_count += 1;
+            yield contrib.$update(['check_count']);
+        }else if( type === CONTRIB_EDIT ){
+            contrib.edit_count += 1;
+            yield contrib.$update(['edit_count']);
+        }else if( type === CONTRIB_REFER ){
+            contrib.refer_count += 1;
+            yield contrib.$update(['refer_count']);
+        }//else no do
+    }else{
+        contrib = {
+            snippet_id: snippet_id,
+            user_id: user_id,
+            check_count: type === CONTRIB_CHECK ? 1 : 0,
+            edit_count: type === CONTRIB_EDIT ? 1 : 0,
+            refer_count: type === CONTRIB_REFER ? 1 : 0
+        }
+        yield modelContribute.$create(contrib);
+    } 
+}
+
+function* addCheckContribution( snippet_id, user_id ){
+    yield addContribution( snippet_id, user_id, CONTRIB_CHECK );
+}
+
+function* addEditContribution( snippet_id, user_id ){
+    yield addContribution( snippet_id, user_id, CONTRIB_EDIT );
+}
+
+function* addReferContribution( snippet_id, user_id ){
+    yield addContribution( snippet_id, user_id, CONTRIB_REFER );
+}
+
+var cachePath = [
+'/api/snippet/list/lastest'
+];
 function* $_removeLangCache(lang){
     yield cache.$remove(keyLangCount(lang) );
     yield cache.$remove(keyLangFirstPage(lang) );
+
+    for( var i = 0; i< cachePath.length; i++ ){
+        yield cache.$remove(cachePath[i]);    
+    }
 }
 
 function getId(request) {
@@ -185,6 +237,7 @@ GET:
 /snippet
 /snippet/create
 /snippet/entity/view?id=id
+/snippet/entity/edit?id=id
 /snippet/pending
 /snippet/pending/check?id=id
 /snippet/pending/edit?id=id
@@ -194,8 +247,10 @@ GET:
 /api/snippet/pending/lang/:lang
 /api/snippet/view/entity/:id
 
+
 POST:
 /api/snippet/create
+/api/snippet/entity/edit/:id
 /api/snippet/pending/entity/:id
 /api/snippet/pending/check
 */
@@ -238,7 +293,6 @@ module.exports = {
         var 
             user = this.request.user,
             snippet,
-            contrib,
             data = this.request.body;
 
         //validate data
@@ -267,14 +321,9 @@ module.exports = {
             score:0,
             contributor:''
         };
-        contrib = {
-            id: next_id(),
-            snippet_id: snippet.id,
-            user_id: user.id,
-            edit_count: 1
-        }
+
         yield modelFlow.$create(snippet);
-        yield modelContribute.$create(contrib);
+        yield addEditContribution( snippet.id, user.id );
 
         //update cache
         yield $_removeLangCache(data.language);
@@ -304,11 +353,13 @@ module.exports = {
 
     'GET /snippet/pending/edit': function* (){
         var id = getId(this.request),
-            model;
+            model,
+            path = '/api/snippet/pending/entity/' + id;
         model = {'__languages':modelDict['language'], '__environments':modelDict['environment'], '__id': id, '__form': {
-            action: '/api/snippet/pending/entity/' + id, 
+            action: path, 
             name: 'Change', 
-            redirect: this.request.query.redirect
+            redirect: this.request.query.redirect,
+            src: path
             } };
         yield $_render( this, model, 'snippet-form.html');
     }, 
@@ -372,7 +423,7 @@ module.exports = {
 
     'POST /api/snippet/pending/check': function* (){
         var 
-            contrib, r, history, num,
+            r, history, num,
             columns = ['score', 'contributor'],
             user = this.request.user,
             data = this.request.body;
@@ -388,7 +439,7 @@ module.exports = {
         if( r.user_id === user.id ){
             throw api.notAllowed(this.translate('Not Allowed'));
         }
-        console.log(data);
+        
         num = yield modelFlowHistory.$findNumber( {
             select: 'count(*)',
             where: '`flow_id`=? and `user_id`=?',
@@ -399,22 +450,7 @@ module.exports = {
         }
 
         /*record the contribution*/
-        contrib = yield modelContribute.$find({
-                    where: '`snippet_id`=? and `user_id`=?',
-                    params: [r.snippet_id, user.id], 
-                    limit: 1
-                });
-        if( contrib ){
-            contrib.check_count += 1;
-            yield contrib.$update(['check_count']);
-        }else{
-            contrib = {
-                snippet_id: r.snippet_id,
-                user_id: user.id,
-                check_count: 1
-            }
-            yield modelContribute.$create(contrib);
-        } 
+        yield addCheckContribution( r.snippet_id, user.id );
 
         /* save the action history*/ 
         history = {
@@ -429,31 +465,46 @@ module.exports = {
         if( data.type === 'pass' ){
             r.score = r.score + SCORE_DELTA > 100 ? 100 : r.score + SCORE_DELTA;
             if( r.score === 100 ){
-                var snippet;
+                var snippet,
+                    baseSnippet = yield modelSnippet.$find(r.snippet_id);
 
-                snippet = {
-                    id: r.snippet_id,
-                    creator_id: r.user_id,
-                    own_id: r.user_id,
-                    name: r.name, 
-                    brief: r.brief,
-                    language: r.language,
-                    environment: r.environment,
-                    keywords: r.keywords, 
-                    code: r.code, 
-                    help: r.help,
-                    version: 0,
-                    created_at: r.created_at 
-                }; 
+                /* create or update */
+                if( baseSnippet === null ){
+                    snippet = {
+                        id: r.snippet_id,
+                        creator_id: r.user_id,
+                        own_id: r.user_id,
+                        name: r.name, 
+                        brief: r.brief,
+                        language: r.language,
+                        environment: r.environment,
+                        keywords: r.keywords, 
+                        code: r.code, 
+                        help: r.help,
+                        version: 0,
+                        created_at: r.created_at 
+                    };
+                    yield modelSnippet.$create(snippet);
+                }else{
+                    baseSnippet.name = r.name;
+                    baseSnippet.brief = r.brief;
+                    baseSnippet.language = r.language;
+                    baseSnippet.environment = r.environment;
+                    baseSnippet.keywords = r.keywords;
+                    baseSnippet.code = r.code;
+                    baseSnippet.help = r.help;
+                    //baseSnippet.version = r.newversion; _base.js auto increment
+                    yield baseSnippet.$update(['name','brief', 'language', 'environment', 'keywords', 'code', 'help', 'version']);
+                }
 
-                r.result('pass');
+                r.result = 'pass';
                 columns.push('result');
-                yield modelSnippet.$create(snippet);
+                
             }//else update score only
         }else if( data.type === 'discard' ){
             r.score = r.score - SCORE_DELTA < -100? -100 : r.score - SCORE_DELTA;
             if( r.score === -100 ){
-                r.result('discard');
+                r.result = 'discard';
                 columns.push('result');
             }
         }
@@ -518,6 +569,71 @@ module.exports = {
         
         this.body = record || {};
     },
+
+    /* edit the snippet */
+    'GET /snippet/entity/edit': function* (){
+        var id = getId(this.request),
+            model,
+            path = '/api/snippet/entity/edit/' + id;
+        model = {'__languages':modelDict['language'], '__environments':modelDict['environment'], '__id': id, '__form': {
+            action: '/api/snippet/entity/edit/' + id, 
+            name: 'Change', 
+            src: '/api/snippet/view/entity/' + id,
+            redirect: this.request.query.redirect
+            } };
+        yield $_render( this, model, 'snippet-form.html');
+    }, 
+
+    'POST /api/snippet/entity/edit/:id': function* (id){
+        var 
+            user = this.request.user,
+            snippet, flowsnippet,
+            contrib,
+            data = this.request.body;
+
+        //validate data
+        json_schema.validate('createSnippet', data);
+        if( !validLanguage(data.language) ){
+            throw api.invalidParam('language'); 
+        }
+        if( !validEnvironment(data.environment)){
+            throw api.invalidParam('environment'); 
+        }
+
+        snippet = yield modelSnippet.$find(id);
+        if( snippet === null ){
+            throw api.notFound('snippet', this.translate('Record not found'));
+        }
+
+        //flow object
+        flowsnippet = {
+            id: next_id(),
+            flow_type: FLOW_EDIT,
+            snippet_id: id,
+            user_id: user.id,
+            name: data.name,
+            brief: data.brief,
+            language: data.language,
+            environment: data.environment,
+            keywords: data.keywords,
+            code: data.code,
+            help: data.help,
+            newversion: snippet.version + 1,
+            score:0,
+            contributor:''
+        };
+
+        yield addEditContribution( id, user.id );
+        yield modelFlow.$create(flowsnippet);
+
+        //update cache
+        yield $_removeLangCache(data.language);
+
+        this.body = {
+            id: snippet.id
+        };
+    },
+
 
     'LoginRequired': [ '/snippet/create', '/api/snippet/create', '/snippet/pending']
 };

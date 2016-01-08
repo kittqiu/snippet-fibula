@@ -40,7 +40,7 @@ $(function () {
 					<td>{{ record.brief }}</td>
 					<td><a href="/snippet/pending/edit?id={{ record.id }}&amp;redirect=/snippet/pending" class="dv-link">{{ _('Change') }}</a></td>
 					{% else %}
-					<td><a href="/snippet/pending/check?id={{ record.id }}" class="dv-link"><b>{{ record.name }}</b></a></td>
+					<td><a href="/snippet/pending/check?id={{ record.id }}&amp;redirect=/snippet/pending" class="dv-link"><b>{{ record.name }}</b></a></td>
 					<td>{{ record.brief }}</td>
 					<td>
 						{% if record.contributor && record.contributor|find(__user__.id) %}

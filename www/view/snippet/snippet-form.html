@@ -81,7 +81,7 @@ function initVM( data ){
 
 $(function () {
 	{% if __id %}
-	getJSON( '/api/snippet/pending/entity/{{ __id }}', function(err, snippet){
+	getJSON( '{{ __form.src }}', function(err, snippet){
 		if(err){
 			fatal(err);
 		}else{

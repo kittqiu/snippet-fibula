@@ -332,3 +332,21 @@ function arrayToMatrix(array, columns){
     console.log(matrix);
     return matrix;
 }
+
+function setDefButton(id) {
+    $("input").bind("keydown", function(event) {
+      // track enter key
+      var keycode = (event.keyCode ? event.keyCode : (event.which ? event.which : event.charCode));
+      if (keycode == 13) { // keycode for enter key
+         var btn = document.getElementById(id);
+         if(btn){
+            btn.click();
+            return false;
+        }else{
+            return true;
+        }
+      } else  {
+         return true;
+      }
+   }); // end of function
+};
