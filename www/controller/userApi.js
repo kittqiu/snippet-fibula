@@ -173,7 +173,7 @@ module.exports = {
             httpOnly: true,
             expires: new Date(0)
         });
-        var redirect = getReferer(this.request);
+        var redirect = '/';//getReferer(this.request);
         console.log('Signout, goodbye!');
         this.response.redirect(redirect);
     },

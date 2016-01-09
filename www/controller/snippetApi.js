@@ -209,7 +209,6 @@ function* $_getContribution(snippet_id, type){
         column = type + '_count',
         sql = 'select c.' + column+',u.name from  snippet_contribute as c, users as u where c.snippet_id=? and c.' + column + ' != 0 and c.user_id=u.id';
     rs = yield warp.$query( sql, [snippet_id] );
-    console.log( rs );
     return rs || [];
 }
 function* $_getAllContribution( snippet_id ){
@@ -222,8 +221,15 @@ function* $_getAllContribution( snippet_id ){
         edit: edit,
         refer: refer
     };
-    console.log( contrib );
     return contrib;
+}
+
+function* $_getLastestHistory(snippet_id, version){
+    var rs,
+        sql = 'select h.newversion,u.name from  snippet_flow as h, users as u  where h.snippet_id=? and h.result=? and h.newversion <> ? and h.user_id=u.id order by h.newversion DESC limit 4';
+    rs = yield warp.$query( sql, [snippet_id,'pass',version] );
+    console.log( rs );
+    return rs || [];
 }
 
 var cachePath = [
@@ -574,6 +580,9 @@ module.exports = {
             }
             if( param.contributor){
                 record.contrib = yield $_getAllContribution( id );
+            }
+            if( param.history){
+                record.history = yield $_getLastestHistory(id,record.version);
             }
         }
         this.body = record || {};

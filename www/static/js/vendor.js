@@ -312,7 +312,7 @@ function fatal(err) {
 
 function formatDate(second){
     var date = new Date(second);
-    return date.getFullYear() + '-' + date.getMonth() + '-' + date.getDay();
+    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDay();
 }
 
 function arrayToMatrix(array, columns){

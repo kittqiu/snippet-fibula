@@ -29,12 +29,13 @@ function initVM( data ){
 			version: data.version || 0,
 			id: data.id || '',
 			next_version: data.next_version || null /*{newversion:21, score:20,contributor:'def'}*/,
-			contrib: data.contrib || {}
+			contrib: data.contrib || {},
+			history: data.history || []
 		},
 		methods:{
 		}
 	});
-	console.log( data.contrib );
+
 	$('#help').html( marked(data.help));
 
     var html = codeToHtml(data.code, 'dv-snippet-view');
@@ -56,7 +57,7 @@ function initVM( data ){
 }
 
 $(function () {
-	var param = { idToName: true, nextVersion: true, contributor:true};
+	var param = { idToName: true, nextVersion: true, contributor:true, history:true};
 	getJSON( '/api/snippet/view/entity/{{ __id }}', param, function(err, snippet){
 		if(err){
 			fatal(err);
@@ -154,10 +155,10 @@ function copyToClipboard(){
 
 			<h3 class="dv-box-title">修改历史</h3>
 			<ul class="dv-box" >
-				<li><span>版次19：张三</span></li>
-				<li><span>版次18：张三</span></li>
-				<li><span>版次17：张三</span></li>
-				<li><span>版次16：张三</span><a v-bind:href="'/snippet/pending/edit?id=' + id" class="dv-link uk-float-right" style="">{{ _('Any More') }}</a></li>
+				<li v-for="(i,r) in history">
+					<span v-text="'版次'+r.newversion + ': ' + r.name"></span>
+					<a v-if="i===history.length-1 && r.newversion !== 0" v-bind:href="'/snippet/pending/edit?id=' + id" class="dv-link uk-float-right">{{ _('Any More') }}</a>
+				</li>
 			</ul>
 		</div>
 	</div>
