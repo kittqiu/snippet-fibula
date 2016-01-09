@@ -163,7 +163,7 @@ function* $_getAllPending(lang,page) {
         });
 }
 
-function* addContribution( snippet_id, user_id, type ){
+function* $_addContribution( snippet_id, user_id, type ){
     var contrib = yield modelContribute.$find({
                     where: '`snippet_id`=? and `user_id`=?',
                     params: [snippet_id, user_id ], 
@@ -192,16 +192,38 @@ function* addContribution( snippet_id, user_id, type ){
     } 
 }
 
-function* addCheckContribution( snippet_id, user_id ){
-    yield addContribution( snippet_id, user_id, CONTRIB_CHECK );
+function* $_addCheckContribution( snippet_id, user_id ){
+    yield $_addContribution( snippet_id, user_id, CONTRIB_CHECK );
 }
 
-function* addEditContribution( snippet_id, user_id ){
-    yield addContribution( snippet_id, user_id, CONTRIB_EDIT );
+function* $_addEditContribution( snippet_id, user_id ){
+    yield $_addContribution( snippet_id, user_id, CONTRIB_EDIT );
 }
 
-function* addReferContribution( snippet_id, user_id ){
-    yield addContribution( snippet_id, user_id, CONTRIB_REFER );
+function* $_addReferContribution( snippet_id, user_id ){
+    yield $_addContribution( snippet_id, user_id, CONTRIB_REFER );
+}
+
+function* $_getContribution(snippet_id, type){
+    var rs,
+        column = type + '_count',
+        sql = 'select c.' + column+',u.name from  snippet_contribute as c, users as u where c.snippet_id=? and c.' + column + ' != 0 and c.user_id=u.id';
+    rs = yield warp.$query( sql, [snippet_id] );
+    console.log( rs );
+    return rs || [];
+}
+function* $_getAllContribution( snippet_id ){
+    var check, edit, refer, contrib;
+    check = yield $_getContribution( snippet_id, CONTRIB_CHECK );
+    edit = yield $_getContribution( snippet_id, CONTRIB_EDIT );
+    refer = yield $_getContribution( snippet_id, CONTRIB_REFER );
+    contrib = {
+        check: check,
+        edit: edit,
+        refer: refer
+    };
+    console.log( contrib );
+    return contrib;
 }
 
 var cachePath = [
@@ -253,6 +275,7 @@ POST:
 /api/snippet/entity/edit/:id
 /api/snippet/pending/entity/:id
 /api/snippet/pending/check
+/api/snippet/refer/entity/:id
 */
 
 
@@ -323,7 +346,7 @@ module.exports = {
         };
 
         yield modelFlow.$create(snippet);
-        yield addEditContribution( snippet.id, user.id );
+        yield $_addEditContribution( snippet.id, user.id );
 
         //update cache
         yield $_removeLangCache(data.language);
@@ -450,7 +473,7 @@ module.exports = {
         }
 
         /*record the contribution*/
-        yield addCheckContribution( r.snippet_id, user.id );
+        yield $_addCheckContribution( r.snippet_id, user.id );
 
         /* save the action history*/ 
         history = {
@@ -540,7 +563,7 @@ module.exports = {
             }
             if( param.nextVersion ){
                 var next_version = record.version + 1,
-                    new_version = modelFlow.$find({
+                    new_version = yield modelFlow.$find({
                     select: ['score', 'contributor', 'newversion'],
                     where: '`snippet_id`=? and `newversion`=?',
                     params: [record.id, next_version]
@@ -548,6 +571,9 @@ module.exports = {
                 if( new_version !== null){
                     record.next_version = new_version;
                 }
+            }
+            if( param.contributor){
+                record.contrib = yield $_getAllContribution( id );
             }
         }
         this.body = record || {};
@@ -623,7 +649,7 @@ module.exports = {
             contributor:''
         };
 
-        yield addEditContribution( id, user.id );
+        yield $_addEditContribution( id, user.id );
         yield modelFlow.$create(flowsnippet);
 
         //update cache
@@ -632,6 +658,14 @@ module.exports = {
         this.body = {
             id: snippet.id
         };
+    },
+
+    'POST /api/snippet/refer/entity/:id': function* (id){
+        var user = this.request.user;
+        yield $_addReferContribution(id, user.id);
+        this.body = {
+            result: 'ok'
+        }
     },
 
 

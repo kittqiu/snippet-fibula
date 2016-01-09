@@ -28,12 +28,13 @@ function initVM( data ){
 			master: data.master || '',
 			version: data.version || 0,
 			id: data.id || '',
-			next_version: data.next_version || {newversion:21, score:20,contributor:'def'}
+			next_version: data.next_version || null /*{newversion:21, score:20,contributor:'def'}*/,
+			contrib: data.contrib || {}
 		},
 		methods:{
 		}
 	});
-	
+	console.log( data.contrib );
 	$('#help').html( marked(data.help));
 
     var html = codeToHtml(data.code, 'dv-snippet-view');
@@ -44,6 +45,10 @@ function initVM( data ){
 	clipboard.on('success', function(e) {
 	    e.clearSelection();
 	    showCode(!ishidden);
+	    {% if __user__.id %}
+	    postJSON( '/api/snippet/refer/entity/{{ __id }}', function(err,result){
+	    });
+	    {% endif %}
 	});	 
 	clipboard.on('error', function(e) {
 		showCode(ishidden);
@@ -51,7 +56,7 @@ function initVM( data ){
 }
 
 $(function () {
-	var param = { idToName: true, nextVersion: true};
+	var param = { idToName: true, nextVersion: true, contributor:true};
 	getJSON( '/api/snippet/view/entity/{{ __id }}', param, function(err, snippet){
 		if(err){
 			fatal(err);
@@ -113,11 +118,12 @@ function copyToClipboard(){
 		<div class="uk-width-1-3">
 			<ul class="dv-box" style="margin-top:60px">
 				<li><span v-text="creator + '{{_('Created at')}}' + created_at + ', Master: ' + master"></span></li>
-				<li>{{ _('Revision')}}: <span v-text="version"></span><a v-if="'{{ __user__.id }}'" v-bind:href="'/snippet/entity/edit?id=' + id" class="dv-link uk-float-right" style="">{{ _('Edit') }}</a></li>
+				<li>{{ _('Revision')}}: <span v-text="version"></span><a v-if="'{{ __user__.id }}' && next_version===null" v-bind:href="'/snippet/entity/edit?id=' + id" class="dv-link uk-float-right" style="">{{ _('Edit') }}</a></li>
 				<li>{{ _('Next revision')}}: 
 					<span v-if="next_version">
 						<span v-text="next_version.newversion"></span>
 						<a v-if="'{{ __user__.id }}' && next_version.contributor && next_version.contributor.indexOf('{{ __user__.id }}')===-1" class="dv-link uk-float-right" v-bind:href="'/snippet/pending/check?id=' + id +'&redirect=' + '{{ __request__.path}}'">{{ _('Check or Discard')}}(<span v-text="next_version.score"></span>%)</a>
+						<span v-else class="uk-float-right">{{ _('Pending to check')}}</span>
 					</span>
 					<span v-else>{{ _('None')}}</span>
 				</li>
@@ -132,9 +138,18 @@ function copyToClipboard(){
 
 			<h3 class="dv-box-title">贡献</h3>
 			<ul class="dv-box" >
-				<li><span>张三(3)、李四(2)、王五编辑</span></li>
-				<li><span>张三(2)、李四审核</span></li>
-				<li><span>王五(9)、李四(8)引用</span></li>
+				<li>
+					<span  v-for="(i,r) in contrib.edit" v-text="r.name + '(' + r.edit_count + ')' + (i===contrib.edit.length-1?'编辑':',')"></span>
+					<span v-if="contrib.edit.length===0">暂无人编辑</span>
+				</li>
+				<li>
+					<span  v-for="(i,r) in contrib.check" v-text="r.name + '(' + r.check_count + ')' + (i===contrib.check.length-1?'审核':',')"></span>
+					<span v-if="contrib.check.length===0">暂无人审核</span>
+				</li>
+				<li>
+					<span v-for="(i,r) in contrib.refer" v-text="r.name + '(' + r.refer_count + ')' + (i===contrib.refer.length-1?'引用':',')"></span>
+					<span v-if="contrib.refer.length===0">暂无人引用</span>
+				</li>
 			</ul>
 
 			<h3 class="dv-box-title">修改历史</h3>
