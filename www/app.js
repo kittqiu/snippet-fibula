@@ -191,7 +191,7 @@ app.use( function* theMiddleWare(next){
  * scan controller directory and load all modules
  */
 
- function registerRoute(method, path, fn){
+function registerRoute(method, path, fn){
 	if( method === 'GET' ){
 		console.log( "found route: GET %s", path );
 		app.use( route.get(path,fn));
@@ -214,12 +214,54 @@ function loadControllerFileNames(){
 	});
 }
 
+/* find *Api.js in controller sub directory and load it*/
+function loadApiModule(parent, ctrls){
+	var files = fs.readdirSync( __dirname + '/' + parent ),
+		re = new RegExp( "^[A-Za-z][A-Za-z0-9\\_]*Api\\.js$"),
+		jss = _.filter( files, function(f){
+			return re.test(f);
+		}),
+		modules = _.map( jss, function(f){
+			return f.substring(0, f.length-3);
+		}),
+		pkg = parent.replace('/', '.');
+
+	_.each(modules, function(module){
+		var cls = parent +'/' + module;
+		ctrls[cls] = require( parent + '/' + module );
+		console.log('load module: cls(' + cls + '), mod(' + parent + '/' + module + ')');
+	});
+
+	_.each( files, function(f){
+		var file = parent + '/' + f;
+		if( fs.statSync( __dirname + '/' + file).isDirectory()){
+			_.merge( ctrls, loadApiModule(file, {}));
+		}
+	});
+	return ctrls;
+}
+
+function loadControllerSubSystem(){
+	var ctrls = {},
+		parent = "./controller",
+		files = fs.readdirSync( __dirname + '/' + parent );
+
+	_.each( files, function(f){
+		var file = parent + '/' + f;
+		if( fs.statSync( __dirname + '/' + file).isDirectory()){
+			_.merge( ctrls, loadApiModule(file, {}));
+		}
+	});
+	return ctrls;
+}
+
 //load modules by require statments
 function loadControllers(){
 	var ctrls = {};
 	_.each( loadControllerFileNames(), function(filename){
 		ctrls[filename] = require('./controller/' + filename );
 	});
+	_.merge( ctrls, loadControllerSubSystem());
 	return ctrls;
 }
 

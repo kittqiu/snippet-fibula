@@ -40,7 +40,8 @@ function initVM( data ){
 				form.postJSON( '/api/snippet/pending/check', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
-						jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
+						jumpTo( result.redirect, "{{ _('History Page')}}", 3 );
+						//jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
 					}
 				});
 			}

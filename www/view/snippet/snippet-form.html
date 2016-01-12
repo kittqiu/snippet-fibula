@@ -60,9 +60,10 @@ function initVM( data ){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
 						{% if __id %}
-						jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
+						jumpTo( result.redirect, "{{ _('History Page')}}", 3 );
 						{% else %}
-						jumpTo( '/', "{{ _('Home')}}", 3 );
+						//jumpTo( '/', "{{ _('Home')}}", 3 );
+						jumpTo( result.redirect, "{{ _('History Page')}}", 3 );
 						{% endif %}	
 					}
 				});
