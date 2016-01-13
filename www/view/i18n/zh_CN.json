@@ -24,6 +24,8 @@
 	"Edit": "编辑",
 	"email": "邮箱",
 
+	"Found": "找到",
+
 	"go back to the last page": "返回前一页",
 
 	"Help": "帮助",
@@ -57,8 +59,10 @@
 	"Program language": "编程语言",
 
 	"Raw Code": "原始代码",
+	"Rearch result": "搜索结果",
 	"Record not found": "未找到对应的数据记录，可能数据已经被转移",
 	"Revision": "版次",
+
 
 	"SignUp": "注册",
 	"sign up": "注册",

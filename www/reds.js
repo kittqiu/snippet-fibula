@@ -249,6 +249,37 @@ Query.prototype.between = function(start, stop){
 };
 
 /**
+ * count the query and callback `fn(err, ids)`.
+ *
+ * @return count
+ * @api public
+ */
+Query.prototype.count = function(fn){
+  var key = this.search.key;
+  var db = this.search.client;
+  var query = this.str;
+  var words = exports.stem(exports.stripStopWords(exports.words(query)));
+  var keys = exports.metaphoneKeys(key, words);
+  var type = this._type;
+  var start = this._start || 0;
+  var stop = this._stop || -1;
+
+  if (!keys.length) return fn(null, []);
+
+  var tkey = key + 'tmpkey';
+  db.multi([
+    [type, tkey, keys.length].concat(keys),
+    ['zcount', tkey, '-inf', '+inf'],
+    ['zremrangebyrank', tkey, start, stop],
+  ]).exec(function(err, ids) {
+    ids = ids[1];
+    fn(err, ids);
+  });
+
+  return this;
+}
+
+/**
  * Perform the query and callback `fn(err, ids)`.
  *
  * @param {Function} fn

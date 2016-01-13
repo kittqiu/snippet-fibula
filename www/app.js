@@ -90,6 +90,10 @@ swig.setDefaults({
 });
 function swFind(input,str) { return input.indexOf(str) !== -1; }
 swig.setFilter('find', swFind);
+function swURL(input,str) { 
+	return input.replace(' ', '+');
+}
+swig.setFilter('url', swURL);
 
 /*define template render function, log execution time and catch the exception*/
 app.use( function* theMiddleWare(next){

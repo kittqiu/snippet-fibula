@@ -1,0 +1,63 @@
+{% extends './snippet_base.html' %}
+
+{% block title %} {{ _('Rearch result')}} {% endblock %}
+
+{% block head %}
+<script type="text/javascript">
+$(function(){
+	$('#q').val('{{ __request__.query.q }}');
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container">
+		<h3 style="text-align:center">{{ _('Found')}}{{ page.total }}个结果</h3>
+		<div style="margin-bottom: 50px">	
+			<hr style="margin-top:2px;border-top:2px solid #888;">
+			{% if count > 0 %}
+			<table class="uk-table uk-table-striped">
+				{% for m, r in rs %}
+				<tr>			
+					<td><a href="/snippet/entity/view?id={{ r.id }}" class="dv-link"><b>{{ r.name }}</b></a></td>
+					<td>{{ r.brief }}</td>
+					<td>{{ r.language }}</td>
+					<td>{{ r.environment }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+			{% if page.pages > 1 %}
+			<div style="text-align:center">
+				<ul class="uk-pagination">
+					{% if page.index == 1 %}
+						<li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+					{% else %}
+						<li><a href="/snippet/search?q={{ __request__.query.q|url }}&page={{ page.index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
+					{% endif %}
+					{% for index in page.list %}
+						{% if index == '...' %}
+						<li class="uk-disabled"><span>...</span></li>
+						{% elseif index == page.index %}
+						<li class="uk-active"><span>{{ index }}</span></li>
+						{% else %}
+						<li><a href="/snippet/search?q={{ __request__.query.q|url}}&page={{ index }}">{{ index }}</a></li>
+						{% endif %}
+					{% endfor %}
+					{% if page.index == page.total %}
+						<li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
+					{% else %}
+						<li><a href="/snippet/search?q={{ __request__.query.q|url}}&page={{ page.index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
+					{% endif %}
+	            </ul>
+	        </div>
+            {% endif %}
+			{% else %}
+			<p>{{ _('No record')}}</p>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+

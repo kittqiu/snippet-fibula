@@ -9,13 +9,15 @@ var
     cache = require('../cache'),
     helper = require('../helper'),
     constants = require('../constants'),
-    json_schema = require('../json_schema');
+    json_schema = require('../json_schema'),
+    config = require('../config');
 
 var
     Setting = db.setting,
     warp = db.warp,
     next_id = db.next_id;
 
+console.log( '....+++++ ' + config.name);
 // default settings:
 var defaultSettingDefinitions = {
     website: [
@@ -23,7 +25,7 @@ var defaultSettingDefinitions = {
             key: 'name',
             label: 'Name',
             description: 'Name of the website',
-            value: 'My Website',
+            value: config.name || 'My Website',
             type: 'text'
         },
         {

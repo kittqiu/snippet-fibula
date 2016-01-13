@@ -82,6 +82,9 @@ function getHistoryUrl( context ){
 }
 
 module.exports = {
+    /*constant*/
+    name: 'snippet',
+
     /*members*/
     model: models,
     config: config.snippet,

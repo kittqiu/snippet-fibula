@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/kittqiu/snippet-fibula#readme",
   "dependencies": {
+    "co": "^4.6.0",
     "jjv": "^1.0.2",
     "koa": "^1.1.2",
     "koa-bodyparser": "^2.0.1",

@@ -8,10 +8,12 @@ var
     api = require('../../api'),
     base = require('./base'),
     cache = require('./snippet_cache'),
-    contrib = require('./contribute');
+    contrib = require('./contribute'),
+    search = require('./search');
 
 var 
     PAGE_SIZE = config.snippet.page_size,
+    LARGE_PAGE_SIZE = config.snippet.large_page_size,
     SCORE_DELTA = config.snippet.score_delta,
     FLOW_CREATE = 'create',
     FLOW_EDIT = 'edit';
@@ -88,6 +90,7 @@ GET:
 /snippet/pending/check?id=id
 /snippet/pending/edit?id=id
 /snippet/pending/list/:lang
+/snippet/search
 /api/snippet/list/lastest?limit=limit
 /api/snippet/pending/entity/:id
 /api/snippet/pending/lang/:lang
@@ -187,6 +190,22 @@ module.exports = {
         var pageModel = {'__language':lang, '__page': this.request.query.page||1};
         base.setHistoryUrl(this);
         yield $render( this, pageModel, 'snippet-pending-list.html' );        
+    },
+
+    'GET /snippet/search': function* (){
+        var rs = [],
+            qstr = this.request.query.q,
+            page =  helper.getPage(this.request,LARGE_PAGE_SIZE), 
+            pageModel;
+        if( qstr ){
+            console.log( 'search:' + qstr);
+            page.total = yield search.$count(qstr);
+            if( !page.isEmpty ){
+                rs = yield search.$search( qstr, LARGE_PAGE_SIZE * (page.index-1), LARGE_PAGE_SIZE );
+            }
+        }
+        pageModel = { q:qstr, 'rs': rs, count:rs.length,  page: page };
+        yield $render( this, pageModel, 'snippet-search-list.html' );
     },
 
     'GET /api/snippet/list/lastest': function* (id){

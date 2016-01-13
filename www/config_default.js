@@ -10,6 +10,7 @@
  */
 
  module.exports = {
+    name: 'My Website',
      // server domain name:
     domain: 'www.example.com',
     // the theme used, default to 'default':
@@ -63,8 +64,15 @@
         static_prefix: ''
     },
 
+    search:{
+        //host of redis
+        host: '127.0.0.1',
+        port: 6379
+    },
+
     snippet: {
         page_size: 10,
+        large_page_size: 20,
         score_delta: 34
     },
 

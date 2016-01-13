@@ -13,9 +13,6 @@ var
 	fs = require('fs');
 
 // init database:
-var warp = Warp.create( config.db );
-
-// init database:
 var warp = Warp.create(config.db);
 
 warp.$transaction = thunkify(warp.transaction);
