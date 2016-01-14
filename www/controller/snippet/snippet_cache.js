@@ -3,7 +3,8 @@
 var 
     _ = require('lodash'),
     base = require('./base'),
-    cache = require('../../cache');
+    cache = require('../../cache'),
+    contrib = require('./contribute');
 
 var 
     model = base.model,
@@ -14,7 +15,10 @@ var
 var
     CACHE_PREFIX = 'snippet/',
     PAGE_SIZE = config.page_size,
-    Languages = model.language;
+    Languages = model.language, 
+    KEY_STATS = 'key_snippet_stats',
+    KEY_LASTEST_SNIPPET = 'Key_snippet_lastest',
+    KEY_BEST_SNIPPET = 'Key_snippet_best';
 
 function keyLangCount(lang){
     return CACHE_PREFIX + 'pending/language/' + lang;
@@ -107,6 +111,67 @@ function* $_removeLangCache(lang){
     }
 }
 
+function* $__getStatistics(){
+    var sum = yield base.$countSnippets(),
+        ct = yield contrib.$statsRefers();
+    return {count:sum, contribute: ct };
+}
+
+function* $_getStatistics(){
+    return yield cache.$get( KEY_STATS, $__getStatistics );
+}
+
+function* $_getLastestSnippet(size){
+    var limit = size || 15;
+    return yield cache.$get( KEY_LASTEST_SNIPPET, function*(){
+        return yield model.snippet.$findAll( {
+            select: ['id', 'name', 'brief', 'language'],
+            order: '`updated_at` desc',
+            limit: limit,
+            offset: 0
+        });
+    });
+}
+
+function* $_getBestSnippet(size){
+    var limit = size || 15;
+
+    return yield cache.$get( KEY_BEST_SNIPPET, function*(){
+        var i, j, bs, ids, id, ret;
+        bs = yield model.referStats.$findAll( {
+            select: ['snippet_id'],
+            order: '`sum` desc',
+            limit: limit,
+            offset: 0
+            });
+
+        for( i = 0; i < bs.length; i++ ){
+            id = bs[i].snippet_id;
+            if( i === 0 )
+                ids = "'" + id + "'";
+            else
+                ids += ",'" + id + "'";
+        }
+        if( bs.length > 0 ){
+            var rs = yield model.snippet.$findAll( {
+                select: ['id', 'name', 'brief', 'language'],
+                where: "`id` in (" + ids + ")"
+            });
+            //order by ids
+            ret = [];
+            for( i = 0; i < bs.length; i++ ){
+                id = bs[i].snippet_id;
+                for( j = 0; j < rs.length; j++ ){
+                    if( rs[j].id === id )
+                        ret.push( rs[j] );
+                }
+            }
+            return ret;
+        }
+        return [];
+    });
+}
+
 module.exports = {
     $getAllPendingCount: $_getAllPendingCount,
 
@@ -116,5 +181,9 @@ module.exports = {
 
     $removeLang: $_removeLangCache, 
     
-    $get: cache.$get
+    $get: cache.$get,
+
+    $getStatistics: $_getStatistics, 
+    $getLastestSnippet: $_getLastestSnippet,
+    $getBestSnippet: $_getBestSnippet
 };

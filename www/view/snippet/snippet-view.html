@@ -30,7 +30,8 @@ function initVM( data ){
 			id: data.id || '',
 			next_version: data.next_version || null /*{newversion:21, score:20,contributor:'def'}*/,
 			contrib: data.contrib || {},
-			history: data.history || []
+			history: data.history || [],
+			stats: data.stats || {}
 		},
 		methods:{
 		}
@@ -57,7 +58,7 @@ function initVM( data ){
 }
 
 $(function () {
-	var param = { idToName: true, nextVersion: true, contributor:true, history:true};
+	var param = { idToName: true, nextVersion: true, contributor:true, history:true, stats:true};
 	getJSON( '/api/snippet/view/entity/{{ __id }}', param, function(err, snippet){
 		if(err){
 			fatal(err);
@@ -131,13 +132,13 @@ function copyToClipboard(){
 			</ul>
 			<h3 class="dv-box-title">统计信息</h3>
 			<ul class="dv-box" >
-				<li><span>共被引用n次</span></li>
-				<li><span>本周被引用n次</span></li>
-				<li><span>本月被引用n次</span></li>
-				<li><span>本年度被引用n次</span></li>
+				<li><span v-text="'昨天前共被引用' + stats.sum + '次'"></span></li>
+				<li><span v-text="'上周被引用' + stats.last_week + '次'"></span></li>
+				<li><span v-text="'上月被引用' + stats.last_month + '次'"></span></li>
+				<li><span v-text="'去年被引用' + stats.last_year + '次'"></span></li>
 			</ul>
 
-			<h3 class="dv-box-title">贡献</h3>
+			<h3 class="dv-box-title">{{_('Contribution')}}</h3>
 			<ul class="dv-box" >
 				<li>
 					<span  v-for="(i,r) in contrib.edit" v-text="r.name + '(' + r.edit_count + ')' + (i===contrib.edit.length-1?'编辑':',')"></span>
@@ -153,13 +154,13 @@ function copyToClipboard(){
 				</li>
 			</ul>
 
-			<h3 class="dv-box-title">修改历史</h3>
+			<h3 class="dv-box-title">{{ _('Change log') }}</h3>
 			<ul class="dv-box" >
 				<li v-for="(i,r) in history">
 					<span v-text="'版次'+r.newversion + ': ' + r.name"></span>
 					<a v-if="i===history.length-1 && r.newversion !== 0" v-bind:href="'/snippet/pending/edit?id=' + id" class="dv-link uk-float-right">{{ _('Any More') }}</a>
 				</li>
-				<li v-if="history.length === 0">无</li>
+				<li v-if="history.length === 0">{{ _('None')}}</li>
 			</ul>
 		</div>
 	</div>

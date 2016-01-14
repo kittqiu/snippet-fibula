@@ -34,7 +34,11 @@ function string2Integer(s) {
     return null;
 }
 
-
+function getWeek(){
+    var now = new Date(),
+        onejan = new Date(now.getFullYear(), 0, 1);
+    return Math.floor((((now - onejan) / 86400000) + onejan.getDay()) / 7);
+}
 
 module.exports = {
 
@@ -58,5 +62,7 @@ module.exports = {
             size = 10;
         }
         return new Page(index, size);
-    }
+    }, 
+
+    getWeek: getWeek
 };

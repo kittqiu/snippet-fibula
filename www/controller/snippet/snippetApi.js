@@ -24,6 +24,7 @@ var
     modelContribute = model.contrib,
     modelHistory = model.history,
     modelRefer = model.refer,
+    modelReferStats = model.referStats,
     modelFlow = model.flow,
     modelFlowHistory = model.flowHistory,
     modelUser = model.user,
@@ -66,8 +67,16 @@ function* $_getLastestHistory(snippet_id, version){
     var rs,
         sql = 'select h.newversion,u.name from  snippet_flow as h, users as u  where h.snippet_id=? and h.result=? and h.newversion <> ? and h.user_id=u.id order by h.newversion DESC limit 4';
     rs = yield warp.$query( sql, [snippet_id,'pass',version] );
-    console.log( rs );
     return rs || [];
+}
+
+function* $_getStatsHistory(snippet_id){
+    var r = yield modelReferStats.$find({
+            select: '*',
+            where: '`snippet_id`=?',
+            params: [snippet_id]
+        });
+    return r || { snippet_id: snippet_id, last_week: 0, last_month: 0, last_year: 0, sum: 0 };
 }
 
 function mergeFixedModel(pageModel){
@@ -91,6 +100,7 @@ GET:
 /snippet/pending/edit?id=id
 /snippet/pending/list/:lang
 /snippet/search
+/api/snippet/index
 /api/snippet/list/lastest?limit=limit
 /api/snippet/pending/entity/:id
 /api/snippet/pending/lang/:lang
@@ -208,20 +218,17 @@ module.exports = {
         yield $render( this, pageModel, 'snippet-search-list.html' );
     },
 
+    'GET /api/snippet/index': function* (){
+        var limit =  this.query.limit || 15,
+            stats = yield cache.$getStatistics(),
+            lastest = yield cache.$getLastestSnippet( limit ),
+            best = yield cache.$getBestSnippet(limit);
+        this.body = { stats: stats, lastest: lastest, best:best };
+    },
+
     'GET /api/snippet/list/lastest': function* (id){
-        var 
-            limit = this.query.limit || 15,
-            record;
-        record = yield cache.$get( this.request.path, function*(){
-            return yield model.snippet.$findAll( {
-                select: ['id', 'name', 'brief', 'language'],
-                order: '`updated_at` desc',
-                limit: limit,
-                offset: 0
-            });
-        } );
-        
-        this.body = record || {};
+        var r = yield cache.$getLastestSnippet( this.query.limit || 15);        
+        this.body = r || {};
     },
 
     'GET /api/snippet/pending/entity/:id': function* (id){
@@ -273,9 +280,14 @@ module.exports = {
             if( param.history){
                 record.history = yield $_getLastestHistory(id,record.version);
             }
+            if( param.stats){
+                record.stats = yield $_getStatsHistory(id);
+            }
         }
         this.body = record || {};
     }, 
+
+
 
     /******************* POST METHOD *************************/
 

@@ -2,6 +2,7 @@
 
 var base = require('../_base');
 
+/*no used*/
 module.exports = function(warp){
 	return base.defineModel(warp, 'SnippetHistory', [
 		base.column_id('snippet_id', { index: true }),

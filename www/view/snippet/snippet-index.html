@@ -7,20 +7,24 @@ function initVM( data ){
 		el: '#vm',
 		debug:true,
 		data:{
-			lastest: data || []
+			lastest: arrayToMatrix(data.lastest) || [],
+			stats: data.stats,
+			best: arrayToMatrix(data.best) || []
 		},
 		methods:{
 		}
 	});	
+	console.log(data.best);
+	console.log(data.best);
 }
 
 $(function () {
 	var param = { limit: 15 };
-	getJSON( '/api/snippet/list/lastest', param, function(err, data){
+	getJSON( '/api/snippet/index', param, function(err, data){
 		if(err){
 			fatal(err);
-		}else{			
-			initVM( arrayToMatrix(data) );
+		}else{
+			initVM( data );
 			$('#vm').show();
 		}
 	});
@@ -39,29 +43,29 @@ $(function () {
 			<div class="uk-width-1-4">
 				<i class="uk-icon-codepen uk-icon-large uk-float-left"></i>
 				<section style="margin-left: 40px">
-					<span>20,000</span>
+					<span v-text="stats.count"></span>
 					<p class="uk-text-muted" style="margin:0">代码段</p>
 				</section>
 			</div>
 			<div class="uk-width-1-4">
 				<i class="uk-icon-gear uk-icon-large uk-float-left"></i>
 				<section style="margin-left: 40px">
-					<span>20,000</span>
-					<p class="uk-text-muted" style="margin:0">最近一周</p>
+					<span v-text="stats.contribute.last_week"></span>
+					<p class="uk-text-muted" style="margin:0">上一周引用</p>
 				</section>
 			</div>
 			<div class="uk-width-1-4">
 				<i class="uk-icon-moon-o uk-icon-large uk-float-left"></i>
 				<section style="margin-left: 40px">
-					<span>20,000</span>
-					<p class="uk-text-muted" style="margin:0">最近一月</p>
+					<span v-text="stats.contribute.last_month"></span>
+					<p class="uk-text-muted" style="margin:0">上一月引用</p>
 				</section>
 			</div>
 			<div class="uk-width-1-4">
 				<i class="uk-icon-thumbs-up uk-icon-large uk-float-left"></i>
 				<section style="margin-left: 40px">
-					<span>20,000</span>
-					<p class="uk-text-muted" style="margin:0">总计</p>
+					<span v-text="stats.contribute.sumary"></span>
+					<p class="uk-text-muted" style="margin:0">总计引用</p>
 				</section>
 			</div>
 		</div>
@@ -69,9 +73,9 @@ $(function () {
 			<h3 class="dv-text-caution" style="margin-bottom:5px;text-align:center;" >使用最多的代码段</h3>
 			<hr style="margin-top:0px;margin-bottom:10px;">
 			<table class="uk-width-1-1">
-				<tr v-for="row in lastest">
+				<tr v-for="row in best">
 					<td v-for="(col,item) in row" track-by="$index" class="uk-width-1-3">
-						<div class="uk-float-left " style="height:40px;">
+						<div class="uk-float-left " style="height:40px;margin-right:10px;">
 							<span v-if="item" class="dv-link uk-text-middle" v-text="item.language" style="font-size:20px;"></span>
 						</div>
 						<div v-if="item" style="margin-left:20px"><a v-bind:href="'/snippet/entity/view?id=' + item.id" style="color:#333"><b v-text="item.name"></b></a>

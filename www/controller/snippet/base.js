@@ -12,6 +12,7 @@ var models = {
     contrib: db.snippet_contribute,
     history: db.snippet_history,
     refer: db.snippet_refer,
+    referStats: db.snippet_refer_statistics,
     flow: db.snippet_flow,
     flowHistory: db.snippet_flow_history,
     user: db.user,
@@ -81,6 +82,12 @@ function getHistoryUrl( context ){
     return url || '/snippet/';
 }
 
+function* $_countSnippets(){
+    return yield models.snippet.$findNumber({
+                select: 'count(*)'
+            });
+}
+
 module.exports = {
     /*constant*/
     name: 'snippet',
@@ -95,5 +102,6 @@ module.exports = {
     setHistoryUrl: setHistoryUrl,
     validEnvironment: validEnvironment,
     validLanguage: validLanguage,
-    $render: $_render
+    $render: $_render,
+    $countSnippets: $_countSnippets
 };

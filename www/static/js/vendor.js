@@ -329,7 +329,6 @@ function arrayToMatrix(array, columns){
         }
         matrix.push(row);
     }
-    console.log(matrix);
     return matrix;
 }
 

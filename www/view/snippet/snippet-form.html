@@ -1,5 +1,6 @@
 {% extends './snippet_base.html' %}
 
+
 {% block css %}
 <link rel="stylesheet" href="/static/css/codemirror.css"/>
 {% endblock %}
@@ -188,7 +189,7 @@ snippet修改成功
 			        <div class="uk-form-controls">
 			        	<input v-model="keywords" name="keywords" type="text" class="uk-width-1-1">
 			        </div>
-			        <p class="help-text">3-100字符，最多10个关键词</p>
+			        <p class="help-text">3-100字符，最多10个关键词，需要把模块名称中的词语设置为关键字</p>
 			    </div>
 			    <div class="uk-form-row" style="margin-top:20px">
 			    	<label class="uk-form-label">{{ _('Code snippet') }}</label>

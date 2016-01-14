@@ -15,7 +15,7 @@ var
 	Snippet = model.snippet;
 
 function createEngine(){
-	reds.client = redis.createClient({host:'45.78.49.170', port:6001});
+	reds.client = redis.createClient({host:config.search.host, port:config.search.port});
 	reds.Query.prototype.$end = thunkify(reds.Query.prototype.end);
 	reds.Query.prototype.$count = thunkify(reds.Query.prototype.count);
 	return reds.createSearch( base.name );
@@ -56,7 +56,7 @@ function MODULE_init(){
 		});
 }
 
-MODULE_init();
+//MODULE_init();
 
 var MAX_LIMIT = 20;
 

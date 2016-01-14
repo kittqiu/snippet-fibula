@@ -1,12 +1,19 @@
 'use strict';
 
 var 
-	base = require('./base');
+    reminder = require('reminder'),
+    co = require('co'),
+	base = require('./base'), 
+    helper = require('../../helper');
 
 var 
     model = base.model,
     modelContribute = model.contrib,
-    warp = model.warp;
+    modelRefer = model.refer,
+    modelReferStats = model.referStats,
+    modelSnippet = model.snippet,
+    warp = model.warp,
+    job;
 
 var
     CONTRIB_EDIT = 'edit',
@@ -52,6 +59,7 @@ function* $_addEditContribution( snippet_id, user_id ){
 
 function* $_addReferContribution( snippet_id, user_id ){
     yield $_addContribution( snippet_id, user_id, CONTRIB_REFER );
+    yield modelRefer.$create({snippet_id: snippet_id, user_id: user_id});
 }
 
 function* $_getContribution(snippet_id, type){
@@ -75,10 +83,137 @@ function* $_getAllContribution( snippet_id ){
     return contrib;
 }
 
+/************ statistics ******************/
+function* $_statsRefers(){
+    var r = yield modelReferStats.$findAll({
+        select: 'sum(`last_week`) as last_week, sum(`last_month`) as last_month, sum(`last_year`) as last_year, sum(`sum`) as sumary'
+    });
+    return r === null ? {} : r[0];
+}
+
+function* $__statsSnippet( snippet_id, type, year, tyvalue ){
+    var 
+        where = '`snippet_id`=? and year(FROM_UNIXTIME(`created_at`/1000))=?' + (type === 'YEAR' ? '': ' and ' + type + '(FROM_UNIXTIME(`created_at`/1000)) = ?'),
+        params = [ snippet_id, year ];
+    if( type !== 'YEAR' ){
+        params.push(tyvalue);
+    }
+    return yield modelRefer.$findNumber( {
+                select: 'count(*)',
+                where: where,
+                params: params
+            });
+}
+
+function* $_statsSnippet( snippet_id ){    
+    var now = new Date(),
+        week = helper.getWeek()+1,
+        month = now.getMonth()+1,
+        year = now.getFullYear(), 
+        lastweek, lastmonth, lastyear,
+        weekcnt, monthcnt, yearcnt, sum, 
+        r;
+
+    //last week
+    if( week === 0 ){
+        lastweek = 52;
+        lastyear = year -1;
+    }else{
+        lastweek = week - 1;
+        lastyear = year;
+    }
+    weekcnt = yield $__statsSnippet( snippet_id, 'WEEK', lastyear, lastweek);
+
+    //last month
+    if( month === 0 ){
+        lastmonth = 12;
+        lastyear = year -1;
+    }else{
+        lastmonth = month;//mysql 1-12, but javascript 0-11
+        lastyear = year;
+    }
+    monthcnt = yield $__statsSnippet( snippet_id, 'MONTH', lastyear, lastmonth);
+
+    //last year
+    lastyear = year - 1;
+    yearcnt = yield $__statsSnippet( snippet_id, 'YEAR', lastyear);
+
+    sum = yield modelRefer.$findNumber( {
+                select: 'count(*)',
+                where: '`snippet_id`=?',
+                params: [snippet_id]
+            });
+
+    r = yield modelReferStats.$find({
+            select: '*',
+            where: '`snippet_id`=?',
+            params: [snippet_id]
+        });
+    if( r === null ){
+        r = {
+            snippet_id: snippet_id,
+            last_week: weekcnt,
+            last_month: monthcnt, 
+            last_year: yearcnt,
+            sum: sum
+        };
+        yield modelReferStats.$create(r);
+    }else{
+        r.last_week = weekcnt;
+        r.last_month = monthcnt;
+        r.last_year = yearcnt;
+        r.sum = sum;
+        yield r.$update(['last_week', 'last_month', 'last_year', 'sum']);
+    }
+}
+
+function* $statsSnippets(){
+    var i, j, rs,
+        page_size = 100,
+        count = yield base.$countSnippets();
+
+    for( i = 0; i < count; i += page_size){
+        rs = yield modelSnippet.$findAll({
+                select: ['id'],
+                order: '`created_at` desc',
+                limit: page_size,
+                offset: i
+            });
+        for( j = 0; j < rs.length; j++ ){
+            yield $_statsSnippet( rs[j].id );
+        }
+    }
+}
+
+function statsSnippets(){
+    co( $statsSnippets ).then( function () {
+          console.log('statistics ok!');
+          setTimeout(resetJob, 120000 );
+          //setTimeout(resetJob, 12000 );
+        }, function (err) {
+          console.error(err.stack);
+          setTimeout(resetJob, 120000 );
+        });
+}
+
+function resetJob(){
+    console.log( 'reset statistics jobs');
+    job.at( '23:59', statsSnippets );
+    //job.at( '17:39', statsSnippets );
+}
+
+function __init(){
+    job = new reminder();
+    statsSnippets();    
+}
+__init();
+
+
 module.exports = {
     $addCheck: $_addCheckContribution,
     $addEdit: $_addEditContribution,
     $addRefer: $_addReferContribution,
     $get: $_getContribution,
-    $getAll: $_getAllContribution
+    $getAll: $_getAllContribution,
+    $statsRefers: $_statsRefers
 };
