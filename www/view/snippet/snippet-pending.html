@@ -33,32 +33,6 @@
 				</tr>
 				{% endfor %}
 			</table>
-			{% set page = __pages[n] %}
-			{% if page.pages > 1 %}
-			<div style="text-align:center">
-				<ul class="uk-pagination">
-					{% if page.index == 1 %}
-						<li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-					{% else %}
-						<li><a href="/snippet/pending/{{ lang }}?page={{ page.index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
-					{% endif %}
-					{% for index in page.list %}
-						{% if index == '...' %}
-						<li class="uk-disabled"><span>...</span></li>
-						{% elseif index == page.index %}
-						<li class="uk-active"><span>{{ index }}</span></li>
-						{% else %}
-						<li><a href="/snippet/pending/{{ lang }}?page={{ index }}">{{ index }}</a></li>
-						{% endif %}
-					{% endfor %}
-					{% if page.index == page.total %}
-						<li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
-					{% else %}
-						<li><a href="/snippet/pending/{{ lang }}?page={{ page.index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
-					{% endif %}
-	            </ul>
-	        </div>
-            {% endif %}
 			{% else %}
 			<p>{{ _('No record')}}</p>
 			{% endif %}

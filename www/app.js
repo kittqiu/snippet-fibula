@@ -90,10 +90,17 @@ swig.setDefaults({
 });
 function swFind(input,str) { return input.indexOf(str) !== -1; }
 swig.setFilter('find', swFind);
+
 function swURL(input,str) { 
 	return input.replace(' ', '+');
 }
 swig.setFilter('url', swURL);
+
+function swTimeToDate(input,str) {
+	var date = new Date(input);
+    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDay();
+}
+swig.setFilter('time2Date', swTimeToDate);
 
 /*define template render function, log execution time and catch the exception*/
 app.use( function* theMiddleWare(next){

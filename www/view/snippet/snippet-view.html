@@ -158,8 +158,11 @@ function copyToClipboard(){
 			<h3 class="dv-box-title">{{ _('Change log') }}</h3>
 			<ul class="dv-box" >
 				<li v-for="(i,r) in history">
-					<span v-text="'版次'+r.newversion + ': ' + r.name"></span>
-					<a v-if="i===history.length-1 && r.newversion !== 0" v-bind:href="'/snippet/pending/edit?id=' + id" class="dv-link uk-float-right">{{ _('Any More') }}</a>
+					<a v-bind:href="'/snippet/history/view?id=' + id + '&version=' + r.newversion" class="dv-link uk-text-muted" v-text="'版次'+r.newversion"></a>
+					<span v-text="': ' + r.name"></span>					
+					<span v-if="i===history.length-1 && r.newversion !== 0" class="uk-float-right">
+						<a v-bind:href="'/snippet/history/list?id=' + id" class="dv-link">{{ _('Any More') }} </a>
+					</span>
 				</li>
 				<li v-if="history.length === 0">{{ _('None')}}</li>
 			</ul>

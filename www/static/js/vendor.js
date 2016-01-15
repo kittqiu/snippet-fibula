@@ -177,7 +177,7 @@ function parseDocBlock( lines ){
 
     _.each(ss, function (value) {
         value = value.replace('\\', '@');
-        console.log(value);
+        //console.log(value);
         var m, param, err;
 
         //brief

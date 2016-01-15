@@ -62,6 +62,41 @@ function* $_getStatsHistory(snippet_id){
     return r || { snippet_id: snippet_id, last_week: 0, last_month: 0, last_year: 0, sum: 0 };
 }
 
+function* $_getSnippetHistory(snippet_id, offset, limit){
+    offset = offset < 0 ? 0: offset;
+    limit = limit < 0 ? LARGE_PAGE_SIZE : limit;
+    /*return yield modelFlow.$findAll({
+        select: ['id', 'snippet_id', 'user_id', 'newversion', 'updated_at'],
+        where: '`snippet_id`=? and result=?',
+        params: [snippet_id, 'pass'],
+        order: '`newversion` desc',
+        limit: limit,
+        offset: offset
+    });*/
+
+    var rs,
+        sql = 'select h.id, h.snippet_id, h.newversion, h.updated_at, u.name as user from snippet_flow as h, users as u where h.snippet_id=? and h.result=? and h.user_id=u.id order by h.newversion DESC limit '
+        + limit + ' OFFSET ' + offset;
+    rs = yield warp.$query( sql, [snippet_id,'pass'] );
+    return rs || [];
+}
+
+function* $_countSnippetHistory(snippet_id){
+    return yield modelFlow.$findNumber({
+        select: 'count(*)',
+        where: '`snippet_id`=? and result=?',
+        params: [snippet_id, 'pass']
+    });
+}
+
+function* $_getSnippetVersion(snippet_id, version){
+    return yield modelFlow.$find({
+            select: '*',
+            where: '`snippet_id`=? and `newversion`=? and result=?',
+            params: [snippet_id, version, 'pass']
+        });
+}
+
 function mergeFixedModel(pageModel){
     pageModel['__languages'] = model.language;
     pageModel['__environments'] = model.environment;
@@ -78,6 +113,8 @@ GET:
 /snippet/create
 /snippet/entity/view?id=id
 /snippet/entity/edit?id=id
+/snippet/history/list?id=id&page=x
+/snippet/history/view?id=id&version=x
 /snippet/mine/index
 /snippet/mine/own?page=1
 /snippet/pending
@@ -86,6 +123,7 @@ GET:
 /snippet/pending/list/:lang
 /snippet/search
 /api/snippet/index
+/api/snippet/history/entity?id=id&version=x
 /api/snippet/list/lastest?limit=limit
 /api/snippet/pending/entity/:id
 /api/snippet/pending/lang/:lang?page=x
@@ -136,6 +174,25 @@ module.exports = {
                 } };        
         yield $_render( this, pageModel, 'snippet-form.html');
     }, 
+
+    'GET /snippet/history/list': function* (){
+        var id = getId(this.request),
+            index = this.request.query.page||1,
+            page = new Page(index, LARGE_PAGE_SIZE),
+            snippets = yield $_getSnippetHistory( id, (index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE ),
+            record = yield model.snippet.$find(id),
+            pageModel;
+        page.total = yield $_countSnippetHistory( id );
+        pageModel = { name: record.name, id:id, page:page, snippets:snippets, count: snippets.length };
+        yield $_render( this, pageModel, 'snippet-history.html');      
+    },
+
+    'GET /snippet/history/view': function* (){
+        var id = getId(this.request), 
+            version = this.request.query.version||0, 
+            pageModel = { id:id, version: version};
+        yield $_render( this, pageModel, 'snippet-history-view.html');
+    },
 
     'GET /snippet/mine/index': function* (){
         var pageModel,
@@ -227,6 +284,12 @@ module.exports = {
         }
         pageModel = { q:qstr, 'rs': rs, count:rs.length,  page: page };
         yield $render( this, pageModel, 'snippet-search-list.html' );
+    },
+
+    'GET /api/snippet/history/entity': function* (){
+        var id = getId(this.request),
+            version = this.request.query.version || 0;
+        this.body = yield $_getSnippetVersion(id, version);
     },
 
     'GET /api/snippet/index': function* (){

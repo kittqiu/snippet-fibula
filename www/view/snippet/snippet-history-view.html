@@ -1,0 +1,110 @@
+{% extends './snippet_base.html' %}
+{% block title %} {{ _('Revision history')}} {% endblock %}
+{% block css %}
+<link rel="stylesheet" href="/static/css/codemirror.css"/>
+{% endblock %}
+
+{% block head %}
+<script src="/static/js/codemirror.js"></script>
+<script src="/static/js/marked.js"></script>
+<script src="/static/js/clipboard.min.js"></script>
+<script src="/static/js/uikit/components/accordion.js"></script>
+<script type="text/javascript">
+var start_time, ishidden = true;
+function initVM( data ){
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: data.name || '',
+			brief: data.brief || '',
+			language: data.language || '{{ __languages[0]}}',
+			environment: data.environment ||'{{ __environments[0]}}',			
+			keywords: data.keywords ||'',
+			code:data.code ||'',
+			help:data.help ||'',
+			created_at: formatDate(data.updated_at),
+			version: data.newversion || 0,
+			id: data.id || ''
+		},
+		methods:{
+		}
+	});
+
+	$('#help').html( marked(data.help));
+
+    var html = codeToHtml(data.code, 'dv-snippet-view');
+	$('#codeAnddoc').html(html);	
+	
+	var btn = document.getElementById('btn_copy');
+	var clipboard = new Clipboard(btn);
+	clipboard.on('success', function(e) {
+	    e.clearSelection();
+	    showCode(!ishidden);
+	    postJSON( '/api/snippet/refer/entity/{{ id }}', function(err,result){
+	    });
+	});	 
+	clipboard.on('error', function(e) {
+		showCode(ishidden);
+	});
+}
+
+$(function () {
+	var param = { id: '{{id}}', version: {{version}}};
+	getJSON( '/api/snippet/history/entity', param, function(err, snippet){
+		if(err){
+			fatal(err);
+		}else{
+			initVM( snippet );
+			$('#vm').show();
+		}
+	});	
+});
+
+function showCode(shown){
+	$('#orgcode').parent().attr('style', shown? 'height: auto; position: relative;' :'overflow:hidden;height:0;position:relative;');
+}
+
+function copyToClipboard(){
+	var orgStyle = $('#orgcode').parent().attr('style');
+	if( orgStyle.indexOf('hidden') !== -1){
+		ishidden = true;
+	}else{
+		ishidden = false;
+	}
+	showCode(true);//show the element for copying to clipboard. On completed, hide it again
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content"  style="max-width:800px;">
+	<div id="vm" class="uk-grid" style="display:none;">
+		<div class="uk-width-1-1" style="padding:20px;">
+			<div >
+				<h2  v-text="name + ' - 版次' + version "class="uk-width-2-3"></h2>
+				<p class="uk-text-muted" style="margin-bottom:5px" v-text="brief"></p>
+				<hr style="margin-top:2px">
+				<div style="margin-left:30px;">
+					<p><span>{{ _('Program language') }}: <span v-text="language"></span></span>
+						<span style="margin-left:40px;">{{ _('develop environment') }}: <span v-text="environment"></span></span>
+					</p>
+					<p>{{ _('Keywords') }}: <span v-text="keywords"></span></p>
+				</div>
+				<div style="margin-top:40px">
+					<h3><b>{{ _('Code snippet') }}</b></h3>
+					<div class="uk-float-right" style="text-align:right;margin-top:-30px;"><button id="btn_copy" onclick="copyToClipboard()"  data-clipboard-target="#orgcode"><span class="uk-icon-clipboard"></span> {{ _('Copy') }}</button></div>
+					<div id="codeAnddoc" class="uk-block-muted"></div>
+					<div class="uk-accordion" data-uk-accordion="{showfirst:false}">
+					    <label class="uk-accordion-title uk-form-label uk-text-muted" style="font-size: 14px;" >{{ _('Raw Code')}} <i class="uk-icon-caret-square-o-down"></i></label>
+						<textarea id="orgcode" v-text="code" class="uk-accordion-content uk-width-1-1" style="height:240px;"></textarea>
+					</div>
+				</div>
+				<div style="margin-top:40px">
+					<h3><b>{{ _('Help') }}</b></h3>
+					<div id="help"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
