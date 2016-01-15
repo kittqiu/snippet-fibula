@@ -9,7 +9,8 @@ var
     base = require('./base'),
     cache = require('./snippet_cache'),
     contrib = require('./contribute'),
-    search = require('./search');
+    search = require('./search'),
+    Page = require( '../../page');;
 
 var 
     PAGE_SIZE = config.snippet.page_size,
@@ -39,29 +40,11 @@ var
     validLanguage = base.validLanguage,
     validEnvironment = base.validEnvironment;
 
-/*function loadCacheData(){
-    _.each( modelDict['language'], function(lang, index){
-        modelSnippet.findNumber({
-            select: 'count(*)',
-            where: 'language=? and version=0',
-            params: [index]
-        }, function(err, num ){
-            if(err){
-                console.log(err);
-            }else{
-                console.log( num );
-                cache.set( CACHE_PREFIX + 'language/' + lang, num );
-            }
-        });
-    } );
-}*/
-
 
 function __init(){
 }
 
 __init();
-//loadCacheData();
 
 function* $_getLastestHistory(snippet_id, version){
     var rs,
@@ -95,6 +78,8 @@ GET:
 /snippet/create
 /snippet/entity/view?id=id
 /snippet/entity/edit?id=id
+/snippet/mine/index
+/snippet/mine/own?page=1
 /snippet/pending
 /snippet/pending/check?id=id
 /snippet/pending/edit?id=id
@@ -103,7 +88,7 @@ GET:
 /api/snippet/index
 /api/snippet/list/lastest?limit=limit
 /api/snippet/pending/entity/:id
-/api/snippet/pending/lang/:lang
+/api/snippet/pending/lang/:lang?page=x
 /api/snippet/view/entity/:id
 
 
@@ -152,13 +137,39 @@ module.exports = {
         yield $_render( this, pageModel, 'snippet-form.html');
     }, 
 
+    'GET /snippet/mine/index': function* (){
+        var pageModel,
+            user_id = this.request.user.id,
+            count = yield contrib.$countMySnippet( user_id ),
+            snippets = yield contrib.$getMySnippets( user_id, 0, PAGE_SIZE ), 
+            stats_month = yield contrib.$statsCurrentMonth(user_id),
+            stats_all = yield contrib.$statsMyContrib(user_id);
+
+        pageModel = { count: count, more: count > PAGE_SIZE, snippets: snippets, stats_month: stats_month, stats_all: stats_all };
+        yield $_render( this, pageModel, 'snippet-mine.html');
+    },
+
+    'GET /snippet/mine/own': function* (){
+        var pageModel,
+            index = this.request.query.page||1,
+            page = new Page(index, LARGE_PAGE_SIZE),
+            user_id = this.request.user.id,
+            snippets;
+        base.setHistoryUrl(this);
+        page.total = yield contrib.$countMySnippet( user_id );
+        snippets = yield contrib.$getMySnippets( user_id, (index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE );
+            
+        pageModel = { page:page, snippets:snippets, count: snippets.length };
+        yield $render( this, pageModel, 'snippet-mine-list.html' );        
+    },
+
     /* get pending snippets for all language */
     'GET /snippet/pending': function* (){
         var
             counts = yield cache.$getAllPendingCount(),
             records = yield cache.$getAllPendingFirstPage(),
             pages = [];
-        console.log( records );
+
         for(var i = 0; i < counts.length; i++){
             if(counts[i]){
                 var page = new Page(0,PAGE_SIZE);

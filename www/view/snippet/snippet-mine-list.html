@@ -1,0 +1,57 @@
+{% extends './snippet_base.html' %}
+
+{% block title %} {{ _('My Contribution')}} {% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container">
+		<h2 class="x-title">{{ _('I Created') }}</h2>
+		<div>
+			<table class="uk-table uk-table-striped">
+				{% if count %}
+				{% for r in snippets %}		
+				<tr>
+					<td><a href="/snippet/entity/view?id={{ r.id }}" class="dv-link"><b>{{ r.name }}</b></a></td>
+					<td>{{ r.brief }}</td>
+					<td>{{ r.language }}</td>
+					<td>{{ r.environment }}</td>					
+				</tr>
+				{% endfor %}
+				{% else %}
+				<tr>
+					<td>{{ _('No record')}}</td>
+				</tr>
+				{% endif %}
+			</table>
+
+			{% if page.pages > 1 %}
+			<div style="text-align:center">
+				<ul class="uk-pagination">
+					{% if page.index == 1 %}
+						<li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+					{% else %}
+						<li><a href="?page={{ page.index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
+					{% endif %}
+					{% for index in page.list %}
+						{% if index == '...' %}
+						<li class="uk-disabled"><span>...</span></li>
+						{% elseif index == page.index %}
+						<li class="uk-active"><span>{{ index }}</span></li>
+						{% else %}
+						<li><a href="?page={{ index }}">{{ index }}</a></li>
+						{% endif %}
+					{% endfor %}
+					{% if page.index == page.total %}
+						<li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
+					{% else %}
+						<li><a href="?page={{ page.index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
+					{% endif %}
+	            </ul>
+	        </div>
+            {% endif %}
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+

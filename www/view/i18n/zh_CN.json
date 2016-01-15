@@ -15,7 +15,7 @@
 	"Copy": "复制",
 	"Create": "创建",	
 	"Create snippet module": "创建模块",
-	"Created at": "创建于",
+	"Created at": "创建于",	
 
 	"depend on": "依赖于",
 	"dependence": "依赖",
@@ -34,14 +34,17 @@
 	"History Page": "历史页面",
 	"Home": "首页",
 
+	"I Created": "我创建的",
+
 	"Keywords": "关键字",
 
 	"Login": "登录",
 	"log in": "登录",
 	"logout": "退出",
 
+	"Mine": "我的",
 	"More": "查看更多",
-
+	"My Contribution":"我的贡献",
 
 	"Name": "名称",
 	"new password":"新密码",
@@ -63,6 +66,7 @@
 	"Raw Code": "原始代码",
 	"Rearch result": "搜索结果",
 	"Record not found": "未找到对应的数据记录，可能数据已经被转移",
+	"Refer": "引用",
 	"Revision": "版次",
 
 

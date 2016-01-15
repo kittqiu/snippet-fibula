@@ -1,6 +1,6 @@
 {% extends '../_base.html' %}
 
-{% block head %}
+{% block pagehead %}
 <script src="/static/js/sha1.min.js"></script>
 <script type="text/javascript">
 $(function () {
@@ -23,6 +23,7 @@ $(function () {
 				}				
 			},
 			submit: function(){
+				console.log('submit');
 				var data,
 					form = $('#vm').find('form');
 				try{
@@ -31,13 +32,14 @@ $(function () {
 				}catch(e){
 					form.showFormError(e);
 					return;
-				}				
-
+				}			
 				form.postJSON( '/api/authenticate', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
 						jumpTo( '/snippet/', "{{ _('Home')}}", 1 );
 						
+					}else{
+						console.log(err);
 					}
 				});
 			}

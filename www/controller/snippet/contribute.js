@@ -12,6 +12,8 @@ var
     modelRefer = model.refer,
     modelReferStats = model.referStats,
     modelSnippet = model.snippet,
+    modelFlowHistory = model.flowHistory,
+    modelFlow = model.flow,
     warp = model.warp,
     job;
 
@@ -209,11 +211,71 @@ function __init(){
 __init();
 
 
+/**********************mine***********************/
+function* $_countMySnippet(user_id){
+    return yield modelSnippet.$findNumber({
+        select: 'count(*)',
+        where: '`own_id`=?',
+        params: [user_id]
+    });
+}
+
+function* $_getMySnippets(user_id, offset, limit){
+    offset = offset < 0 ? 0: offset;
+    limit = limit < 0 ? 10 : limit;
+    return yield modelSnippet.$findAll({
+        where: '`own_id`=?',
+        params: [user_id],
+        order: '`created_at` desc',
+        limit: limit,
+        offset: offset
+    });
+}
+
+function* $__countFromDate(Model, user_id, start_time){
+    return yield Model.$findNumber({
+            select: 'count(*)',
+            where: '`user_id`=? and `created_at`>?',
+            params: [user_id, start_time],
+        });
+}
+
+function* $__countByUser(Model,user_id){
+    return yield Model.$findNumber({
+            select: 'count(*)',
+            where: '`user_id`=?',
+            params: [user_id],
+        });
+}
+
+function* $_statsCurrentMonth(user_id){
+    var start_time = helper.getFirstDayOfMonth().getTime(),
+        checkcnt = yield $__countFromDate(modelFlowHistory, user_id, start_time),
+        editcnt = yield $__countFromDate(modelFlow, user_id, start_time),
+        refercnt = yield $__countFromDate(modelRefer, user_id, start_time);
+    return {check:checkcnt, edit:editcnt, refer:refercnt};
+}
+
+function* $_statsMyContrib(user_id){
+    var checkcnt = yield $__countByUser(modelFlowHistory, user_id),
+        editcnt = yield $__countByUser(modelFlow, user_id),
+        refercnt = yield $__countByUser(modelRefer, user_id);
+    return {check:checkcnt, edit:editcnt, refer:refercnt};
+}
+
+
 module.exports = {
     $addCheck: $_addCheckContribution,
     $addEdit: $_addEditContribution,
     $addRefer: $_addReferContribution,
     $get: $_getContribution,
     $getAll: $_getAllContribution,
-    $statsRefers: $_statsRefers
+
+    $statsRefers: $_statsRefers,
+
+    $countMySnippet: $_countMySnippet,
+    $getMySnippets: $_getMySnippets,
+    $statsCurrentMonth: $_statsCurrentMonth,
+    $statsMyContrib: $_statsMyContrib
 };
+

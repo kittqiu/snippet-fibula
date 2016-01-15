@@ -64,6 +64,7 @@ $(function () {
 			fatal(err);
 		}else{
 			initVM( snippet );
+			$('#vm').show();
 		}
 	});	
 });
@@ -88,7 +89,7 @@ function copyToClipboard(){
 
 {% block content %}
 <div id="content-block" class="dv-container x-content"  style="max-width:1180px;">
-	<div id="vm" class="uk-grid">
+	<div id="vm" class="uk-grid" style="display:none;">
 		<div class="uk-width-2-3" style="padding:20px;">
 			<div >
 				<h2  v-text="name"class="uk-width-2-3"></h2>

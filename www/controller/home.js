@@ -44,6 +44,7 @@ module.exports = {
 	},
 	'GET /login': function* (){
 		var model = { __salt__:  config.security.salt };
+		console.log( "get login");
 		this.render( getView('system/login.html'), yield $getModel.apply(this, [{model}]) );
 	},
 	'GET /user/changepassword': function* (){

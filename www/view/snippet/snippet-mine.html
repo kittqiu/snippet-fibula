@@ -1,0 +1,71 @@
+{% extends './snippet_base.html' %}
+
+{% block title %} {{ _('My Contribution')}} {% endblock %}
+
+{% block head %}
+<script type="text/javascript">
+$(function(){
+	$('#q').val('{{ __request__.query.q }}');
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container">
+		<h2 style="font-size:32px;text-align:center;margin-top:50px;">{{ _('My Contribution')}}</h2>
+		<div class="dv-container uk-grid" style="margin-top:40px;">
+			<div class="uk-width-1-2">
+				<div style="padding-left:50px">
+					<i class="uk-icon-moon-o uk-icon-large uk-float-left" style="font-size: 400%;"></i>
+					<section style="margin-left: 30px;">
+						<ul style="list-style: none;margin-bottom:0px">
+							<li><span class="uk-text-muted">{{ _('Edit')}}:</span><span class="dv-text-caution uk-text-large">{{ stats_month.edit }}</span></li>
+							<li><span class="uk-text-muted">{{ _('Check')}}:</span><span class="dv-text-caution uk-text-large">{{ stats_month.check }}</span></li>
+							<li><span class="uk-text-muted">{{ _('Refer')}}:</span><span class="dv-text-caution uk-text-large">{{ stats_month.refer }}</span></li>
+						</ul>
+					</section>
+					<p style="margin-top:0;"><b>当月贡献</b></p>
+				</div>
+			</div>
+			<div class="uk-width-1-2">
+				<div style="padding-left:50px">
+					<i class="uk-icon-thumbs-up uk-icon-large uk-float-left" style="font-size: 400%"></i>
+					<section style="margin-left: 30px">
+						<ul style="list-style: none;margin-bottom:0px">
+							<li><span class="uk-text-muted">{{ _('Edit')}}:</span><span class="dv-text-caution uk-text-large">{{ stats_all.edit }}</span></li>
+							<li><span class="uk-text-muted">{{ _('Check')}}:</span><span class="dv-text-caution uk-text-large">{{ stats_all.check }}</span></li>
+							<li><span class="uk-text-muted">{{ _('Refer')}}:</span><span class="dv-text-caution uk-text-large">{{ stats_all.refer }}</span></li>
+						</ul>
+					</section>
+					<p style="margin-top:0"><b>总计贡献</b></p>
+				</div>
+			</div>			
+		</div>
+
+		<div style="margin-top: 80px">
+			<h2 class="dv-text-caution" style="margin-bottom:5px;text-align:center;" >{{ _('I Created') }}</h2>
+			{% if more %}
+			<div style="text-align:right"><a href="/snippet/mine/own?page=1" class="dv-link">{{ _('More') }}({{ count }})</a></div>
+			{% endif %}
+			<hr style="margin-top:2px;border-top:2px solid #888;">
+			{% if count > 0 %}
+			<table class="uk-table uk-table-striped">
+				{% for m, r in snippets %}
+				<tr>			
+					<td><a href="/snippet/entity/view?id={{ r.id }}" class="dv-link"><b>{{ r.name }}</b></a></td>
+					<td>{{ r.brief }}</td>
+					<td>{{ r.language }}</td>
+					<td>{{ r.environment }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+			{% else %}
+			<p>{{ _('No record')}}</p>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+

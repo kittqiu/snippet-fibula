@@ -40,6 +40,11 @@ function getWeek(){
     return Math.floor((((now - onejan) / 86400000) + onejan.getDay()) / 7);
 }
 
+function getFirstDayOfMonth(){
+    var now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
 module.exports = {
 
 	checkPermission: function( request, expectedRole ){
@@ -64,5 +69,6 @@ module.exports = {
         return new Page(index, size);
     }, 
 
-    getWeek: getWeek
+    getWeek: getWeek, 
+    getFirstDayOfMonth: getFirstDayOfMonth
 };

@@ -56,7 +56,7 @@ function MODULE_init(){
 		});
 }
 
-//MODULE_init();
+MODULE_init();
 
 var MAX_LIMIT = 20;
 
