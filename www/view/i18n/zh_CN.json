@@ -1,6 +1,8 @@
 {
 	"Advice": "修改建议",
 	"Any More": "更多",
+	"Attachment": "附件",
+	"Attach files by dropping them here or": "请把文件拖放到这个区域或",
 
 	"Code": "代码",
 	"Change": "修改",
@@ -70,6 +72,7 @@
 	"Revision": "版次",
 	"Revision history":"版次历史",
 
+	"Select a file": "选择一个文件",
 	"SignUp": "注册",
 	"sign up": "注册",
 	"sign up so": "立即注册",

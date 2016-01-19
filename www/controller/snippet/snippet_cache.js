@@ -109,6 +109,8 @@ function* $_removeLangCache(lang){
     for( var i = 0; i< cachePath.length; i++ ){
         yield cache.$remove(cachePath[i]);    
     }
+
+    yield cache.$remove( KEY_LASTEST_SNIPPET );
 }
 
 function* $__getStatistics(){

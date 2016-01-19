@@ -109,8 +109,8 @@ function* $__statsSnippet( snippet_id, type, year, tyvalue ){
 
 function* $_statsSnippet( snippet_id ){    
     var now = new Date(),
-        week = helper.getWeek()+1,
-        month = now.getMonth()+1,
+        week = helper.getWeek(),
+        month = now.getMonth(),
         year = now.getFullYear(), 
         lastweek, lastmonth, lastyear,
         weekcnt, monthcnt, yearcnt, sum, 

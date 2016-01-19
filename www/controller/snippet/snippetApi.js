@@ -17,7 +17,9 @@ var
     LARGE_PAGE_SIZE = config.snippet.large_page_size,
     SCORE_DELTA = config.snippet.score_delta,
     FLOW_CREATE = 'create',
-    FLOW_EDIT = 'edit';
+    FLOW_EDIT = 'edit',
+    TYPE_CODE = 'code',
+    TYPE_ATT = 'attachment';
 
 var 
     model = base.model,
@@ -391,6 +393,7 @@ module.exports = {
             language: data.language,
             environment: data.environment,
             keywords: data.keywords,
+            type: TYPE_CODE,
             code: data.code,
             help: data.help,
             newversion: 0,
@@ -441,6 +444,7 @@ module.exports = {
             language: data.language,
             environment: data.environment,
             keywords: data.keywords,
+            type: TYPE_CODE,
             code: data.code,
             help: data.help,
             newversion: snippet.version + 1,
@@ -561,6 +565,7 @@ module.exports = {
                         language: r.language,
                         environment: r.environment,
                         keywords: r.keywords, 
+                        type: r.type,
                         code: r.code, 
                         help: r.help,
                         version: 0,
@@ -573,6 +578,7 @@ module.exports = {
                     baseSnippet.language = r.language;
                     baseSnippet.environment = r.environment;
                     baseSnippet.keywords = r.keywords;
+                    baseSnippet.type = r.type;
                     baseSnippet.code = r.code;
                     baseSnippet.help = r.help;
                     //baseSnippet.version = r.newversion; _base.js auto increment

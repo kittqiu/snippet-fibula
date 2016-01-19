@@ -267,19 +267,20 @@ function codeToHtml( src, cls ){
     var html = cls ? '<div class="' + cls + '">' : '<div class="dv-snippet">';
     if( codeobj.doc ){
         var doc = codeobj.doc;
+        console.log(doc);
         if( doc.name ){
             html += '<h2>' + _.escape(doc.name) + '</h2>';
         }
         if( doc.brief ){
            html += '<p>' + _.escape(doc.brief) + '</p>';
         }
-        if( doc.description ){
+        if( doc.description.length > 0 ){
             html += '<dl>';
             html += '<dt>说明:</dt>';
             html += '<dd>' + doc.description + '</dd>';
             html += '</dl>';             
         }
-        if( doc.params ){
+        if( doc.params && doc.params.length > 0 ){
             html += '<dl class="dv-params">';
             html += '<dt>参数:</dt>';
             html += '<dd><table class="dv-params">';
@@ -288,17 +289,20 @@ function codeToHtml( src, cls ){
             });
             html += '</table></dd></dl>';
         }
-        html += '<dl class="dv-returns"><dt>返回:</dt>';
-        if( doc.result ){            
-            html += '<dd>' + _.escape(doc.result) +'</dd>';
-        }else if( doc.returns ){
-            html += '<dd><table class="dv-returns">';
-            _.each(doc.returns, function(result){
-                html += '<tr><td class="dv-retval">' + _.escape(result.value) + '</td><td>' + _.escape(result.description) + '</td></tr>'
-            });
-            html += '</table></dd>';
+
+        if( doc.result.length > 0 || doc.returns.length > 0 ){
+            html += '<dl class="dv-returns"><dt>返回:</dt>';
+            if( doc.result ){            
+                html += '<dd>' + _.escape(doc.result) +'</dd>';
+            }else if( doc.returns ){
+                html += '<dd><table class="dv-returns">';
+                _.each(doc.returns, function(result){
+                    html += '<tr><td class="dv-retval">' + _.escape(result.value) + '</td><td>' + _.escape(result.description) + '</td></tr>'
+                });
+                html += '</table></dd>';
+            }
+            html += '</dl>';
         }
-        html += '</dl>';
     }
     html += '<div><dl><dt>代码:</dt><dd><pre>' + codeobj.code.trim()  +'</dd></dl></pre></div>';
     html += '</div>';
@@ -308,6 +312,15 @@ function codeToHtml( src, cls ){
 function fatal(err) {
     console.error( err );
     //_display_error($('#loading'), err);
+}
+
+function info(msg){
+    UIkit.notify({
+        message : msg,
+        status  : 'info',
+        timeout : 2000,
+        pos     : 'top-center'
+    });
 }
 
 function formatDate(second){

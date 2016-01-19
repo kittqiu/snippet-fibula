@@ -11,6 +11,7 @@ module.exports = function(warp){
 		base.column_varchar_20('language'),
 		base.column_varchar_20('environment'),
 		base.column_varchar_100('keywords'),
+		base.column_varchar_20('type', {defautValue:'code'}),//'code', 'file', 'zip'
 		base.column_text('code'),
 		base.column_text('help')
 		], {

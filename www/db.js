@@ -37,7 +37,8 @@ var dict = {
 
 var MODELPATHS = [
 	'./model',
-	'./model/snippet'
+	'./model/snippet',
+	'./model/system'
 ];
 
 function loadModels( relativepath ){

@@ -9,8 +9,61 @@
 <script src="/static/js/codemirror.js"></script>
 <script src="/static/js/marked.js"></script>
 <script src="/static/js/uikit/components/htmleditor.js"></script>
+<script src="/static/js/uikit/components/upload.js"></script>
 <script src="/static/js/base64.min.js"></script>
+
 <script type="text/javascript">
+function initUploadField(){
+    var progressbar = $("#progressbar"),
+        bar         = progressbar.find('.uk-progress-bar'),
+        uploadfiles = [],
+        settings    = {
+	        action: '/api/file/upload?t=snippet', // upload url
+
+	        before: function(settings, files){
+	        	var i, names = [];
+	        	for( i = 0; i<files.length; i++ ){
+	        		names.push( files[i].name );
+	        	}
+	        	for(var i = 0; i < uploadfiles.length; i++ ){
+	        		if( names.indexOf(uploadfiles[i])!==-1){
+	        			info('请不要上传相同的文件');
+	        			return false;
+	        		}
+	        	}
+	        	return true;
+	        },
+
+	        //allow : '*.(jpg|jpeg|gif|png)', // allow only images
+	        loadstart: function() {
+	            bar.css("width", "0%").text("0%");
+	            progressbar.removeClass("uk-hidden");
+	        },
+
+	        progress: function(percent) {
+	            percent = Math.ceil(percent);
+	            bar.css("width", percent+"%").text(percent+"%");
+	        },
+	        complete:function(response){
+	        	console.log( response);
+	            var allfiles = JSON.parse(response).files,
+	            	f = allfiles[0];
+
+	            uploadfiles.push( f.name );
+	            $('#attachments').append( 
+	            '<tr id="' + f.attid +'"><td>' + f.name + '</td><td style="text-align:right"><a onclick="removeFile(\'' + f.attid + '\')" class="uk-close"></a></td></tr>' );
+	        },
+	        allcomplete: function(response) {
+	            bar.css("width", "100%").text("100%");
+	            setTimeout(function(){
+	                progressbar.addClass("uk-hidden");
+	            }, 250);
+	        }
+	    };
+
+    var select = UIkit.uploadSelect($("#upload-select"), settings),
+        drop   = UIkit.uploadDrop($("#upload-drop"), settings);
+}
 
 function initVM( data ){
 	var vm = new Vue({
@@ -47,6 +100,11 @@ function initVM( data ){
 				}	
 			},
 			submit: function(){
+				var files = [];
+				$('#files tr').each(function(i){
+					files.push($(this).attr("id"));
+				});
+				console.log( files );			
 				var data,
 					form = $('#vm').find('form');
 				try{
@@ -55,7 +113,7 @@ function initVM( data ){
 				}catch(e){
 					form.showFormError(e);
 					return;
-				}				
+				}
 
 				form.postJSON( '{{ __form.action }}', data, function(err, result){
 					if( !err ){
@@ -77,8 +135,10 @@ function initVM( data ){
     maxsplitsize: 600
     });
 
-    var html = codeToHtml(data.code);
-	$('#codeAnddoc').html(html);
+	if( data.code && data.code.length > 0 ){
+	    var html = codeToHtml(data.code);
+		$('#codeAnddoc').html(html);
+	}
 }
 
 $(function () {
@@ -100,11 +160,22 @@ $(function () {
 		help:Base64.decode('{{ __record.help }}')
 		};*/
 	{% else %}
-	var data = {};
+	var helptext = '## 使用说明与示例\n[尽量提供]\n\n'
+	+ '## 需要的头文件\n[可选]\n\n'
+	+ '## 依赖的库\n[可选]\n\n'
+	+ '## 附件说明\n[可选]\n\n'
+	+ '## 版本更新列表\n[尽量提供]\n\n'
+	+ '## TODO列表\n[尽量提供]\n\n';
+	var data = {help:helptext};
 	initVM( data );
 	{% endif %}
-	
+	initUploadField();
+
 });
+function removeFile(id)
+{
+	$('#'+id).remove();			
+}
 
 </script>
 {% endblock %}
@@ -232,6 +303,20 @@ snippet修改成功
 			        	<textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" ></textarea>
 			        </div>
 			        <p class="help-text">markdown格式，填写帮助信息，如需要包含何种头文件 、使用示例等</p>
+			    </div>
+			     <div class="uk-form-row" style="margin-top:20px">
+			    	<label class="uk-form-label">{{ _('Attachment') }}</label>
+			    	<div>
+						<table id="attachments" class="uk-table uk-table-striped">
+						</table>
+					</div>
+			    	<div id="upload-drop" class="uk-placeholder">
+					    {{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="upload-select" type="file"></a>.
+					</div>
+					<div id="progressbar" class="uk-progress uk-hidden">
+					    <div class="uk-progress-bar" style="width: 0%;">...</div>
+					</div>
+
 			    </div>
 			    <div class="uk-form-row uk-clearfix">
 			        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
