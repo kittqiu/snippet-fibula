@@ -8,8 +8,7 @@ module.exports = function(warp){
 		base.column_id('user_id'),
 		base.column_id('att_id'),
 		base.column_varchar_20('type', {defautValue:'attachment'}),//'attachment' or 'code'
-		base.column_bigint('from_version'),
-		base.column_bigint('to_version')
+		base.column_bigint('new_version')
 		], {
 			table: 'snippet_resource'
 		});

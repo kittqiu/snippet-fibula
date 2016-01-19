@@ -198,6 +198,16 @@ var PROPERTY = {
         uniqueItems: true
     },
 
+    ID_EMPTY_LIST: {
+        type: 'array',
+        items: {
+            type: 'string',
+            pattern: '^[0-9a-f]{50}$'
+        },
+        minItems: 0,
+        uniqueItems: true
+    },
+
     MIME: {
         type: 'string',
         pattern: '^[0-9a-z]{1,15}\\/[0-9a-z\\.\\-]{1,24}$'
@@ -280,9 +290,10 @@ var schemas = {
             environment:PROPERTY.ENVIRONMENT,
             keywords:PROPERTY.KEYWORD,
             code:PROPERTY.SNIPPET,
-            help:PROPERTY.HELP
+            help:PROPERTY.HELP,
+            attachments:PROPERTY.ID_EMPTY_LIST
         },
-        required:['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help']
+        required:['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help', 'attachments']
     },
 
     updateWebsiteSettings: {

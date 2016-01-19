@@ -45,7 +45,6 @@ function initUploadField(){
 	            bar.css("width", percent+"%").text(percent+"%");
 	        },
 	        complete:function(response){
-	        	console.log( response);
 	            var allfiles = JSON.parse(response).files,
 	            	f = allfiles[0];
 
@@ -65,6 +64,14 @@ function initUploadField(){
         drop   = UIkit.uploadDrop($("#upload-drop"), settings);
 }
 
+function getUploadAttachList(){
+	var files = [];
+	$('#attachments tr').each(function(i){
+		files.push($(this).attr("id"));
+	});
+	return files;
+}
+
 function initVM( data ){
 	var vm = new Vue({
 		el: '#vm',
@@ -75,7 +82,8 @@ function initVM( data ){
 			environment: data.environment ||'{{ __environments[0]}}',			
 			keywords: data.keywords ||'',
 			code: data.code ||'',
-			help:data.help ||''
+			help:data.help ||'',
+			attachments: data.attachments || []
 		},
 		methods:{
 			gendoc: function(){
@@ -93,18 +101,14 @@ function initVM( data ){
 					environment: this.environment,
 					keywords: this.keywords,
 					code: this.code,
-					help: this.help
+					help: this.help,
+					attachments: getUploadAttachList()
 				};
 				if(validateJsonObj('createSnippet', data)){
 					return data;
 				}	
 			},
-			submit: function(){
-				var files = [];
-				$('#files tr').each(function(i){
-					files.push($(this).attr("id"));
-				});
-				console.log( files );			
+			submit: function(){						
 				var data,
 					form = $('#vm').find('form');
 				try{
@@ -126,6 +130,10 @@ function initVM( data ){
 						{% endif %}	
 					}
 				});
+			},
+			vm_removeFile: function(id)
+			{
+				$('#'+id).remove();			
 			}
 		}
 	});
@@ -270,33 +278,7 @@ snippet修改成功
 			        <p class="help-text"></p>
 			        <div id="codeAnddoc">
 			        </div>
-			    	<!--div class="uk-grid">	    	
-				    	<div class="uk-width-1-2">
-					        <textarea cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:400px"></textarea>
-				        </div>
-				        <div class="uk-width-1-10">
-				        <div class="uk-vertical-align" style="margin-left:0px;margin-right:0px;height:400px;" >				        
-					        <div class="uk-vertical-align-middle">
-					        	<b class="uk-icon-arrow-right uk-icon-medium"></b>
-						        <p> 转换</p>
-					        </div>
-				        </div>
-				    </div>
-				        <div class="uk-width-4-10">
-					        <textarea cols="" rows="" placeholder="" class="uk-width-1-1" style="height:400px" disabled></textarea>
-				        </div>
-				        <div>
-				        	<p class="help-text"></p>
-				    	</div>
-				    </div-->
 			    </div>
-			    <!--div class="uk-form-row" style="margin-top:20px">
-			        <label class="uk-form-label">{{ _('dependence') }}</label>
-			        <div class="uk-form-controls">
-			        	<textarea cols="" rows="" placeholder="需要包含何种头文件等，markdown格式" class="uk-width-1-1" style="height:100px" data-uk-htmleditor="{maxsplitsize:600, markdown:true}"></textarea>
-			        </div>
-			        <p class="help-text">markdown格式，填写执行时依赖的环境等data-uk-htmleditor="{maxsplitsize:600, markdown:true}"</p>
-			    </div-->
 			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Help') }}</label>
 			        <div class="uk-form-controls">
@@ -304,10 +286,14 @@ snippet修改成功
 			        </div>
 			        <p class="help-text">markdown格式，填写帮助信息，如需要包含何种头文件 、使用示例等</p>
 			    </div>
-			     <div class="uk-form-row" style="margin-top:20px">
+			    <div class="uk-form-row" style="margin-top:20px">
 			    	<label class="uk-form-label">{{ _('Attachment') }}</label>
 			    	<div>
 						<table id="attachments" class="uk-table uk-table-striped">
+							<tr v-for="att in attachments" v-bind:id="att.id">
+								<td v-text="att.name"></td>
+								<td style="text-align:right"><a v-on:click="vm_removeFile(att.id )" class="uk-close"></a></td>
+							</tr>
 						</table>
 					</div>
 			    	<div id="upload-drop" class="uk-placeholder">
@@ -316,7 +302,6 @@ snippet修改成功
 					<div id="progressbar" class="uk-progress uk-hidden">
 					    <div class="uk-progress-bar" style="width: 0%;">...</div>
 					</div>
-
 			    </div>
 			    <div class="uk-form-row uk-clearfix">
 			        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >

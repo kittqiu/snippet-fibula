@@ -15,6 +15,7 @@ var models = {
     referStats: db.snippet_refer_statistics,
     flow: db.snippet_flow,
     flowHistory: db.snippet_flow_history,
+    resource: db.snippet_resource,
     user: db.user,
     next_id: db.next_id,
     warp : db.warp

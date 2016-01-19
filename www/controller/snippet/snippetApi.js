@@ -10,7 +10,8 @@ var
     cache = require('./snippet_cache'),
     contrib = require('./contribute'),
     search = require('./search'),
-    Page = require( '../../page');;
+    Page = require( '../../page'),
+    resource = require('./resource');
 
 var 
     PAGE_SIZE = config.snippet.page_size,
@@ -19,7 +20,8 @@ var
     FLOW_CREATE = 'create',
     FLOW_EDIT = 'edit',
     TYPE_CODE = 'code',
-    TYPE_ATT = 'attachment';
+    TYPE_ATT = 'attachment',
+    RESULT_DOING = 'processing';
 
 var 
     model = base.model,
@@ -31,6 +33,7 @@ var
     modelFlow = model.flow,
     modelFlowHistory = model.flowHistory,
     modelUser = model.user,
+    modelRes = model.resource,
     next_id = model.next_id,
     warp = model.warp;
 
@@ -97,6 +100,16 @@ function* $_getSnippetVersion(snippet_id, version){
             where: '`snippet_id`=? and `newversion`=? and result=?',
             params: [snippet_id, version, 'pass']
         });
+}
+
+function _validateSnippet(data){
+    json_schema.validate('createSnippet', data);
+    if( !validLanguage(data.language) ){
+        throw api.invalidParam('language'); 
+    }
+    if( !validEnvironment(data.environment)){
+        throw api.invalidParam('environment'); 
+    }
 }
 
 function mergeFixedModel(pageModel){
@@ -290,8 +303,12 @@ module.exports = {
 
     'GET /api/snippet/history/entity': function* (){
         var id = getId(this.request),
-            version = this.request.query.version || 0;
-        this.body = yield $_getSnippetVersion(id, version);
+            version = this.request.query.version || 0,
+            r = yield $_getSnippetVersion(id, version);
+        if( r !== null){
+            r.attachments = yield resource.$findAttachments(r.snippet_id, r.newversion);
+        }  
+        this.body = r;
     },
 
     'GET /api/snippet/index': function* (){
@@ -308,7 +325,12 @@ module.exports = {
     },
 
     'GET /api/snippet/pending/entity/:id': function* (id){
-        var record = yield model.flow.$find(id);
+        var record = yield model.flow.$find(id), 
+            atts;
+        if( record !== null){
+            atts = yield resource.$findAttachments(record.snippet_id, record.newversion);
+            record.attachments = atts;
+        } 
         this.body = record || {};
     },
 
@@ -326,7 +348,14 @@ module.exports = {
     'GET /api/snippet/view/entity/:id': function* (id){
         var 
             param = this.query || {},
-            record = yield model.snippet.$find(id);
+            record = yield model.snippet.$find(id),
+            atts;
+
+        if( record !== null){
+            atts = yield resource.$findAttachments(id, record.version);
+            record.attachments = atts;
+        } 
+
         if( record && param){
             if( param.idToName ){
                 var master,
@@ -342,9 +371,9 @@ module.exports = {
             if( param.nextVersion ){
                 var next_version = record.version + 1,
                     new_version = yield model.flow.$find({
-                    select: ['id', 'score', 'contributor', 'newversion'],
-                    where: '`snippet_id`=? and `newversion`=?',
-                    params: [record.id, next_version]
+                    select: ['id', 'user_id', 'score', 'contributor', 'newversion'],
+                    where: '`snippet_id`=? and `newversion`=? and `result`=?',
+                    params: [record.id, next_version, RESULT_DOING ]
                     });
                 if( new_version !== null){
                     record.next_version = new_version;
@@ -371,16 +400,11 @@ module.exports = {
         var 
             user = this.request.user,
             snippet,
-            data = this.request.body;
+            data = this.request.body, 
+            attachments;
 
-        //validate data
-        json_schema.validate('createSnippet', data);
-        if( !validLanguage(data.language) ){
-            throw api.invalidParam('language'); 
-        }
-        if( !validEnvironment(data.environment)){
-            throw api.invalidParam('environment'); 
-        }
+        _validateSnippet(data);//validate data
+        attachments = data.attachments || [];
 
         //flow object
         snippet = {
@@ -402,6 +426,9 @@ module.exports = {
         };
 
         yield model.flow.$create(snippet);
+        if(attachments.length > 0){
+            yield resource.$createAttachments(snippet,attachments);
+        }
         yield contrib.$addEdit( snippet.id, user.id );
 
         //update cache
@@ -417,16 +444,11 @@ module.exports = {
         var 
             user = this.request.user,
             snippet, flowsnippet,
-            data = this.request.body;
+            data = this.request.body, 
+            attachments;
 
-        //validate data
-        json_schema.validate('createSnippet', data);
-        if( !validLanguage(data.language) ){
-            throw api.invalidParam('language'); 
-        }
-        if( !validEnvironment(data.environment)){
-            throw api.invalidParam('environment'); 
-        }
+        _validateSnippet(data);//validate data
+        attachments = data.attachments || [];
 
         snippet = yield modelSnippet.$find(id);
         if( snippet === null ){
@@ -454,6 +476,7 @@ module.exports = {
 
         yield contrib.$addEdit( id, user.id );
         yield modelFlow.$create(flowsnippet);
+        yield resource.$createAttachments(flowsnippet,attachments);
 
         //update cache
         yield cache.$removeLang(data.language);
@@ -468,16 +491,12 @@ module.exports = {
         var 
             isLangChanged = false,
             oldLang,
-            data = this.request.body;
+            data = this.request.body,
+            attachments;
 
-        //validate data
-        json_schema.validate('createSnippet', data);
-        if( !validLanguage(data.language) ){
-            throw api.invalidParam('language'); 
-        }
-        if( !validEnvironment(data.environment)){
-            throw api.invalidParam('environment'); 
-        }
+        _validateSnippet(data);//validate data
+        attachments = data.attachments || [];
+        console.log( attachments );
 
         var r = yield model.flow.$find(id);
         if( r === null ){
@@ -495,6 +514,8 @@ module.exports = {
         r.help = data.help;
 
         yield r.$update(['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help']);
+        yield resource.$updateAttachments(r,attachments);
+
         //update cache
         yield cache.$removeLang(data.language);
         if( isLangChanged ){
@@ -593,6 +614,7 @@ module.exports = {
             if( r.score === -100 ){
                 r.result = 'discard';
                 columns.push('result');
+                yield resource.$deleteAttachments(r);
             }
         }
 

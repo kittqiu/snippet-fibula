@@ -22,11 +22,12 @@ function initVM( data ){
 			keywords: data.keywords ||'',
 			code: data.code ||'',
 			help:data.help ||'',
-			advice:''
+			advice:'', 
+			attachments: data.attachments || []
 		},
 		methods:{
 			submit: function(){},
-			do:function(type){
+			doAction:function(type){
 				var data,
 					form = $('#vm').find('form'),
 					use_time = Date.now() - start_time;
@@ -172,6 +173,18 @@ $(function () {
 			        <p class="help-text"></p>
 			    </div>
 			    <div class="uk-form-row" style="margin-top:20px">
+			    	<label class="uk-form-label">{{ _('Attachment') }}</label>
+			    	<div>
+						<table id="attachments" class="uk-table uk-table-striped">
+							<tr v-for="att in attachments" v-bind:id="att.id">
+								<td v-text="att.name"></td>
+								<td style="text-align:right"><a v-bind:href="'/api/file/download?id='+ att.id" class="uk-icon-cloud-download uk-icon-medium dv-link"></a></td>
+							</tr>
+						</table>
+						<span v-if="attachments.length==0">{{_('None')}}</span>
+					</div>
+			    </div>
+			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Advice') }}</label>
 			        <div class="uk-form-controls" id="help" >
 			        	<input id="advice" v-model="advice" type="text" placeholder="" class="uk-width-1-1" autofocus>
@@ -179,10 +192,10 @@ $(function () {
 			        <p class="help-text"></p>
 			    </div>
 			    <div class="uk-form-row uk-clearfix">
-			    	<button  v-on:click="do('discard')" class="uk-button-success uk-button-large" style="width:240px;" >
+			    	<button  v-on:click="doAction('discard')" class="uk-button-success uk-button-large" style="width:240px;" >
 			        	<i class="uk-icon-close uk-icon-medium"></i> {{ _('Discard') }}
 			        </button>
-			        <button  v-on:click="do('pass')" id="passbutton" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
+			        <button  v-on:click="doAction('pass')" id="passbutton" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
 			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _('Pass') }}
 			        </button>
 			    </div>

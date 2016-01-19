@@ -47,16 +47,7 @@ function* $_hashFile(path){
 	return crypter.digest('hex');
 }
 
-function* $_createDirs(dist){
-	/*var dir1 = parent + '/' + dhash.substr(0,2),
-		dir2 = dir1 + '/' + dhash.substr(2,2);
-	if( !(yield cofs.exists(dir1))){
-		yield cofs.mkdir(dir1);
-	}
-	if( !(yield cofs.exists(dir2))){
-		yield cofs.mkdir(dir2);
-	}*/
-	
+function* $_createDirs(dist){	
 	var dist = path.resolve(dist);
 	if( yield cofs.exists(dist)){
 		return true;
@@ -107,11 +98,25 @@ function* $_createAttachment(tmppath, fileName, subsystem){
 		});
 		id = att.id;
 	}
-	console.log( id );
 	return id;
+}
+
+function* $_addRefer(id){
+	var att = yield modelAtt.$find(id);
+	att.refer += 1;
+	yield att.$update(['refer']);
+}
+
+function* $_descRefer(id){
+	var att = yield modelAtt.$find(id);
+	att.refer -= 1;
+	yield att.$update(['refer']);
 }
 
 module.exports = {
 	$createAttachment: $_createAttachment,
-	$saveTmpFile: $_saveTmpFile
+	$saveTmpFile: $_saveTmpFile,
+
+	$addRefer: $_addRefer,
+	$descRefer: $_descRefer
 };

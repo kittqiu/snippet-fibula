@@ -24,7 +24,8 @@ function initVM( data ){
 			help:data.help ||'',
 			created_at: formatDate(data.updated_at),
 			version: data.newversion || 0,
-			id: data.id || ''
+			id: data.id || '',
+			attachments: data.attachments || []
 		},
 		methods:{
 		}
@@ -103,6 +104,18 @@ function copyToClipboard(){
 					<h3><b>{{ _('Help') }}</b></h3>
 					<div id="help"></div>
 				</div>
+				<div style="margin-top:20px">
+					<h3><b>{{ _('Attachment') }}</b></h3>
+			    	<div>
+						<table id="attachments" class="uk-table uk-table-striped">
+							<tr v-for="att in attachments" v-bind:id="att.id">
+								<td v-text="att.name"></td>
+								<td style="text-align:right"><a v-bind:href="'/api/file/download?id='+ att.id" class="uk-icon-cloud-download uk-icon-medium dv-link"></a></td>
+							</tr>
+						</table>
+						<span v-if="attachments.length==0">{{_('None')}}</span>
+					</div>
+			    </div>
 			</div>
 		</div>
 	</div>

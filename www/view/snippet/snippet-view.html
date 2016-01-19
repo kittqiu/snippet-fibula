@@ -31,7 +31,8 @@ function initVM( data ){
 			next_version: data.next_version || null /*{newversion:21, score:20,contributor:'def'}*/,
 			contrib: data.contrib || {},
 			history: data.history || [],
-			stats: data.stats || {}
+			stats: data.stats || {},
+			attachments: data.attachments || []
 		},
 		methods:{
 		}
@@ -115,6 +116,18 @@ function copyToClipboard(){
 					<h3><b>{{ _('Help') }}</b></h3>
 					<div id="help"></div>
 				</div>
+				<div style="margin-top:20px">
+					<h3><b>{{ _('Attachment') }}</b></h3>
+			    	<div>
+						<table id="attachments" class="uk-table uk-table-striped">
+							<tr v-for="att in attachments" v-bind:id="att.id">
+								<td v-text="att.name"></td>
+								<td style="text-align:right"><a v-bind:href="'/api/file/download?id='+ att.id" class="uk-icon-cloud-download uk-icon-medium dv-link"></a></td>
+							</tr>
+						</table>
+						<span v-if="attachments.length==0">{{_('None')}}</span>
+					</div>
+			    </div>
 			</div>
 		</div>
 
@@ -125,7 +138,7 @@ function copyToClipboard(){
 				<li>{{ _('Next revision')}}: 
 					<span v-if="next_version">
 						<span v-text="next_version.newversion"></span>
-						<a v-if="'{{ __user__.id }}' &&  '{{ __user__.id }}'!==creator && ( !next_version.contributor || (next_version.contributor && next_version.contributor.indexOf('{{ __user__.id }}')===-1))" class="dv-link uk-float-right" v-bind:href="'/snippet/pending/check?id=' + next_version.id +'&redirect=' + '{{ __request__.path}}'">{{ _('Check or Discard')}}(<span v-text="next_version.score"></span>%)</a>
+						<a v-if="'{{ __user__.id }}' &&  '{{ __user__.id }}'!==next_version.user_id && ( !next_version.contributor || (next_version.contributor && next_version.contributor.indexOf('{{ __user__.id }}')===-1))" class="dv-link uk-float-right" v-bind:href="'/snippet/pending/check?id=' + next_version.id +'&redirect=' + '{{ __request__.path}}'">{{ _('Check or Discard')}}(<span v-text="next_version.score"></span>%)</a>
 						<span v-else class="uk-float-right">{{ _('Pending to check')}}</span>
 					</span>
 					<span v-else>{{ _('None')}}</span>

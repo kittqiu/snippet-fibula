@@ -45,6 +45,14 @@ function getFirstDayOfMonth(){
     return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
+function getId(request) {
+    var id = request.query.id;
+    if (id && id.length === 50) {
+        return id;
+    }
+    throw api.notFound('id');
+}
+
 module.exports = {
 
 	checkPermission: function( request, expectedRole ){
@@ -70,5 +78,6 @@ module.exports = {
     }, 
 
     getWeek: getWeek, 
-    getFirstDayOfMonth: getFirstDayOfMonth
+    getFirstDayOfMonth: getFirstDayOfMonth,
+    getId: getId
 };
