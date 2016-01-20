@@ -13,28 +13,44 @@
 <script src="/static/js/base64.min.js"></script>
 
 <script type="text/javascript">
-function initUploadField(){
-    var progressbar = $("#progressbar"),
+function initUploadField(prefix, allow, onlyone){
+    var progressbar = $('#' +  prefix + '-progressbar'),
         bar         = progressbar.find('.uk-progress-bar'),
         uploadfiles = [],
         settings    = {
-	        action: '/api/file/upload?t=snippet', // upload url
+	        action: '/api/file?t=snippet', // upload url
 
 	        before: function(settings, files){
 	        	var i, names = [];
 	        	for( i = 0; i<files.length; i++ ){
 	        		names.push( files[i].name );
 	        	}
+
+	        	uploadfiles = [];
+	        	$('#' + prefix +' tr').each(function(i){
+					uploadfiles.push($(this).attr("name"));
+				});
+
 	        	for(var i = 0; i < uploadfiles.length; i++ ){
 	        		if( names.indexOf(uploadfiles[i])!==-1){
 	        			info('请不要上传相同的文件');
 	        			return false;
 	        		}
 	        	}
+	        	if(onlyone && names.length + uploadfiles.length > 1){
+	        		info('只能上传1个文件');
+	        		return false;
+	        	}
 	        	return true;
 	        },
 
-	        //allow : '*.(jpg|jpeg|gif|png)', // allow only images
+	        allow : allow || '*.*', // allow only images
+	        notallowed:function(file, settings){
+	        	var exts = settings.allow.substring(settings.allow.indexOf('.')+2);
+	        	exts = exts.slice(0,-1);
+	        	exts = exts.split('|').join(', ');
+	        	info('仅允许后缀名为'+ exts + '的文件');
+	        },
 	        loadstart: function() {
 	            bar.css("width", "0%").text("0%");
 	            progressbar.removeClass("uk-hidden");
@@ -49,8 +65,8 @@ function initUploadField(){
 	            	f = allfiles[0];
 
 	            uploadfiles.push( f.name );
-	            $('#attachments').append( 
-	            '<tr id="' + f.attid +'"><td>' + f.name + '</td><td style="text-align:right"><a onclick="removeFile(\'' + f.attid + '\')" class="uk-close"></a></td></tr>' );
+	            $('#' + prefix).append( 
+	            '<tr id="' + f.attid +'" name="' + f.name +'"><td>' + f.name + '</td><td style="text-align:right"><a onclick="removeFile(\'' + f.attid + '\')" class="uk-close"></a></td></tr>' );
 	        },
 	        allcomplete: function(response) {
 	            bar.css("width", "100%").text("100%");
@@ -60,8 +76,8 @@ function initUploadField(){
 	        }
 	    };
 
-    var select = UIkit.uploadSelect($("#upload-select"), settings),
-        drop   = UIkit.uploadDrop($("#upload-drop"), settings);
+    var select = UIkit.uploadSelect($("#" + prefix + "-upload-select"), settings),
+        drop   = UIkit.uploadDrop($("#" + prefix + "-upload-drop"), settings);
 }
 
 function getUploadAttachList(){
@@ -158,15 +174,7 @@ $(function () {
 			initVM( snippet );
 		}
 	});
-	/*var snippet = {
-		name: '{{ __record.name }}',
-		brief: '{{ __record.brief }}',
-		language: '{{ __record.language }}',
-		environment: '{{ __record.environment }}',	
-		keywords: '{{ __record.keywords }}',
-		snippet: Base64.decode('{{ __record.snippet }}'),
-		help:Base64.decode('{{ __record.help }}')
-		};*/
+
 	{% else %}
 	var helptext = '## 使用说明与示例\n[尽量提供]\n\n'
 	+ '## 需要的头文件\n[可选]\n\n'
@@ -177,7 +185,23 @@ $(function () {
 	var data = {help:helptext};
 	initVM( data );
 	{% endif %}
-	initUploadField();
+	initUploadField('attachments');
+	// initUploadField('codefiles', '*.(h|c|cpp|java|js|html|json|css|less|def|py|php|sh|rb|cs)');
+	// initUploadField('pkgfile', '*.zip', true )
+
+	$("[name='codetype']").on({
+		change: function(){
+			var v=$(this).val(),
+				vs = ['code','file', 'pkg'];		
+			
+			$('#block-'+v).show();
+			for(var i = 0; i<vs.length;i++){
+				if(v!==vs[i]){
+					$('#block-'+vs[i]).hide();
+				}
+			}
+		}
+	});
 
 });
 function removeFile(id)
@@ -270,7 +294,15 @@ snippet修改成功
 			        </div>
 			        <p class="help-text">3-100字符，最多10个关键词，需要把模块名称中的词语设置为关键字</p>
 			    </div>
-			    <div class="uk-form-row" style="margin-top:20px">
+			    <!--div class="uk-form-row" style="margin-top:20px">
+			    	<label class="uk-form-label">{{ _('代码类型') }}</label>
+			    	<div class="uk-form-controls">
+			        	<input type="radio" name="codetype" value="code" checked>单个代码段</input>
+			        	<input type="radio" name="codetype" value="file" style="margin-left:30px;">代码文件(1个或多个)</input>
+			        	<input type="radio" name="codetype" value="pkg" style="margin-left:30px;">包(1个zip压缩包，可包含文件夹)</input>
+			        </div>
+			    </div-->
+			    <div id="block-code" class="uk-form-row" style="margin-top:20px">
 			    	<label class="uk-form-label">{{ _('Code snippet') }}</label>
 			    	<div class="uk-form-controls">
 			        	<textarea v-model="code" v-on:change="gendoc" cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:300px" ></textarea>
@@ -279,6 +311,40 @@ snippet修改成功
 			        <div id="codeAnddoc">
 			        </div>
 			    </div>
+			    <!--div id="block-file" class="uk-form-row" style="margin-top:20px;display:none">
+			    	<label class="uk-form-label">{{ _('代码文件') }}</label>
+			    	<div>
+						<table id="codefiles" class="uk-table uk-table-striped">
+							<tr v-for="att in attachments" v-bind:id="att.id" v-bind:name="att.name">
+								<td v-text="att.name"></td>
+								<td style="text-align:right"><a v-on:click="vm_removeFile(att.id )" class="uk-close"></a></td>
+							</tr>
+						</table>
+					</div>
+			    	<div id="codefiles-upload-drop" class="uk-placeholder">
+					    <i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="codefiles-upload-select" type="file"></a>.
+					</div>
+					<div id="codefiles-progressbar" class="uk-progress uk-hidden">
+					    <div class="uk-progress-bar" style="width: 0%;">...</div>
+					</div>
+			    </div>
+			    <div id="block-pkg" class="uk-form-row" style="margin-top:20px;display:none">
+			    	<label class="uk-form-label">{{ _('代码包文件') }}</label>
+			    	<div>
+						<table id="pkgfile" class="uk-table uk-table-striped">
+							<tr v-for="att in attachments" v-bind:id="att.id" v-bind:name="att.name">
+								<td v-text="att.name"></td>
+								<td style="text-align:right"><a v-on:click="vm_removeFile(att.id )" class="uk-close"></a></td>
+							</tr>
+						</table>
+					</div>
+			    	<div id="pkgfile-upload-drop" class="uk-placeholder">
+					    <i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="pkgfile-upload-select" type="file"></a>.
+					</div>
+					<div id="pkgfile-progressbar" class="uk-progress uk-hidden">
+					    <div class="uk-progress-bar" style="width: 0%;">...</div>
+					</div>
+			    </div-->
 			    <div class="uk-form-row" style="margin-top:20px">
 			        <label class="uk-form-label">{{ _('Help') }}</label>
 			        <div class="uk-form-controls">
@@ -296,10 +362,10 @@ snippet修改成功
 							</tr>
 						</table>
 					</div>
-			    	<div id="upload-drop" class="uk-placeholder">
-					    {{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="upload-select" type="file"></a>.
+			    	<div id="attachments-upload-drop" class="uk-placeholder">
+					    <i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="attachments-upload-select" type="file"></a>.
 					</div>
-					<div id="progressbar" class="uk-progress uk-hidden">
+					<div id="attachments-progressbar" class="uk-progress uk-hidden">
 					    <div class="uk-progress-bar" style="width: 0%;">...</div>
 					</div>
 			    </div>

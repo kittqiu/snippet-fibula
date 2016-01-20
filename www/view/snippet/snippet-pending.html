@@ -9,24 +9,24 @@
 		{% for n, lang in __languages %}
 		<div style="margin-bottom: 50px">
 			<h3 class="dv-title">{{ lang }}</h3>
-			<div style="text-align:right"><a href="/snippet/pending/list/{{ lang }}?page=1" class="dv-link">{{ _('More') }}({{ __counts[n] }})</a></div>			
+			<div style="text-align:right"><a href="/snippet/pending/lang/{{ lang }}?page=1" class="dv-link">{{ _('More') }}({{ __counts[n] }})</a></div>			
 			<hr style="margin-top:2px;border-top:2px solid #888;">
 			{% if __counts[n] > 0 %}
 			<table class="uk-table uk-table-striped">
 				{% for m, record in __records[n] %}
 				<tr>
 					{% if __user__.id == record.user_id %}				
-					<td><a href="/snippet/pending/edit?id={{ record.id }}" class="dv-link"><b>{{ record.name }}</b></a></td>
+					<td><a href="/snippet/pending/{{ record.id }}/edit" class="dv-link"><b>{{ record.name }}</b></a></td>
 					<td>{{ record.brief }}</td>
-					<td><a href="/snippet/pending/edit?id={{ record.id }}" class="dv-link">{{ _('Change') }}</a></td>
+					<td><a href="/snippet/pending/{{ record.id }}/edit" class="dv-link">{{ _('Change') }}</a></td>
 					{% else %}
-					<td><a href="/snippet/pending/check?id={{ record.id }}" class="dv-link"><b>{{ record.name }}</b></a></td>
+					<td><a href="/snippet/pending/{{ record.id }}/check" class="dv-link"><b>{{ record.name }}</b></a></td>
 					<td>{{ record.brief }}</td>
 					<td>
 						{% if record.contributor && record.contributor|find(__user__.id) %}
 						<span>已审核({{ record.score }}%)</span>
 						{% else %}
-						<a href="/snippet/pending/check?id={{ record.id }}" class="dv-link">{{ _('Check') }}({{ record.score }}%)</a>
+						<a href="/snippet/pending/{{ record.id }}/check" class="dv-link">{{ _('Check') }}({{ record.score }}%)</a>
 						{% endif %}
 					</td>
 					{% endif %}					

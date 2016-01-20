@@ -13,17 +13,16 @@ var
 
 /*
 GET:
-/api/file/download?id=?
+/api/file/:id
 
 POST:
-/api/file/upload?t=?
+/api/file?t=?
 */
 
 module.exports = {
     /***************** GET METHOD *********/
-    'GET /api/file/download': function* (){
-        var id = getId(this.request),
-            att = yield modelAtt.$find(id);
+    'GET /api/file/:id': function* (id){
+        var att = yield modelAtt.$find(id);
 
         if( att != null ){
             this.attachment(att.name); 
@@ -34,7 +33,7 @@ module.exports = {
     },
 
     /***************** POST METHOD *********/
-    'POST /api/file/upload': function* (){
+    'POST /api/file': function* (){
     	if( !this.request.is('multipart/*')){
     		return yield next;
     	}    	
@@ -52,7 +51,6 @@ module.exports = {
 		      	var file = {}, id;
                 //console.dir( part );
                 file = yield attachment.$saveTmpFile( part, part.filename );
-		      	//part.pipe(fs.createWriteStream(tmppath));
 		      	id = yield attachment.$createAttachment( file.path, part.filename, subsys );
 		     	files.push({attid:id, name:part.filename})
 		      	console.log( part.filename );

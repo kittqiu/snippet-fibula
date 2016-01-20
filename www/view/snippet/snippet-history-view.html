@@ -41,7 +41,7 @@ function initVM( data ){
 	clipboard.on('success', function(e) {
 	    e.clearSelection();
 	    showCode(!ishidden);
-	    postJSON( '/api/snippet/refer/entity/{{ id }}', function(err,result){
+	    postJSON( '/api/snippet/s/{{ id }}/refer', function(err,result){
 	    });
 	});	 
 	clipboard.on('error', function(e) {
@@ -50,8 +50,7 @@ function initVM( data ){
 }
 
 $(function () {
-	var param = { id: '{{id}}', version: {{version}}};
-	getJSON( '/api/snippet/history/entity', param, function(err, snippet){
+	getJSON( '/api/snippet/s/{{id}}/history/{{version}}', function(err, snippet){
 		if(err){
 			fatal(err);
 		}else{
@@ -110,7 +109,7 @@ function copyToClipboard(){
 						<table id="attachments" class="uk-table uk-table-striped">
 							<tr v-for="att in attachments" v-bind:id="att.id">
 								<td v-text="att.name"></td>
-								<td style="text-align:right"><a v-bind:href="'/api/file/download?id='+ att.id" class="uk-icon-cloud-download uk-icon-medium dv-link"></a></td>
+								<td style="text-align:right"><a v-bind:href="'/api/file/'+ att.id" class="uk-icon-cloud-download uk-icon-medium dv-link"></a></td>
 							</tr>
 						</table>
 						<span v-if="attachments.length==0">{{_('None')}}</span>

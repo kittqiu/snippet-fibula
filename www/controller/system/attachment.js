@@ -22,16 +22,19 @@ function* $__saveFile(istream, ostream){
 		yield cos.write(data);
 		size += data.length;
 	}
+	yield cos.end();
 	return size;
 }
 
 function* $_saveTmpFile(istream, fname){
 	var tmpname  = fname + Date.now() + '.tmp',
 		tmppath = './media/tmp',
-		size;
+		size, os;
 	yield $_createDirs(tmppath);
 	tmppath += '/' + tmpname;
+	os = fs.createWriteStream(tmppath);
 	size = yield $__saveFile(istream, fs.createWriteStream(tmppath));
+	os.end();
 	return {path:tmppath, name: tmpname, size: size};
 }
 
@@ -56,7 +59,7 @@ function* $_createDirs(dist){
 		if( !(yield cofs.exists(parent)) ){
 			yield $_createDirs(parent);
 		}
-		cofs.mkdir(dist);		
+		yield cofs.mkdir(dist);		
 	}
 	return true;
 }
@@ -97,6 +100,8 @@ function* $_createAttachment(tmppath, fileName, subsystem){
 			params: [path]
 		});
 		id = att.id;
+		yield cofs.unlink(tmppath);
+		console.log( 'unlink ' + tmppath );
 	}
 	return id;
 }

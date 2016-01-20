@@ -39,13 +39,13 @@ $(function () {
 			
 			<table class="uk-table uk-table-striped">				
 				<tr v-for="a in snippets">
-					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/edit?id=' + a.id" class="dv-link"><b v-text="a.name"></b></a></td>
-					<td v-else><a v-bind:href="'/snippet/pending/check?id=' + a.id +'&redirect=' + '{{ __request__.path}}'" class="dv-link"><b v-text="a.name"></b></a></td>
+					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/' + a.id + '/edit'" class="dv-link"><b v-text="a.name"></b></a></td>
+					<td v-else><a v-bind:href="'/snippet/pending/' + a.id +'/check'" class="dv-link"><b v-text="a.name"></b></a></td>
 					<td v-text="a.brief"></td>
-					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/edit?id=' + a.id" class="dv-link">{{ _('Change') }}</a></td>					
+					<td v-if="'{{ __user__.id }}' === a.user_id"><a v-bind:href="'/snippet/pending/' + a.id + '/edit'" class="dv-link">{{ _('Change') }}</a></td>					
 					<td v-else>
 						<span v-if="a.contributor && a.contributor.indexOf('{{ __user__.id }}')!==-1">已审核(<span v-text="a.score"></span>%)</span>
-						<a v-else v-bind:href="'/snippet/pending/check?id=' + a.id +'&redirect=' + '{{ __request__.path}}'" class="dv-link" >{{ _('Check') }}{{a.score}}(<span v-text="a.score"></span>%)</a>
+						<a v-else v-bind:href="'/snippet/pending/' + a.id +'/check'" class="dv-link" >{{ _('Check') }}{{a.score}}(<span v-text="a.score"></span>%)</a>
 					</td>					
 				</tr>
 				<tr v-if="page.total===0">
@@ -56,14 +56,14 @@ $(function () {
 			<div v-if="page.pages > 1" style="text-align:center">
 				<ul class="uk-pagination" >
 					<li v-if="page.index === 1" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-					<li v-else><a v-bind:href="'/snippet/pending/list/{{ __language }}?page=' + (page.index -1)"><i class="uk-icon-angle-double-left"></i></a></li>
+					<li v-else><a v-bind:href="'/snippet/pending/lang/{{ __language }}?page=' + (page.index -1)"><i class="uk-icon-angle-double-left"></i></a></li>
 					<template v-for="p in page.list">
 						<li v-if="p === '...'" ><span >...</span></li>
 						<li v-if="p === page.index" class="uk-active"><span  v-text="p" ></span></li>
-						<li v-if="p !== '...' && p !== page.index"><a v-bind:href="'/snippet/pending/list/{{ __language }}?page=' + p" v-text="p"></a></li>						
+						<li v-if="p !== '...' && p !== page.index"><a v-bind:href="'/snippet/pending/lang/{{ __language }}?page=' + p" v-text="p"></a></li>						
 					</template>
 					<li v-if="page.index === page.pages" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
-					<li v-else><a v-bind:href="'/snippet/pending/list/{{ __language }}?page=' + (page.index +1)"><i class="uk-icon-angle-double-right"></i></a></li>
+					<li v-else><a v-bind:href="'/snippet/pending/lang/{{ __language }}?page=' + (page.index +1)"><i class="uk-icon-angle-double-right"></i></a></li>
 	            </ul>
 	        </div>			
 		</div>

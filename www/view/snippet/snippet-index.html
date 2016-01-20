@@ -76,7 +76,7 @@ $(function () {
 						<div class="uk-float-left " style="height:40px;margin-right:10px;">
 							<span v-if="item" class="dv-link uk-text-middle" v-text="item.language" style="font-size:20px;"></span>
 						</div>
-						<div v-if="item" style="margin-left:20px"><a v-bind:href="'/snippet/entity/view?id=' + item.id" style="color:#333"><b v-text="item.name"></b></a>
+						<div v-if="item" style="margin-left:20px"><a v-bind:href="'/snippet/s/' + item.id" style="color:#333"><b v-text="item.name"></b></a>
 							<p v-text="item.brief" class="uk-text-muted" style="margin-top:0"></p>
 						</div>
 					</td>
@@ -92,7 +92,7 @@ $(function () {
 						<div class="uk-float-left " style="height:40px;margin-right:10px;">
 							<span v-if="item" class="dv-link uk-text-middle" v-text="item.language" style="font-size:20px;"></span>
 						</div>
-						<div v-if="item" style=""><a v-bind:href="'/snippet/entity/view?id=' + item.id" style="color:#333"><b v-text="item.name"></b></a>
+						<div v-if="item" style=""><a v-bind:href="'/snippet/s/' + item.id" style="color:#333"><b v-text="item.name"></b></a>
 							<p v-text="item.brief" class="uk-text-muted" style="margin-top:0"></p>
 						</div>
 					</td>

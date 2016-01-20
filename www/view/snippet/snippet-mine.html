@@ -53,7 +53,7 @@ $(function(){
 			<table class="uk-table uk-table-striped">
 				{% for m, r in snippets %}
 				<tr>			
-					<td><a href="/snippet/entity/view?id={{ r.id }}" class="dv-link"><b>{{ r.name }}</b></a></td>
+					<td><a href="/snippet/s/{{ r.id }}" class="dv-link"><b>{{ r.name }}</b></a></td>
 					<td>{{ r.brief }}</td>
 					<td>{{ r.language }}</td>
 					<td>{{ r.environment }}</td>

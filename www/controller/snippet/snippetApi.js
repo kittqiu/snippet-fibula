@@ -70,14 +70,6 @@ function* $_getStatsHistory(snippet_id){
 function* $_getSnippetHistory(snippet_id, offset, limit){
     offset = offset < 0 ? 0: offset;
     limit = limit < 0 ? LARGE_PAGE_SIZE : limit;
-    /*return yield modelFlow.$findAll({
-        select: ['id', 'snippet_id', 'user_id', 'newversion', 'updated_at'],
-        where: '`snippet_id`=? and result=?',
-        params: [snippet_id, 'pass'],
-        order: '`newversion` desc',
-        limit: limit,
-        offset: offset
-    });*/
 
     var rs,
         sql = 'select h.id, h.snippet_id, h.newversion, h.updated_at, u.name as user from snippet_flow as h, users as u where h.snippet_id=? and h.result=? and h.user_id=u.id order by h.newversion DESC limit '
@@ -125,32 +117,30 @@ function* $_render( context, pageModel, view ){
 /*
 GET:
 /snippet
-/snippet/create
-/snippet/entity/view?id=id
-/snippet/entity/edit?id=id
-/snippet/history/list?id=id&page=x
-/snippet/history/view?id=id&version=x
+/snippet/s/creation
+/snippet/s/:id
+/snippet/s/:id/edit
+/snippet/s/:id/history?page=x
+/snippet/s/:id/history/:version
 /snippet/mine/index
 /snippet/mine/own?page=1
 /snippet/pending
-/snippet/pending/check?id=id
-/snippet/pending/edit?id=id
-/snippet/pending/list/:lang
+/snippet/pending/:id/check
+/snippet/pending/:id/edit
+/snippet/pending/lang/:lang?page=x
 /snippet/search
 /api/snippet/index
-/api/snippet/history/entity?id=id&version=x
-/api/snippet/list/lastest?limit=limit
-/api/snippet/pending/entity/:id
+/api/snippet/s/:id?idToName=true&nextVersion=true&contributor=true&history=true&stats=true
+/api/snippet/s/:id/history/:version
+/api/snippet/pending/:id
 /api/snippet/pending/lang/:lang?page=x
-/api/snippet/view/entity/:id
-
 
 POST:
-/api/snippet/create
-/api/snippet/entity/edit/:id
-/api/snippet/pending/entity/:id
-/api/snippet/pending/check
-/api/snippet/refer/entity/:id
+/api/snippet/s
+/api/snippet/s/:id
+/api/snippet/s/:id/refer
+/api/snippet/pending/:id/edit
+/api/snippet/pending/:id/check
 */
 
 
@@ -164,34 +154,31 @@ module.exports = {
     },
 
     /* create a snippet */
-    'GET /snippet/create':function* (){
-        var pageModel = {'__form': {action: '/api/snippet/create', name: 'Create'}};
+    'GET /snippet/s/creation':function* (){
+        var pageModel = {'__form': {action: '/api/snippet/s', name: 'Create'}};
         yield $_render( this, pageModel, 'snippet-form.html' );
     },
 
     /* view a snippet */
-    'GET /snippet/entity/view': function* (id){
-        var id = getId(this.request),
-            pageModel = {'__id': id };
+    'GET /snippet/s/:id': function* (id){
+        var pageModel = {'__id': id };
         base.setHistoryUrl(this);
         yield $_render( this, pageModel, 'snippet-view.html');
     },
 
     /* edit the snippet */
-    'GET /snippet/entity/edit': function* (){
-        var id = getId(this.request),
-            path = '/api/snippet/entity/edit/' + id,
-            pageModel = {'__id': id, '__form': {
-                action: '/api/snippet/entity/edit/' + id, 
+    'GET /snippet/s/:id/edit': function* (id){
+        var pageModel = {'__id': id, '__form': {
+                action: '/api/snippet/s/' + id, 
                 name: 'Change', 
-                src: '/api/snippet/view/entity/' + id,
+                src: '/api/snippet/s/' + id,
                 redirect: this.request.query.redirect
                 } };        
         yield $_render( this, pageModel, 'snippet-form.html');
     }, 
 
-    'GET /snippet/history/list': function* (){
-        var id = getId(this.request),
+    'GET /snippet/s/:id/history': function* (id){
+        var //id = getId(this.request),
             index = this.request.query.page||1,
             page = new Page(index, LARGE_PAGE_SIZE),
             snippets = yield $_getSnippetHistory( id, (index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE ),
@@ -202,10 +189,8 @@ module.exports = {
         yield $_render( this, pageModel, 'snippet-history.html');      
     },
 
-    'GET /snippet/history/view': function* (){
-        var id = getId(this.request), 
-            version = this.request.query.version||0, 
-            pageModel = { id:id, version: version};
+    'GET /snippet/s/:id/history/:version': function* (id,version){
+        var pageModel = { id:id, version: version};
         yield $_render( this, pageModel, 'snippet-history-view.html');
     },
 
@@ -256,9 +241,8 @@ module.exports = {
         yield $_render( this, pageModel, 'snippet-pending.html' );
     }, 
 
-    'GET /snippet/pending/check': function* (){
-        var id = getId(this.request),
-            pageModel = {'__id': id, '__form': {
+    'GET /snippet/pending/:id/check': function* (id){
+        var pageModel = {'__id': id, '__form': {
             action: '/api/snippet/' + id, 
             name: 'Check', 
             redirect: this.request.query.redirect
@@ -266,11 +250,10 @@ module.exports = {
         yield $_render( this, pageModel, 'snippet-check.html');
     },
 
-    'GET /snippet/pending/edit': function* (){
-        var id = getId(this.request),
-            path = '/api/snippet/pending/entity/' + id,
+    'GET /snippet/pending/:id/edit': function* (id){
+        var path = '/api/snippet/pending/' + id,
             pageModel = {'__id': id, '__form': {
-                action: path, 
+                action: '/api/snippet/pending/' + id + '/edit', 
                 name: 'Change', 
                 redirect: this.request.query.redirect,
                 src: path
@@ -279,7 +262,7 @@ module.exports = {
     }, 
 
     /* get pending list*/
-    'GET /snippet/pending/list/:lang': function* (lang){
+    'GET /snippet/pending/lang/:lang': function* (lang){
         var pageModel = {'__language':lang, '__page': this.request.query.page||1};
         base.setHistoryUrl(this);
         yield $render( this, pageModel, 'snippet-pending-list.html' );        
@@ -301,9 +284,9 @@ module.exports = {
         yield $render( this, pageModel, 'snippet-search-list.html' );
     },
 
-    'GET /api/snippet/history/entity': function* (){
-        var id = getId(this.request),
-            version = this.request.query.version || 0,
+    'GET /api/snippet/s/:id/history/:version': function* (id,version){
+        var //id = getId(this.request),
+            //version = this.request.query.version || 0,
             r = yield $_getSnippetVersion(id, version);
         if( r !== null){
             r.attachments = yield resource.$findAttachments(r.snippet_id, r.newversion);
@@ -319,12 +302,7 @@ module.exports = {
         this.body = { stats: stats, lastest: lastest, best:best };
     },
 
-    'GET /api/snippet/list/lastest': function* (id){
-        var r = yield cache.$getLastestSnippet( this.query.limit || 15);        
-        this.body = r || {};
-    },
-
-    'GET /api/snippet/pending/entity/:id': function* (id){
+    'GET /api/snippet/pending/:id': function* (id){
         var record = yield model.flow.$find(id), 
             atts;
         if( record !== null){
@@ -345,7 +323,7 @@ module.exports = {
         };
     },
 
-    'GET /api/snippet/view/entity/:id': function* (id){
+    'GET /api/snippet/s/:id': function* (id){
         var 
             param = this.query || {},
             record = yield model.snippet.$find(id),
@@ -396,7 +374,7 @@ module.exports = {
 
     /******************* POST METHOD *************************/
 
-    'POST /api/snippet/create': function* (){
+    'POST /api/snippet/s': function* (){
         var 
             user = this.request.user,
             snippet,
@@ -440,7 +418,7 @@ module.exports = {
         };
     },
 
-    'POST /api/snippet/entity/edit/:id': function* (id){
+    'POST /api/snippet/s/:id': function* (id){
         var 
             user = this.request.user,
             snippet, flowsnippet,
@@ -487,7 +465,7 @@ module.exports = {
         };
     },    
 
-    'POST /api/snippet/pending/entity/:id': function* (id){
+    'POST /api/snippet/pending/:id/edit': function* (id){
         var 
             isLangChanged = false,
             oldLang,
@@ -528,7 +506,7 @@ module.exports = {
         };
     },
 
-    'POST /api/snippet/pending/check': function* (){
+    'POST /api/snippet/pending/:id/check': function* (id){
         var 
             r, history, num,
             columns = ['score', 'contributor'],
@@ -537,7 +515,7 @@ module.exports = {
 
         //validate data
         json_schema.validate('checkSnippet', data);
-        r = yield model.flow.$find(data.id);
+        r = yield model.flow.$find(id);
         if( r === null ){
             throw api.notFound('snippet', this.translate('Record not found'));
         }
@@ -632,7 +610,7 @@ module.exports = {
         };
     },    
 
-    'POST /api/snippet/refer/entity/:id': function* (id){
+    'POST /api/snippet/s/:id/refer': function* (id){
         var user = this.request.user;
         yield contrib.$addRefer(id, user.id);
         this.body = {
@@ -640,5 +618,5 @@ module.exports = {
         }
     },
 
-    'LoginRequired': [ '/snippet/create', '/api/snippet/create', '/snippet/pending']
+    'LoginRequired': [ '/snippet/create', '/api/snippet/s', '/snippet/pending']
 };

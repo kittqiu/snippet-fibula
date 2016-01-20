@@ -36,7 +36,8 @@ module.exports = {
 
 	'GET /': function* (){
 		var model = {};
-		this.render( getView('index.html'), yield $getModel.apply(this, [model]) );
+		this.redirect('/snippet');
+		//this.render( getView('index.html'), yield $getModel.apply(this, [model]) );
 	},
 	'GET /signup': function* (){
 		var model = { __salt__:  config.security.salt };

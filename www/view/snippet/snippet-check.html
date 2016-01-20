@@ -38,7 +38,7 @@ function initVM( data ){
 					timeused: use_time
 				};
 
-				form.postJSON( '/api/snippet/pending/check', data, function(err, result){
+				form.postJSON( '/api/snippet/pending/{{ __id }}/check', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
 						jumpTo( result.redirect, "{{ _('History Page')}}", 3 );
@@ -62,7 +62,7 @@ function initVM( data ){
 
 $(function () {
 	start_time = Date.now();
-	getJSON( '/api/snippet/pending/entity/{{ __id }}', function(err, snippet){
+	getJSON( '/api/snippet/pending/{{ __id }}', function(err, snippet){
 		if(err){
 			fatal(err);
 		}else{
@@ -88,118 +88,116 @@ $(function () {
 		{% endif %}
 		<hr style="margin-top:2px">
 		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
-			<fieldset>
-				<div class="uk-alert uk-alert-danger uk-hidden"></div>
-			    <div class="uk-form-row uk-grid" style="margin-top:10px">
-			    	<div class="uk-width-1-4">
-				        <label class="uk-form-label">{{ _('Name') }}</label>
-				        <div class="uk-form-controls">
-				        	<input v-model="name" name="name"  type="text" class="uk-width-1-1" disabled>
-				        </div>
-			        </div>
-			        <div style="margin-left:0px;margin-right:0px;">
-				        <div class="uk-form-label" style="padding-top:30px">--</div>
-			        </div>
-			        <div class="uk-width-1-2">
-				        <label class="uk-form-label">{{ _('description') }}</label>
-				        <div class="uk-form-controls">
-				        	<input v-model="brief" name="brief"  type="text" class="uk-width-1-1" disabled>
-				        </div>
-			        </div>
-			        <div>
-			        	<p class="help-text"></p>
-			    	</div>
-			    </div>
-			    <div class="uk-form-row uk-grid" style="margin-top:20px">
-			    	<div class="uk-width-1-4">
-				        <label class="uk-form-label">{{ _('Program language') }}</label>
-				        <div class="uk-form-controls">
-				        	<select id="language" v-model="language" name="language" class="uk-width-1-1" disabled>
-				        		{% for n,lang in __languages %}
-				        			{% if loop.first %}
-				        			<option>{{ lang }}</option>
-				        			{% else %}
-				        			<option>{{ lang }}</option>
-				        			{% endif %}
-				        		{% endfor %}
-				        	</select>
-				        </div>
-			        </div>
-			        <div style="margin-left:0px;margin-right:0px;">
-				        <div class="uk-form-label" style="padding-top:30px">--</div>
-			        </div>
-			        <div class="uk-width-1-2">
-				        <label class="uk-form-label">{{ _('develop environment') }}</label>
-				        <div class="uk-form-controls">
-				        	<select v-model="environment" name="environment" class="uk-width-1-1" disabled>
-				        		{% for n, x in __environments %}
-				        			{% if loop.first %}
-				        			<option>{{ x }}</option>
-				        			{% else %}
-				        			<option>{{ x }}</option>
-				        			{% endif %}
-				        		{% endfor %}
-				        	</select>
-				        </div>
-			        </div>
-			        <div>
-			        	<p class="help-text"></p>
-			    	</div>
-			    </div>
-			    <div class="uk-form-row" style="margin-top:20px">
-			        <label class="uk-form-label">{{ _('Keywords') }}</label>
+			<div class="uk-alert uk-alert-danger uk-hidden"></div>
+		    <div class="uk-form-row uk-grid" style="margin-top:10px">
+		    	<div class="uk-width-1-4">
+			        <label class="uk-form-label">{{ _('Name') }}</label>
 			        <div class="uk-form-controls">
-			        	<input v-model="keywords" name="keywords" type="text" class="uk-width-1-1" disabled>
+			        	<input v-model="name" name="name"  type="text" class="uk-width-1-1" disabled>
 			        </div>
-			        <p class="help-text"></p>
-			    </div>
-			    <div class="uk-form-row" style="margin-top:20px">
-			    	<label class="uk-form-label">{{ _('Code snippet') }}</label>
-			    	<div class="uk-form-controls uk-hidden">
-			        	<textarea v-model="code" cols="" rows="" placeholder="{{ _('Paste the code') }}" class="uk-width-1-1" style="height:300px" disabled ></textarea>
+		        </div>
+		        <div style="margin-left:0px;margin-right:0px;">
+			        <div class="uk-form-label" style="padding-top:30px">--</div>
+		        </div>
+		        <div class="uk-width-1-2">
+			        <label class="uk-form-label">{{ _('description') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="brief" name="brief"  type="text" class="uk-width-1-1" disabled>
 			        </div>
-			        <div id="codeAnddoc"></div>
-			        <div class="uk-accordion" data-uk-accordion="{showfirst:false}">
-					    <label class="uk-accordion-title uk-form-label uk-text-muted" style="font-size: 14px;" >{{ _('Raw Code')}} <i class="uk-icon-caret-square-o-down"></i></label>
-						<pre id="rawcode" class="uk-accordion-content"></pre>
-					</div>
-			    </div>
-			    <div class="uk-form-row" style="margin-top:20px">
-			        <label class="uk-form-label">{{ _('Help') }}</label>
-			        <div class="uk-form-controls dv-snippet-view" id="help" >
-			        	<!--textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" disabled></textarea-->
+		        </div>
+		        <div>
+		        	<p class="help-text"></p>
+		    	</div>
+		    </div>
+		    <div class="uk-form-row uk-grid" style="margin-top:20px">
+		    	<div class="uk-width-1-4">
+			        <label class="uk-form-label">{{ _('Program language') }}</label>
+			        <div class="uk-form-controls">
+			        	<select id="language" v-model="language" name="language" class="uk-width-1-1" disabled>
+			        		{% for n,lang in __languages %}
+			        			{% if loop.first %}
+			        			<option>{{ lang }}</option>
+			        			{% else %}
+			        			<option>{{ lang }}</option>
+			        			{% endif %}
+			        		{% endfor %}
+			        	</select>
 			        </div>
-			        
-			        <p class="help-text"></p>
-			    </div>
-			    <div class="uk-form-row" style="margin-top:20px">
-			    	<label class="uk-form-label">{{ _('Attachment') }}</label>
-			    	<div>
-						<table id="attachments" class="uk-table uk-table-striped">
-							<tr v-for="att in attachments" v-bind:id="att.id">
-								<td v-text="att.name"></td>
-								<td style="text-align:right"><a v-bind:href="'/api/file/download?id='+ att.id" class="uk-icon-cloud-download uk-icon-medium dv-link"></a></td>
-							</tr>
-						</table>
-						<span v-if="attachments.length==0">{{_('None')}}</span>
-					</div>
-			    </div>
-			    <div class="uk-form-row" style="margin-top:20px">
-			        <label class="uk-form-label">{{ _('Advice') }}</label>
-			        <div class="uk-form-controls" id="help" >
-			        	<input id="advice" v-model="advice" type="text" placeholder="" class="uk-width-1-1" autofocus>
+		        </div>
+		        <div style="margin-left:0px;margin-right:0px;">
+			        <div class="uk-form-label" style="padding-top:30px">--</div>
+		        </div>
+		        <div class="uk-width-1-2">
+			        <label class="uk-form-label">{{ _('develop environment') }}</label>
+			        <div class="uk-form-controls">
+			        	<select v-model="environment" name="environment" class="uk-width-1-1" disabled>
+			        		{% for n, x in __environments %}
+			        			{% if loop.first %}
+			        			<option>{{ x }}</option>
+			        			{% else %}
+			        			<option>{{ x }}</option>
+			        			{% endif %}
+			        		{% endfor %}
+			        	</select>
 			        </div>
-			        <p class="help-text"></p>
-			    </div>
-			    <div class="uk-form-row uk-clearfix">
-			    	<button  v-on:click="doAction('discard')" class="uk-button-success uk-button-large" style="width:240px;" >
-			        	<i class="uk-icon-close uk-icon-medium"></i> {{ _('Discard') }}
-			        </button>
-			        <button  v-on:click="doAction('pass')" id="passbutton" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
-			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _('Pass') }}
-			        </button>
-			    </div>
-	    </fieldset>
+		        </div>
+		        <div>
+		        	<p class="help-text"></p>
+		    	</div>
+		    </div>
+		    <div class="uk-form-row" style="margin-top:20px">
+		        <label class="uk-form-label">{{ _('Keywords') }}</label>
+		        <div class="uk-form-controls">
+		        	<input v-model="keywords" name="keywords" type="text" class="uk-width-1-1" disabled>
+		        </div>
+		        <p class="help-text"></p>
+		    </div>
+		    <div class="uk-form-row" style="margin-top:20px">
+		    	<label class="uk-form-label">{{ _('Code snippet') }}</label>
+		    	<div class="uk-form-controls uk-hidden">
+		        	<textarea v-model="code" cols="" rows="" placeholder="{{ _('Paste the code') }}" class="uk-width-1-1" style="height:300px" disabled ></textarea>
+		        </div>
+		        <div id="codeAnddoc"></div>
+		        <div class="uk-accordion" data-uk-accordion="{showfirst:false}">
+				    <label class="uk-accordion-title uk-form-label uk-text-muted" style="font-size: 14px;" >{{ _('Raw Code')}} <i class="uk-icon-caret-square-o-down"></i></label>
+					<pre id="rawcode" class="uk-accordion-content"></pre>
+				</div>
+		    </div>
+		    <div class="uk-form-row" style="margin-top:20px">
+		        <label class="uk-form-label">{{ _('Help') }}</label>
+		        <div class="uk-form-controls dv-snippet-view" id="help" >
+		        	<!--textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" disabled></textarea-->
+		        </div>
+		        
+		        <p class="help-text"></p>
+		    </div>
+		    <div class="uk-form-row" style="margin-top:20px">
+		    	<label class="uk-form-label">{{ _('Attachment') }}</label>
+		    	<div>
+					<table id="attachments" class="uk-table uk-table-striped">
+						<tr v-for="att in attachments" v-bind:id="att.id">
+							<td v-text="att.name"></td>
+							<td style="text-align:right"><a v-bind:href="'/api/file/'+ att.id" class="uk-icon-cloud-download uk-icon-medium dv-link"></a></td>
+						</tr>
+					</table>
+					<span v-if="attachments.length==0">{{_('None')}}</span>
+				</div>
+		    </div>
+		    <div class="uk-form-row" style="margin-top:20px">
+		        <label class="uk-form-label">{{ _('Advice') }}</label>
+		        <div class="uk-form-controls" id="help" >
+		        	<input id="advice" v-model="advice" type="text" placeholder="" class="uk-width-1-1" autofocus>
+		        </div>
+		        <p class="help-text"></p>
+		    </div>
+		    <div class="uk-form-row uk-clearfix">
+		    	<button  v-on:click="doAction('discard')" class="uk-button-success uk-button-large" style="width:240px;" >
+		        	<i class="uk-icon-close uk-icon-medium"></i> {{ _('Discard') }}
+		        </button>
+		        <button  v-on:click="doAction('pass')" id="passbutton" class="uk-button-primary uk-button-large uk-float-right" style="width:240px;" >
+		        	<i class="uk-icon-check uk-icon-medium"></i> {{ _('Pass') }}
+		        </button>
+		    </div>
 		</form>
 	</div>
 </div>

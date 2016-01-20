@@ -10,7 +10,7 @@
 			<table class="uk-table uk-table-striped">
 				{% for r in snippets %}		
 				<tr>
-					<td><a href="/snippet/history/view?id={{ r.snippet_id }}&version={{ r.newversion }}" class="dv-link"><b>{{ _('Revision')}} {{ r.newversion }}</b></a></td>
+					<td><a href="/snippet/s/{{ r.snippet_id }}/history/{{ r.newversion }}" class="dv-link"><b>{{ _('Revision')}} {{ r.newversion }}</b></a></td>
 					<td></td>
 					<td>{{ _('Created at')}}{{ r.updated_at|time2Date }}</td>
 					<td>{{ r.user }}</td>					
