@@ -3,9 +3,11 @@
 {% block title %} {{ _('My Contribution')}} {% endblock %}
 
 {% block head %}
+<script src="/static/js/clipboard.min.js"></script>
 <script type="text/javascript">
 $(function(){
 	$('#q').val('{{ __request__.query.q }}');
+	new Clipboard('.referbtn');
 });
 </script>
 {% endblock %}
@@ -57,6 +59,7 @@ $(function(){
 					<td>{{ r.brief }}</td>
 					<td>{{ r.language }}</td>
 					<td>{{ r.environment }}</td>
+					<td><a data-clipboard-text="[{{r.name}}](/snippet/s/{{ r.id }})" class="dv-link referbtn">{{ _('Refer')}}</a></td>
 				</tr>
 				{% endfor %}
 			</table>

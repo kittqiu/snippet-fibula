@@ -363,3 +363,6 @@ function setDefButton(id) {
    }); // end of function
 };
 
+function copyReferUrl(name, url){
+    var str = '[' + name + '[(' + url + ')';
+}

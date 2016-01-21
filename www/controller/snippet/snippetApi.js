@@ -103,6 +103,26 @@ function* $_findWiki(title){
             });
 }
 
+function* $_countWikiVersion(title){
+    return yield model.wikiHistory.$findNumber({
+        select: 'count(*)',
+        where: '`title`=?',
+        params: [title]
+    })
+}
+
+function* $_getWikiVersions(title, offset, limit){
+    offset = offset < 0 ? 0: offset;
+    limit = limit < 0 ? 10 : limit;
+    return yield model.wikiHistory.$findAll({
+        where: '`title`=?',
+        params: [title],
+        order: '`newversion` desc',
+        limit: limit,
+        offset: offset
+    });
+}
+
 function __getHeaderLevel(line){
     var j, sn = 0;
     for( j = 0; j < line.length; j++ ){//h1, h2, h3...hn
@@ -200,12 +220,15 @@ GET:
 /snippet/wiki
 /snippet/wiki/:title/edit?section=x
 /snippet/wiki/:title/history?page=x
+/snippet/wiki/:title/history/:version
 /api/snippet/index
 /api/snippet/s/:id?idToName=true&nextVersion=true&contributor=true&history=true&stats=true
 /api/snippet/s/:id/history/:version
 /api/snippet/pending/:id
 /api/snippet/pending/lang/:lang?page=x
 /api/snippet/wiki/:title
+/api/snippet/wiki/:title/history/:version
+
 
 POST:
 /api/snippet/s
@@ -368,6 +391,21 @@ module.exports = {
         yield $_render( this, {title:title, section:section}, 'snippet-wiki-form.html');
     },
 
+    'GET /snippet/wiki/:title/history': function* (title){
+        var page =  helper.getPage(this.request,LARGE_PAGE_SIZE),
+            pageModel, rs;
+
+        page.total = yield $_countWikiVersion(title);
+        rs = yield $_getWikiVersions(title, LARGE_PAGE_SIZE * (page.index-1), LARGE_PAGE_SIZE );
+        pageModel = {title:title, page: page, 'rs': rs, count:rs.length};
+
+        yield $_render( this, pageModel, 'snippet-wiki-history-list.html');        
+    },
+
+    'GET /snippet/wiki/:title/history/:version':function* (title, version){
+        yield $_render( this, {title:title, version:version}, 'snippet-wiki-history.html');
+    },
+
     'GET /api/snippet/s/:id/history/:version': function* (id,version){
         var r = yield $_getSnippetVersion(id, version);
         if( r !== null){
@@ -464,6 +502,15 @@ module.exports = {
         }else {
             this.body = {}
         }        
+    },
+
+    'GET /api/snippet/wiki/:title/history/:version':function* (title, version){
+        var r = yield model.wikiHistory.$find({
+                select: '*',
+                where: '`title`=? and `newversion`=?',
+                params: [title, version]
+            });
+        this.body = r || {};     
     },
 
     /******************* POST METHOD *************************/
@@ -675,7 +722,7 @@ module.exports = {
                     baseSnippet.code = r.code;
                     baseSnippet.help = r.help;
                     //baseSnippet.version = r.newversion; _base.js auto increment
-                    yield baseSnippet.$update(['name','brief', 'language', 'environment', 'keywords', 'code', 'help', 'version']);
+                    yield baseSnippet.$update(['name','brief', 'language', 'environment', 'keywords', 'code', 'help', 'updated_at', 'version']);
                 }
 
                 r.result = 'pass';
@@ -726,7 +773,7 @@ module.exports = {
             console.log(sp);
             yield model.wikiHistory.$create( {title:r.title, content:r.content, newversion:r.version} );
             r.content = sp.before + data.content + sp.after;
-            yield r.$update(['content']);
+            yield r.$update(['content','updated_at', 'version']);
         }
 
         this.body = {

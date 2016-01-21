@@ -1,0 +1,71 @@
+{% extends './snippet-wiki-base.html' %}
+
+{% block wikihead %}
+<script src="/static/js/clipboard.min.js"></script>
+<script src="/static/js/uikit/components/accordion.js"></script>
+<script type="text/javascript">
+var ishidden = true;
+function initPage( data ){
+	$('#wiki-content').html( marked(data.content));
+	$('#orgcode').val(data.content);
+
+	var btn = document.getElementById('btn_copy');
+	var clipboard = new Clipboard(btn);
+	clipboard.on('success', function(e) {
+	    e.clearSelection();
+	    showCode(!ishidden);
+	});	 
+	clipboard.on('error', function(e) {
+		showCode(ishidden);
+	});
+}
+
+$(function () {
+	getJSON( '/api/snippet/wiki/{{ title|url }}/history/{{version}}', function(err, wiki){
+		if(err){
+			fatal(err);
+		}else{
+			initPage( wiki );
+		}
+	});	
+});
+
+function showCode(shown){
+	$('#orgcode').parent().attr('style', shown? 'height: auto; position: relative;' :'overflow:hidden;height:0;position:relative;');
+}
+
+function copyToClipboard(){
+	var orgStyle = $('#orgcode').parent().attr('style');
+	if( orgStyle.indexOf('hidden') !== -1){
+		ishidden = true;
+	}else{
+		ishidden = false;
+	}
+	showCode(true);//show the element for copying to clipboard. On completed, hide it again
+}
+
+</script>
+<style type="text/css">
+.wiki-section{
+	font-size:13px;
+	float: right;
+	font-weight:normal;
+}
+</style>
+{% endblock %}
+
+{% block wikicontent %}
+<div class="uk-float-right" style="text-align:right;">
+	<button id="btn_copy" onclick="copyToClipboard()"  data-clipboard-target="#orgcode">
+		<span class="uk-icon-clipboard"></span> {{ _('Copy content') }}
+	</button>
+</div>
+<hr style="margin-top:25px">
+<div id="wiki-content" class="uk-width-1-1 wiki-content">
+</div>
+<div class="uk-accordion" data-uk-accordion="{showfirst:false}">
+    <label class="uk-accordion-title uk-form-label uk-text-muted" style="font-size: 14px;" >{{ _('Raw Code')}} <i class="uk-icon-caret-square-o-down"></i></label>
+	<textarea id="orgcode" class="uk-accordion-content uk-width-1-1" style="height:240px;"></textarea>
+</div>
+
+{% endblock %}
