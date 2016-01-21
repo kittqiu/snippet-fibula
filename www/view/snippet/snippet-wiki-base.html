@@ -1,0 +1,58 @@
+{% extends './snippet_base.html' %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/css/codemirror.css"/>
+{% endblock %}
+
+{% block head %}
+<script src="/static/js/codemirror.js"></script>
+<script src="/static/js/marked.js"></script>
+{% block wikihead %}
+</script>
+{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content uk-grid"  style="max-width:1180px;">
+	<div class="uk-width-1-6" style="border-right:1px solid #ddd">
+		<h3 class="uk-text-muted">{{ _('Menu') }}</h3>
+		<ul class="uk-list uk-list-space">
+			<li><b>{{ _('Language') }}</b>
+				<ul class="uk-list uk-list-space">
+					{% for n, x in __languages %}
+					{% if title==x %}
+					<li class="uk-active">
+						<a href="?lang={{ x|url }}" class="uk-text-large" style="text-decoration: none;color:#a42b2b;">{{ x }}</a>
+					</li>
+					{% else %}
+					<li>
+						<a href="?lang={{ x|url }}" class="uk-text-large" style="text-decoration: none;color:#333;">{{ x }}</a>
+					</li>	
+					{% endif %}		
+					{% endfor %}
+				</ul>
+			</li>
+			<li style="margin-top: 30px"><b>{{ _('Environment') }}</b>
+				<ul class="uk-list uk-list-space">
+					{% for n, x in __environments %}
+					{% if title==x %}
+					<li class="uk-active">
+						<a href="?env={{ x|url }}" class="uk-text-large" style="text-decoration: none;color:#a42b2b;">{{ x }}</a>
+					</li>
+					{% else %}
+					<li>
+						<a href="?env={{ x|url }}" class="uk-text-large" style="text-decoration: none;color:#333">{{ x }}</a>
+					</li>	
+					{% endif %}
+					{% endfor %}
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<div class="uk-width-5-6">
+		{% block wikicontent %}
+		{% endblock %}
+	</div>
+</div>
+
+{% endblock %}

@@ -16,6 +16,8 @@ var models = {
     flow: db.snippet_flow,
     flowHistory: db.snippet_flow_history,
     resource: db.snippet_resource,
+    wiki: db.snippet_wiki,
+    wikiHistory: db.snippet_wiki_history,
     user: db.user,
     next_id: db.next_id,
     warp : db.warp

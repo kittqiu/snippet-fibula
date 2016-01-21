@@ -1,0 +1,79 @@
+{% extends './snippet-wiki-base.html' %}
+
+{% block wikihead %}
+<script src="/static/js/uikit/components/htmleditor.js"></script>
+<script type="text/javascript">
+function initPage( data ){
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			sectioncontent: data.content || ''
+		},
+		methods:{
+			submit: function(){						
+				var data = {
+						section: {{ section }},
+						content: this.sectioncontent
+					},
+					form = $('#vm').find('form');
+				try{
+					form.showFormError();//clear error tip
+				}catch(e){
+					form.showFormError(e);
+					return;
+				}
+
+				form.postJSON( '/api/snippet/wiki/{{ title }}', data, function(err, result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
+						//jumpTo( result.redirect, "{{ _('History Page')}}", 3 );
+						location.assign(result.redirect);
+					}
+				});
+			}
+		}
+	});
+	
+	var htmleditor = UIkit.htmleditor($('#sectioncontent').get(0), {
+	    markdown: true,
+	    mode: 'tab'
+    });
+}
+
+$(function () {
+	var param = { section:{{ section }} }
+	getJSON( '/api/snippet/wiki/{{ title }}', param, function(err, wiki){
+		if(err){
+			fatal(err);
+		}else{
+			initPage( wiki );
+		}
+	});	
+});
+</script>
+{% endblock %}
+
+{% block wikicontent %}
+<div style="text-align:right">
+	<a href="/snippet/wiki/{{ title }}/history?page=1" class="dv-link" >[{{ _('History') }}]</a>
+</div>
+<hr style="margin-top:2px">
+<div id="vm" class="uk-width-1-1">
+	<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
+	<fieldset>
+		<div class="uk-alert uk-alert-danger uk-hidden"></div>			    
+	    <div class="uk-form-row">
+	    	<textarea id="sectioncontent" v-model="sectioncontent" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" ></textarea>
+	        </div>
+	        <p class="help-text">markdown格式</p>
+	    </div>
+	    <div class="uk-form-row uk-clearfix">
+	        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
+	        	<i class="uk-icon-check uk-icon-medium"></i> {{ _('Save') }}
+	        </button>
+	    </div>
+</fieldset>
+</form>
+</div>
+
+{% endblock %}

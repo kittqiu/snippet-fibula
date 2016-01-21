@@ -32,7 +32,8 @@
 		{% endblock %}
 		</div>
 		<div class="uk-flex-item-none " style="padding:10px 20px;">
-		{% if __user__ %}	
+		{% if __user__ %}
+		<a href="/snippet/wiki?lang=C" class="dv-link" style="margin-right:20px">{{ _('Overview') }}</a>
 		<a href="/snippet/s/creation" class="dv-link" style="margin-right:20px">{{ _('Create') }}</a>
 		<a href="/snippet/pending" class="dv-link" style="margin-right:20px">{{ _('Pending to check') }}</a>
 		<a href="/snippet/mine/index" class="dv-link" style="margin-right:20px">{{ _('Mine') }}</a>

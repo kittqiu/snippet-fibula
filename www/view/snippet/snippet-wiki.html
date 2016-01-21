@@ -1,0 +1,41 @@
+{% extends './snippet-wiki-base.html' %}
+
+{% block wikihead %}
+<script type="text/javascript">
+function initPage( data ){
+	$('#wiki-content').html( marked(data.content));
+	$('.wiki-content >:header').each(function(i,el){
+		$(el).append('<span class="wiki-section">[<a href="/snippet/wiki/{{ title }}/edit?section=' + (i+1) +'">编辑</a>]</span>');
+	});
+}
+
+$(function () {
+	getJSON( '/api/snippet/wiki/{{ title|url }}', function(err, wiki){
+		if(err){
+			fatal(err);
+		}else{
+			initPage( wiki );
+		}
+	});	
+});
+</script>
+<style type="text/css">
+.wiki-section{
+	font-size:13px;
+	float: right;
+	font-weight:normal;
+}
+</style>
+{% endblock %}
+
+{% block wikicontent %}
+<div style="text-align:right">
+	<a href="/snippet/wiki/{{ title }}/edit?section=0" class="dv-link">[{{ _('Edit') }}]</a>
+	<span style="margin-left:20px"> </span>
+	<a href="/snippet/wiki/{{ title }}/history?page=1" class="dv-link" >[{{ _('History') }}]</a>
+</div>
+<hr style="margin-top:2px">
+<div id="wiki-content" class="uk-width-1-1 wiki-content">
+</div>
+
+{% endblock %}

@@ -27,12 +27,14 @@
 
 	"Edit": "编辑",
 	"email": "邮箱",
+	"Environment": "运行环境",
 
 	"Found": "找到",
 
 	"go back to the last page": "返回前一页",
 
 	"Help": "帮助",
+	"History": "历史",
 	"History Page": "历史页面",
 	"Home": "首页",
 
@@ -40,10 +42,12 @@
 
 	"Keywords": "关键字",
 
+	"Language": "语言",
 	"Login": "登录",
 	"log in": "登录",
 	"logout": "退出",
 
+	"Menu": "目录",
 	"Mine": "我的",
 	"More": "查看更多",
 	"My Contribution":"我的贡献",
@@ -58,6 +62,7 @@
 
 	"or": "或",
 	"old password":"原始密码",
+	"Overview": "概览",
 	
 	"Pass": "通过",
 	"password": "密码",
@@ -72,6 +77,7 @@
 	"Revision": "版次",
 	"Revision history":"版次历史",
 
+	"Save": "保存",
 	"Select a file": "选择一个文件",
 	"SignUp": "注册",
 	"sign up": "注册",

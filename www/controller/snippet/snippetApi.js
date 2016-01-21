@@ -21,7 +21,8 @@ var
     FLOW_EDIT = 'edit',
     TYPE_CODE = 'code',
     TYPE_ATT = 'attachment',
-    RESULT_DOING = 'processing';
+    RESULT_DOING = 'processing',
+    DEFAULT_SECTION = 0;
 
 var 
     model = base.model,
@@ -94,6 +95,73 @@ function* $_getSnippetVersion(snippet_id, version){
         });
 }
 
+function* $_findWiki(title){
+    return yield model.wiki.$find({
+                select: '*',
+                where: '`title`=?',
+                params: [title]
+            });
+}
+
+function __getHeaderLevel(line){
+    var j, sn = 0;
+    for( j = 0; j < line.length; j++ ){//h1, h2, h3...hn
+        if( line.charAt(j) !== '#'){
+            break;
+        }
+        sn++;
+    }
+    return sn;
+}
+
+function _splitWiki( content, section ){
+    if( typeof(section) === 'string'){
+        section = parseInt(section);
+    }
+    if( section === DEFAULT_SECTION ){
+        return {before:'', value:content, after:''};
+    }
+    var i, m,l, lt, s = 0, 
+        before = '', 
+        after = '',
+        value = '',
+        step = 0,
+        sn = 0,
+        lines = content.split('\n');
+
+    for( i = 0; i < lines.length; i++ ){
+        l = lines[i];
+        lt = l.trim();
+        if( lt.length > 0 && lt.charAt(0) === '#'){
+            if( l.charAt(0) !== '\t' &&  l.substr(0,3) !== '   '){//find header
+                s++;
+                if( s === section ){//find section
+                    step = 1;
+                    sn = __getHeaderLevel( lt );
+                }
+                if( s > section && step === 1 ){//cross section
+                    m = __getHeaderLevel( lt );
+                    if( sn >= m){
+                        step = 2;
+                    }
+                }
+            }
+        }
+        switch(step){
+            case 0:
+                before += l + '\n';
+            break;
+            case 1:
+                value += l + '\n';
+            break;
+            case 2:
+                after += l + '\n';
+            break;
+        }
+    }
+    return {before:before, value:value, after:after};
+}
+
 function _validateSnippet(data){
     json_schema.validate('createSnippet', data);
     if( !validLanguage(data.language) ){
@@ -129,11 +197,15 @@ GET:
 /snippet/pending/:id/edit
 /snippet/pending/lang/:lang?page=x
 /snippet/search
+/snippet/wiki
+/snippet/wiki/:title/edit?section=x
+/snippet/wiki/:title/history?page=x
 /api/snippet/index
 /api/snippet/s/:id?idToName=true&nextVersion=true&contributor=true&history=true&stats=true
 /api/snippet/s/:id/history/:version
 /api/snippet/pending/:id
 /api/snippet/pending/lang/:lang?page=x
+/api/snippet/wiki/:title
 
 POST:
 /api/snippet/s
@@ -141,6 +213,7 @@ POST:
 /api/snippet/s/:id/refer
 /api/snippet/pending/:id/edit
 /api/snippet/pending/:id/check
+/api/snippet/wiki/:title
 */
 
 
@@ -284,10 +357,19 @@ module.exports = {
         yield $render( this, pageModel, 'snippet-search-list.html' );
     },
 
+    'GET /snippet/wiki': function* (){
+        var name = this.request.query.lang || this.request.query.env || model.language[0];
+        base.setHistoryUrl(this);
+        yield $_render( this, {title:name}, 'snippet-wiki.html');
+    },
+
+    'GET /snippet/wiki/:title/edit': function* (title){
+        var section = this.request.query.section || 0;
+        yield $_render( this, {title:title, section:section}, 'snippet-wiki-form.html');
+    },
+
     'GET /api/snippet/s/:id/history/:version': function* (id,version){
-        var //id = getId(this.request),
-            //version = this.request.query.version || 0,
-            r = yield $_getSnippetVersion(id, version);
+        var r = yield $_getSnippetVersion(id, version);
         if( r !== null){
             r.attachments = yield resource.$findAttachments(r.snippet_id, r.newversion);
         }  
@@ -368,9 +450,21 @@ module.exports = {
             }
         }
         this.body = record || {};
-    }, 
+    },
 
-
+    'GET /api/snippet/wiki/:title':function* (title){
+        var section = this.request.query.section || DEFAULT_SECTION,
+            r = yield $_findWiki(title),
+            sp;
+        if( r !== null ){
+            console.log(section);
+            sp = _splitWiki(r.content, section);
+            console.log(sp);
+            this.body = { content: sp.value }
+        }else {
+            this.body = {}
+        }        
+    },
 
     /******************* POST METHOD *************************/
 
@@ -616,6 +710,30 @@ module.exports = {
         this.body = {
             result: 'ok'
         }
+    },
+
+    'POST /api/snippet/wiki/:title': function* (title){
+        var r, section, sp,
+            data = this.request.body;
+
+        json_schema.validate('editwiki', data);        
+        r = yield $_findWiki(title);
+        if( r === null ){
+            yield model.wiki.$create( {title:title, content:data.content});
+        }else{//replace
+            section = data.section;
+            sp = _splitWiki( r.content, section );
+            console.log(sp);
+            yield model.wikiHistory.$create( {title:r.title, content:r.content, newversion:r.version} );
+            r.content = sp.before + data.content + sp.after;
+            yield r.$update(['content']);
+        }
+
+        this.body = {
+            result: 'ok',
+            title: title,
+            redirect: base.getHistoryUrl(this)
+        };
     },
 
     'LoginRequired': [ '/snippet/create', '/api/snippet/s', '/snippet/pending']

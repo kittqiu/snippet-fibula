@@ -94,6 +94,16 @@ var PROPERTY = {
         type: 'string',
         pattern: '^([0-9a-f]{50})?$'
     },
+    POSITIVE_INTEGER: {
+        type: 'integer',
+        minimum: 1,
+        maximum: 32506358400000
+    },
+    NONNEGATIVE_INTEGER: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 32506358400000
+    },
     KEYWORD:{
         type: 'string',
         minLength: 3,
@@ -295,7 +305,14 @@ var schemas = {
         },
         required:['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help', 'attachments']
     },
-
+    editwiki:{
+        type: 'object',
+        properties: {
+            section: PROPERTY.NONNEGATIVE_INTEGER,
+            content: PROPERTY.TEXT
+        },
+        required:['section', 'content']
+    },
     updateWebsiteSettings: {
         type: 'object',
         properties: {
