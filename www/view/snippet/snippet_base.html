@@ -33,10 +33,11 @@
 		</div>
 		<div class="uk-flex-item-none " style="padding:10px 20px;">
 		{% if __user__ %}
-		<a href="/snippet/wiki?lang=C" class="dv-link" style="margin-right:20px">{{ _('Overview') }}</a>
-		<a href="/snippet/s/creation" class="dv-link" style="margin-right:20px">{{ _('Create') }}</a>
-		<a href="/snippet/pending" class="dv-link" style="margin-right:20px">{{ _('Pending to check') }}</a>
-		<a href="/snippet/mine/index" class="dv-link" style="margin-right:20px">{{ _('Mine') }}</a>
+		<a href="/snippet/wiki?lang=C" class="dv-link" style="margin-right:15px">{{ _('Overview') }}</a>
+		<a href="/snippet/s" class="dv-link" style="margin-right:15px">{{ _('All') }}</a>
+		<a href="/snippet/s/creation" class="dv-link" style="margin-right:15px">{{ _('Create') }}</a>
+		<a href="/snippet/pending" class="dv-link" style="margin-right:15px">{{ _('Pending to check') }}</a>
+		<a href="/snippet/mine/index" class="dv-link" style="margin-right:15px">{{ _('Mine') }}</a>
 		{% else %}					
 		{% endif %}
 		</div>			

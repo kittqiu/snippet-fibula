@@ -232,6 +232,30 @@ function* $_getMySnippets(user_id, offset, limit){
     });
 }
 
+function* $_countMyEditSnippet(user_id){
+    /*return yield modelFlow.$findNumber({
+        select: 'count(*)',
+        where: '`user_id`=? group by `snippet_id`',
+        params: [user_id]
+    });*/
+    var sql = "select count(*) as c from ( select count(*)from `snippet_flow` where `user_id`='"
+        + user_id + "' group by `snippet_id`) t",
+        r = yield warp.$query( sql );
+    return r[0].c;
+}
+
+function* $_getMyEditSnippets(user_id, offset, limit){
+    offset = offset < 0 ? 0: offset;
+    limit = limit < 0 ? 10 : limit;
+    return yield modelFlow.$findAll({
+        where: '`user_id`=? group by `snippet_id`',
+        params: [user_id],
+        order: '`created_at` desc',
+        limit: limit,
+        offset: offset
+    });
+}
+
 function* $__countFromDate(Model, user_id, start_time){
     return yield Model.$findNumber({
             select: 'count(*)',
@@ -275,6 +299,8 @@ module.exports = {
 
     $countMySnippet: $_countMySnippet,
     $getMySnippets: $_getMySnippets,
+    $countMyEditSnippet: $_countMyEditSnippet,
+    $getMyEditSnippets: $_getMyEditSnippets,
     $statsCurrentMonth: $_statsCurrentMonth,
     $statsMyContrib: $_statsMyContrib
 };

@@ -1,6 +1,6 @@
 {% extends './snippet_base.html' %}
 
-{% block title %} {{ _('My Contribution')}} {% endblock %}
+{% block title %} {{ _('All')}} {% endblock %}
 
 {% block head %}
 <script src="/static/js/clipboard.min.js"></script>
@@ -11,36 +11,27 @@ $(function(){
 </script>
 {% endblock %}
 
+
 {% block content %}
 <div id="content-block" class="dv-container x-content">
 	<div id="vm" class="dv-container">
-		{% if type == 'create' %}
-		<h2 class="x-title">{{ _('I Created') }}</h2>
+		{% if lang == 'all' %}
+		<h2 class="x-title">{{ _('All') }}Snippet</h2>
 		{% else %}
-		<h2 class="x-title">{{ _('I Edited') }}</h2>
+		<h2 class="x-title">{{ lang }}的Snippet</h2>
 		{% endif %}
 		<div>
 			<table class="uk-table uk-table-striped">
 				{% if count %}
 				{% for r in snippets %}		
-				<tr>					
-					<td>
-						{% if type == 'create' %}
-						<a href="/snippet/s/{{ r.id }}" class="dv-link"><b>{{ r.name }}</b></a>
-						{% else %}
-						<a href="/snippet/s/{{ r.snippet_id }}" class="dv-link"><b>{{ r.name }}</b></a>
-						{% endif %}
-					</td>
+				<tr>
+					<td><a href="/snippet/s/{{ r.id }}" class="dv-link"><b>{{ r.name }}</b></a></td>
 					<td>{{ r.brief }}</td>
+					{% if lang == 'all' %}
 					<td>{{ r.language }}</td>
+					{% endif %}
 					<td>{{ r.environment }}</td>
-					<td>
-						{% if type == 'create' %}
-						<a data-clipboard-text="[{{r.name}}](/snippet/s/{{ r.id }})" class="dv-link referbtn">{{ _('Refer')}}</a>
-						{% else %}
-						<a data-clipboard-text="[{{r.name}}](/snippet/s/{{ r.snippet_id }})" class="dv-link referbtn">{{ _('Refer')}}</a>
-						{% endif %}
-					</td>					
+					<td><a data-clipboard-text="[{{r.name}}](/snippet/s/{{ r.id }})" class="dv-link referbtn">{{ _('Refer')}}</a></td>					
 				</tr>
 				{% endfor %}
 				{% else %}
@@ -56,7 +47,7 @@ $(function(){
 					{% if page.index == 1 %}
 						<li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
 					{% else %}
-						<li><a href="?page={{ page.index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
+						<li><a href="?page={{ page.index - 1 }}&lang={{ lang }}"><i class="uk-icon-angle-double-left"></i></a></li>
 					{% endif %}
 					{% for index in page.list %}
 						{% if index == '...' %}
@@ -64,18 +55,34 @@ $(function(){
 						{% elseif index == page.index %}
 						<li class="uk-active"><span>{{ index }}</span></li>
 						{% else %}
-						<li><a href="?page={{ index }}">{{ index }}</a></li>
+						<li><a href="?page={{ index }}&lang={{ lang|url }}">{{ index }}</a></li>
 						{% endif %}
 					{% endfor %}
 					{% if page.index == page.total %}
 						<li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
 					{% else %}
-						<li><a href="?page={{ page.index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
+						<li><a href="?page={{ page.index + 1 }}&lang={{ lang|url }}"><i class="uk-icon-angle-double-right"></i></a></li>
 					{% endif %}
 	            </ul>
 	        </div>
             {% endif %}
 		</div>
+
+		{% if lang == 'all' %}
+		<h3 style="margin-top:60px;margin-bottom:5px;">{{ _('By language') }}</h3>
+		<hr style="margin-top:2px;">
+		<table class="uk-width-1-1">
+			{% for n, x in __languages %}
+			{% if n%4 == 0 %}
+			<tr style="height:30px;">
+			{% endif %}
+			<td style="text-align:center"><a href="?page=1&lang={{x|url}}" class="dv-link">{{ x }}</a></td>
+			{% if n%4 == 3 %}
+			</tr>
+			{% endif %}
+			{% endfor %}
+		</table>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}

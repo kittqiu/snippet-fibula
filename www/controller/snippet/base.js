@@ -91,6 +91,22 @@ function* $_countSnippets(){
             });
 }
 
+function* $_getSnippets(lang, offset, limit){
+    offset = offset < 0 ? 0: offset;
+    limit = limit < 0 ? 10 : limit;
+    var q = {
+                select: ['id', 'name','brief', 'language', 'environment', 'updated_at', 'version'],
+                order: '`updated_at` desc',
+                limit: limit,
+                offset: offset
+            };
+    if( lang !== 'all' ){
+        q.where =  '`language`=?';
+        q.params = [lang];
+    }
+    return yield  models.snippet.$findAll(q);
+}
+
 module.exports = {
     /*constant*/
     name: 'snippet',
@@ -106,5 +122,6 @@ module.exports = {
     validEnvironment: validEnvironment,
     validLanguage: validLanguage,
     $render: $_render,
-    $countSnippets: $_countSnippets
+    $countSnippets: $_countSnippets,
+    $getSnippets: $_getSnippets
 };

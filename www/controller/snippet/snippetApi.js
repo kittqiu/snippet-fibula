@@ -205,6 +205,7 @@ function* $_render( context, pageModel, view ){
 /*
 GET:
 /snippet
+/snippet/s?page=x?lang=x
 /snippet/s/creation
 /snippet/s/:id
 /snippet/s/:id/edit
@@ -212,6 +213,7 @@ GET:
 /snippet/s/:id/history/:version
 /snippet/mine/index
 /snippet/mine/own?page=1
+/snippet/mine/edit?page=1
 /snippet/pending
 /snippet/pending/:id/check
 /snippet/pending/:id/edit
@@ -249,6 +251,16 @@ module.exports = {
         yield $_render( this, pageModel, 'snippet-index.html' );
     },
 
+    'GET /snippet/s': function* (){
+         var lang= this.request.query.lang || 'all',
+            page = helper.getPage(this.request,LARGE_PAGE_SIZE),
+            pageModel, rs;
+        page.total = yield base.$countSnippets();
+        rs = yield base.$getSnippets( lang, (page.index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE );
+        pageModel = { lang:lang, page:page, snippets:rs, count: rs.length };
+        yield $_render( this, pageModel, 'snippet-all.html');      
+    },
+
     /* create a snippet */
     'GET /snippet/s/creation':function* (){
         var pageModel = {'__form': {action: '/api/snippet/s', name: 'Create'}};
@@ -274,8 +286,7 @@ module.exports = {
     }, 
 
     'GET /snippet/s/:id/history': function* (id){
-        var //id = getId(this.request),
-            index = this.request.query.page||1,
+        var index = this.request.query.page||1,
             page = new Page(index, LARGE_PAGE_SIZE),
             snippets = yield $_getSnippetHistory( id, (index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE ),
             record = yield model.snippet.$find(id),
@@ -295,10 +306,14 @@ module.exports = {
             user_id = this.request.user.id,
             count = yield contrib.$countMySnippet( user_id ),
             snippets = yield contrib.$getMySnippets( user_id, 0, PAGE_SIZE ), 
+            editcount = yield contrib.$countMyEditSnippet( user_id ),
+            editrs = yield contrib.$getMyEditSnippets( user_id, 0, PAGE_SIZE ), 
             stats_month = yield contrib.$statsCurrentMonth(user_id),
             stats_all = yield contrib.$statsMyContrib(user_id);
 
-        pageModel = { count: count, more: count > PAGE_SIZE, snippets: snippets, stats_month: stats_month, stats_all: stats_all };
+        pageModel = { count: count, more: count > PAGE_SIZE, snippets: snippets, 
+            editcount: editcount, editmore: editcount > PAGE_SIZE, editsnippets: editrs,
+            stats_month: stats_month, stats_all: stats_all };
         yield $_render( this, pageModel, 'snippet-mine.html');
     },
 
@@ -312,7 +327,20 @@ module.exports = {
         page.total = yield contrib.$countMySnippet( user_id );
         snippets = yield contrib.$getMySnippets( user_id, (index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE );
             
-        pageModel = { page:page, snippets:snippets, count: snippets.length };
+        pageModel = { type:'create', page:page, snippets:snippets, count: snippets.length };
+        yield $render( this, pageModel, 'snippet-mine-list.html' );        
+    },
+
+    'GET /snippet/mine/edit': function* (){
+        var pageModel,
+            page = new Page(this.request, LARGE_PAGE_SIZE),
+            user_id = this.request.user.id,
+            snippets;
+        base.setHistoryUrl(this);
+        page.total = yield contrib.$countMyEditSnippet( user_id );
+        snippets = yield contrib.$getMyEditSnippets( user_id, (page.index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE );
+            
+        pageModel = { type:'edit', page:page, snippets:snippets, count: snippets.length };
         yield $render( this, pageModel, 'snippet-mine-list.html' );        
     },
 
@@ -632,7 +660,7 @@ module.exports = {
         r.code = data.code;
         r.help = data.help;
 
-        yield r.$update(['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help']);
+        yield r.$update(['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help', 'updated_at']);
         yield resource.$updateAttachments(r,attachments);
 
         //update cache

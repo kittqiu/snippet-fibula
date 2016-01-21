@@ -1,8 +1,11 @@
 {
 	"Advice": "修改建议",
+	"All": "所有的",
 	"Any More": "更多",
 	"Attachment": "附件",
 	"Attach files by dropping them here or": "请把文件拖放到这个区域或",
+
+	"By language": "按语言分类",
 
 	"Code": "代码",
 	"Change": "修改",
@@ -40,6 +43,7 @@
 	"Home": "首页",
 
 	"I Created": "我创建的",
+	"I Edited": "我编辑的",
 
 	"Keywords": "关键字",
 
