@@ -92,9 +92,9 @@ function swFind(input,str) { return input.indexOf(str) !== -1; }
 swig.setFilter('find', swFind);
 
 function swURL(input,str) { 
-	input = input.replace(' ', '+');
-	input = input.replace(/#/g, '%23');
 	input = input.replace(/\+/g, '%2B');
+	input = input.replace(' ', '+');
+	input = input.replace(/#/g, '%23');	
 	input = input.replace(/\//g, '%2F');
 	return input;
 }

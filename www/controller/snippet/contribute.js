@@ -169,20 +169,45 @@ function* $_statsSnippet( snippet_id ){
     }
 }
 
+function* $_getLastStatsTime(){
+    var sql = "SELECT created_at FROM snippet_refer ORDER BY created_at DESC LIMIT 1",
+        r = yield warp.$query( sql );   
+    return r!==null && r.length > 0? r[0].created_at : 0;
+}
+
+function* $_countLastRefer(fromtime){
+    return yield modelRefer.$findNumber({
+        select: 'count(*)',
+        where: '`created_at`>?',
+        params: [fromtime]
+        });
+}
+
 function* $statsSnippets(){
     var i, j, rs,
         page_size = 100,
-        count = yield base.$countSnippets();
+        //count = yield base.$countSnippets(),
+        lasttime = yield $_getLastStatsTime(),
+        count = yield $_countLastRefer(lasttime);
 
     for( i = 0; i < count; i += page_size){
-        rs = yield modelSnippet.$findAll({
+        /*rs = yield modelSnippet.$findAll({
                 select: ['id'],
                 order: '`created_at` desc',
                 limit: page_size,
                 offset: i
+            });*/
+        rs = yield modelRefer.$findAll({
+                select: ['id'],
+                where: '`created_at`>?',
+                params: [lasttime],
+                order: '`created_at` inc',
+                limit: page_size,
+                offset: i
             });
         for( j = 0; j < rs.length; j++ ){
-            yield $_statsSnippet( rs[j].id );
+            //yield $_statsSnippet( rs[j].id );
+            yield $_statsSnippet( rs[j].snippet_id );
         }
     }
 }

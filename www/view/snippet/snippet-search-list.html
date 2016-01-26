@@ -5,7 +5,7 @@
 {% block head %}
 <script type="text/javascript">
 $(function(){
-	$('#q').val('{{ __request__.query.q }}');
+	$('#q').val(decodeURL('{{ __request__.query.q }}'));
 });
 </script>
 {% endblock %}

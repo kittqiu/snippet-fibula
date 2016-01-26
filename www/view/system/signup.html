@@ -4,6 +4,7 @@
 <script src="/static/js/sha1.min.js"></script>
 <script type="text/javascript">
 $(function () {
+	Vue.config.debug = true;
 	var vm = new Vue({
 		el: '#vm',
 		data:{
@@ -50,8 +51,8 @@ $(function () {
 						 if(alertdlg.isActive()){
 						 	alertdlg.hide();
 						 }
-						 location.assign('/');
-						}, 5000 );
+						 location.assign('/login');
+						}, 3000 );
 						
 					}
 				});
@@ -111,7 +112,7 @@ $(function () {
 
 			    <div class="uk-form-row">
 			    	<div class="uk-form-controls">
-			        	<button  type="submit" class="uk-button-primary uk-button-large uk-width-1-1"><i class="uk-icon-check"></i>{{ _('sign up so') }}</button>
+			        	<button  type="submit" name="signup" class="uk-button-primary uk-button-large uk-width-1-1"><i class="uk-icon-check"></i>{{ _('sign up so') }}</button>
 			    	</div>
 			    </div>
 	    </fieldset>

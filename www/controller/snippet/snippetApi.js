@@ -393,16 +393,19 @@ module.exports = {
     },
 
     'GET /snippet/search': function* (){
-        var rs = [],
+        var rs = [], r,
             qstr = this.request.query.q,
             page =  helper.getPage(this.request,LARGE_PAGE_SIZE), 
             pageModel;
         if( qstr ){
             console.log( 'search:' + qstr);
-            page.total = yield search.$count(qstr);
+            r = yield search.$searchAndCount(qstr, LARGE_PAGE_SIZE * (page.index-1), LARGE_PAGE_SIZE);
+           /* page.total = yield search.$count(qstr);
             if( !page.isEmpty ){
                 rs = yield search.$search( qstr, LARGE_PAGE_SIZE * (page.index-1), LARGE_PAGE_SIZE );
-            }
+            }*/
+            page.total = r.count;
+            rs = r.rs;
         }
         pageModel = { q:qstr, 'rs': rs, count:rs.length,  page: page };
         yield $render( this, pageModel, 'snippet-search-list.html' );
@@ -720,7 +723,8 @@ module.exports = {
             r.score = r.score + SCORE_DELTA > 100 ? 100 : r.score + SCORE_DELTA;
             if( r.score === 100 ){
                 var snippet,
-                    baseSnippet = yield model.snippet.$find(r.snippet_id);
+                    baseSnippet = yield model.snippet.$find(r.snippet_id), 
+                    kw = r.name + ' ' + r.language + ' ' + r.environment + ' ' + r.keywords;
 
                 /* create or update */
                 if( baseSnippet === null ){
@@ -752,6 +756,7 @@ module.exports = {
                     //baseSnippet.version = r.newversion; _base.js auto increment
                     yield baseSnippet.$update(['name','brief', 'language', 'environment', 'keywords', 'code', 'help', 'updated_at', 'version']);
                 }
+                yield search.$index( kw, r.snippet_id );
 
                 r.result = 'pass';
                 columns.push('result');                
@@ -811,5 +816,5 @@ module.exports = {
         };
     },
 
-    'LoginRequired': [ '/snippet/create', '/api/snippet/s', '/snippet/pending']
+    'LoginRequired': [ '/snippet/s/creation', '/api/snippet/s', '/snippet/pending']
 };

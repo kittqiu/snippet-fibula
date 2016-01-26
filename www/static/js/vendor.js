@@ -366,3 +366,11 @@ function setDefButton(id) {
 function copyReferUrl(name, url){
     var str = '[' + name + '[(' + url + ')';
 }
+
+function decodeURL(str) { 
+    str = str.replace('+', ' ');
+    str = str.replace('%23', '#');
+    str = str.replace('%2B', '+');
+    str = str.replace('%2F', '/');
+    return str;
+}

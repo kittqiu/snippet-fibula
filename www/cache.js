@@ -33,6 +33,7 @@ var
 	$m_getMulti = thunkify( function(keys,callback){
 		memcached.getMulti( keys, callback );
 	});
+	memcached.flush(function(err){});
 
 
 module.exports = {

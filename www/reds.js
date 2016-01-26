@@ -269,8 +269,7 @@ Query.prototype.count = function(fn){
   var tkey = key + 'tmpkey';
   db.multi([
     [type, tkey, keys.length].concat(keys),
-    ['zcount', tkey, '-inf', '+inf'],
-    ['zremrangebyrank', tkey, start, stop],
+    ['zcount', tkey, '-inf', '+inf']
   ]).exec(function(err, ids) {
     ids = ids[1];
     fn(err, ids);
@@ -278,6 +277,41 @@ Query.prototype.count = function(fn){
 
   return this;
 }
+
+/**
+ * count and end the query, then callback `fn(err, ids)`.
+ *
+ * @return count
+ * @api public
+ */
+Query.prototype.count_end = function(fn){
+  var key = this.search.key;
+  var db = this.search.client;
+  var query = this.str;
+  var words = exports.stem(exports.stripStopWords(exports.words(query)));
+  var keys = exports.metaphoneKeys(key, words);
+  var type = this._type;
+  var start = this._start || 0;
+  var stop = this._stop || -1;
+
+  if (!keys.length) return fn(null, []);
+
+  console.log( 'start:' + start + ',' + stop );
+
+  var tkey = key + 'tmpkey';
+  db.multi([
+    [type, tkey, keys.length].concat(keys),
+    ['zcount', tkey, '-inf', '+inf'],
+    ['zrevrange', tkey, start, stop],
+    ['zremrangebyrank', tkey, start, stop],
+  ]).exec(function(err, rs) {
+    var obj = { count:rs[1], ids:rs[2]};
+    fn(err, obj);
+  });
+
+  return this;
+}
+
 
 /**
  * Perform the query and callback `fn(err, ids)`.
@@ -372,6 +406,26 @@ Search.prototype.remove = function(id, fn){
     multi.exec(fn);
   });
   
+  return this;
+};
+
+/**
+ * exists the key `id`.
+ *
+ * @param {Number|String} id
+ * @param {Function} fn
+ * @api public
+ */
+
+Search.prototype.exists = function(id,fn){
+  var key = this.key;
+  var db = this.client;
+
+  db.exists( key + ':object:' + id, function(err, res){
+      fn(err, res);
+      console.log(res + "," + key + ':object:' + id);
+  });
+
   return this;
 };
 
