@@ -3,6 +3,7 @@
 {% block title %} Snippet {% endblock %}
 
 {% block pagehead %}
+
 {% block head %}<!-- head  -->{% endblock %}
 
 
@@ -38,9 +39,16 @@
 		<a href="/snippet/s/creation" class="dv-link" style="margin-right:15px">{{ _('Create') }}</a>
 		<a href="/snippet/pending" class="dv-link" style="margin-right:15px">{{ _('Pending to check') }}</a>
 		<a href="/snippet/mine/index" class="dv-link" style="margin-right:15px">{{ _('Mine') }}</a>
+		<a onclick="showHelp()" >{{ _('Help')}}</a>
 		{% else %}					
 		{% endif %}
 		</div>			
 	</div>
 </div>
+{% endblock %}
+
+{% block readyscript %}
+<script type="text/javascript">
+
+</script>
 {% endblock %}

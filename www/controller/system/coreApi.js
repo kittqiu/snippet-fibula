@@ -5,7 +5,8 @@ var
 	attachment = require('./attachment'), 
     helper = require('../../helper'),
     api = require('../../api'),
-    db = require('../../db');
+    db = require('../../db'), 
+    help = require('./help');
 
 var 
     modelAtt = db.attachment,
@@ -14,6 +15,7 @@ var
 /*
 GET:
 /api/file/:id
+/api/help?path=encodeURIComponent(path)
 
 POST:
 /api/file?t=?
@@ -29,6 +31,17 @@ module.exports = {
             this.body = fs.createReadStream( att.path );
         }else{
             throw api.notFound( id );
+        }
+    },
+
+    'GET /api/help': function* (){
+        var txt,
+            path = this.request.query.path || '/';
+        path = decodeURIComponent( path );
+        txt = help.getHelpText(path, this.request.get('Accept-Language') || 'en');
+        this.body = {
+            result: 'ok',
+            help: txt
         }
     },
 

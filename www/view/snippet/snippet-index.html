@@ -17,8 +17,10 @@ function initVM( data ){
 }
 
 $(function () {
+	loadingElement('vm');
 	var param = { limit: 15 };
 	getJSON( '/api/snippet/index', param, function(err, data){
+		readyElement('vm');
 		if(err){
 			fatal(err);
 		}else{
@@ -26,7 +28,7 @@ $(function () {
 			$('#vm').show();
 		}
 	});
-	Vue.config.debug = true;	
+	//Vue.config.debug = true;	
 
 });
 

@@ -255,7 +255,7 @@ module.exports = {
          var lang= this.request.query.lang || 'all',
             page = helper.getPage(this.request,LARGE_PAGE_SIZE),
             pageModel, rs;
-        page.total = yield base.$countSnippets();
+        page.total = yield base.$countSnippets(lang);
         rs = yield base.$getSnippets( lang, (page.index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE );
         pageModel = { lang:lang, page:page, snippets:rs, count: rs.length };
         yield $_render( this, pageModel, 'snippet-all.html');      
@@ -503,13 +503,13 @@ module.exports = {
                     select: ['id', 'user_id', 'score', 'contributor', 'newversion'],
                     where: '`snippet_id`=? and `newversion`=? and `result`=?',
                     params: [record.id, next_version, RESULT_DOING ]
-                    });
+                    });//too long, 32ms
                 if( new_version !== null){
                     record.next_version = new_version;
                 }
             }
             if( param.contributor){
-                record.contrib = yield contrib.$getAll( id );
+                record.contrib = yield contrib.$getAll( id );//too long 47ms
             }
             if( param.history){
                 record.history = yield $_getLastestHistory(id,record.version);

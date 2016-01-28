@@ -363,14 +363,18 @@ function setDefButton(id) {
    }); // end of function
 };
 
-function copyReferUrl(name, url){
-    var str = '[' + name + '[(' + url + ')';
-}
-
 function decodeURL(str) { 
     str = str.replace('+', ' ');
     str = str.replace('%23', '#');
     str = str.replace('%2B', '+');
     str = str.replace('%2F', '/');
     return str;
+}
+
+function loadingElement(eid){
+    $('#'+eid).prepend('<div id="loading_'+ eid + '" class="uk-modal-spinner">请稍候</div>');
+}
+
+function readyElement(eid){
+    $('#loading_'+eid).remove();
 }

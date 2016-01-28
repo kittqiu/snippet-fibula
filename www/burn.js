@@ -246,10 +246,21 @@ function* $burnClean(){
 	yield cleanUser();
 }
 
+function* $printHelp(){
+	var h = 'node burn.js [user|snippet|clean|help] [cluster clients]\n'
+		+ '\n'
+		+ '  -user      default parameters. create n*100 users\n'
+		+ '  -snippet   create n*1000 snippet record\n'
+		+ '  -clean     clean all temp data\n'
+		+ '  -help      see help\n';
+	console.log( h );
+}
+
 var burnWork = {
+	'clean': $burnClean,	
+	'help': $printHelp,	
+	'snippet': $burnSnippet,
 	'user': $burnUser, 
-	'clean': $burnClean,
-	'snippet': $burnSnippet
 };
 
 function* burn(){

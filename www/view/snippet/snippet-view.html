@@ -59,8 +59,10 @@ function initVM( data ){
 }
 
 $(function () {
-	var param = { idToName: true, nextVersion: true, contributor:true, history:true, stats:true};
+	loadingElement('vm');
+	var param = { idToName: true, nextVersion: true, contributor:true, history:true, stats:true};	
 	getJSON( '/api/snippet/s/{{ __id }}', param, function(err, snippet){
+		readyElement('vm');
 		if(err){
 			fatal(err);
 		}else{

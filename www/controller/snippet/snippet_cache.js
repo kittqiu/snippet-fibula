@@ -114,7 +114,7 @@ function* $_removeLangCache(lang){
 }
 
 function* $__getStatistics(){
-    var sum = yield base.$countSnippets(),
+    var sum = yield base.$countSnippets('all'),
         ct = yield contrib.$statsRefers();
     return {count:sum, contribute: ct };
 }

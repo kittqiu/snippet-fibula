@@ -85,10 +85,18 @@ function getHistoryUrl( context ){
     return url || '/snippet/';
 }
 
-function* $_countSnippets(){
-    return yield models.snippet.$findNumber({
-                select: 'count(*)'
-            });
+function* $_countSnippets(lang){
+    if( lang === 'all' ){
+        return yield models.snippet.$findNumber({
+                    select: 'count(*)'
+                });
+    }else{
+        return yield models.snippet.$findNumber({
+                    select: 'count(*)',
+                    where: '`language`=?',
+                    params: [lang]
+                });
+    }
 }
 
 function* $_getSnippets(lang, offset, limit){
