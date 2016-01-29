@@ -724,7 +724,8 @@ module.exports = {
             if( r.score === 100 ){
                 var snippet,
                     baseSnippet = yield model.snippet.$find(r.snippet_id), 
-                    kw = r.name + ' ' + r.language + ' ' + r.environment + ' ' + r.keywords;
+                    kw = r.name + ' ' + r.language + ' ' + r.environment + ' ' + r.keywords;         
+                r.help += yield contrib.$getAllCheckAdvice(r.id);
 
                 /* create or update */
                 if( baseSnippet === null ){

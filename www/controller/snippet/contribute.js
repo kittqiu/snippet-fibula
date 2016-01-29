@@ -312,6 +312,23 @@ function* $_statsMyContrib(user_id){
     return {check:checkcnt, edit:editcnt, refer:refercnt};
 }
 
+function* $_getAllCheckAdvice(flow_id){
+     var rs,
+        sql = 'select h.advice,u.name from  snippet_flow_history as h, users as u  where h.flow_id=? and h.user_id=u.id',
+        r = yield modelFlow.$find(flow_id),
+        advice = '';
+    rs = yield warp.$query( sql, [flow_id] );
+    if( r !== null && rs ){
+        advice = '\n\n### 版次' + r.newversion + '的审核建议\n';
+        for( var i = 0; i < rs.length; i++ ){
+            if( rs[i].advice ){
+                advice += '* ' + rs[i].advice + '\n';
+            }
+        }
+        advice += '\n\n'
+    }
+    return advice;
+}
 
 module.exports = {
     $addCheck: $_addCheckContribution,
@@ -319,6 +336,7 @@ module.exports = {
     $addRefer: $_addReferContribution,
     $get: $_getContribution,
     $getAll: $_getAllContribution,
+    $getAllCheckAdvice: $_getAllCheckAdvice,
 
     $statsRefers: $_statsRefers,
 

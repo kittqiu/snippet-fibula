@@ -12,6 +12,7 @@
 	"Change log": "修改历史",
 	"change password": "修改密码",
 	"Check": "审核",
+	"Check new": "审核——新创建的Snippet",
 	"Check or Discard": "审核/放弃",
 	"Chinese name": "中文名",
 	"Chinese or English name": "中文名或英文名",
@@ -84,6 +85,7 @@
 
 	"Save": "保存",
 	"Select a file": "选择一个文件",
+	"Show/Hide difference": "显示或隐藏差异",
 	"SignUp": "注册",
 	"sign up": "注册",
 	"sign up so": "立即注册",

@@ -2,6 +2,7 @@
 
 {% block head %}
 <script src="/static/js/uikit/components/accordion.js"></script>
+<script src="/static/js/diff.min.js"></script>
 <script type="text/javascript">
 var start_time;
 function initVM( data ){
@@ -16,7 +17,8 @@ function initVM( data ){
 			code: data.code ||'',
 			help:data.help ||'',
 			advice:'', 
-			attachments: data.attachments || []
+			attachments: data.attachments || [],
+			version: data.newversion
 		},
 		methods:{
 			submit: function(){},
@@ -49,6 +51,78 @@ function initVM( data ){
 	$('#rawcode').text(data.code);
 }
 
+function diffContent(sn, so){
+	var fields = ['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help'];
+
+	for( var i = 0; i < fields.length; i++ ){
+		console.log( so );
+		var name = fields[i],
+			nstr = sn[name], 
+			ostr = so[name];
+		if( nstr !== ostr ){
+			var diff, isLines = false;
+			if( nstr.indexOf('\n') !== -1 || ostr.indexOf('\n')!==-1){
+				diff = JsDiff.diffLines(ostr, nstr, {newlineIsToken:true});
+				isLines = true;
+			}else {
+				diff = JsDiff.diffChars(ostr, nstr );
+			}
+			$("[name='" + name + "']").parent().prev().append('<span id="' + name + '_diff" style="color:red">(已修改)</span>');
+			var display = $("[name='" + name + "']").parent(),
+				diffcontent = '';
+			diff.forEach(function(part){
+			  // green for additions, red for deletions
+			  // grey for common parts
+			  var color = part.added ? 'green' :
+			    part.removed ? 'red' : 'grey';
+			 var eln = color === 'grey' ? 'span' : 'b';
+			  if( isLines ){
+			  	if( color === 'grey' ){
+			  		diffcontent += part.value;
+			  	}else{
+			  		diffcontent += '<' + eln + ' style="color:' + color +'" class="diff">' + part.value + '</' + eln + '>\n';	
+			  	}			  	
+			  }else{
+			  	diffcontent += '<' + eln + ' style="color:' + color +'" class="diff">' + part.value + '</' + eln + '>';
+			  } 			  
+			});
+			if( name === 'help'){
+				display.append( '<div class="diff">' + marked(diffcontent) + '</div>');
+			}else if(name === 'code'){
+				display.append(codeToHtml(diffcontent, 'dv-snippet-view diff'));
+			}else if( name==='language' ||name==='environment' ){
+				display.append( '<div class="diff">原始值为' + ostr + '</div>');
+			}else{
+				display.append(diffcontent);
+			}
+		}	
+	}
+	showDiff();
+}
+var shown = true;
+function showDiff(){
+	shown = !shown;
+	if( shown ){
+		$('.diff').show();
+	}else{
+		$('.diff').hide();
+	}
+}
+
+function loadLastVersion(snew){
+	var oldversion = snew.newversion - 1;
+	if( oldversion >= 0 ){
+		getJSON( '/api/snippet/s/'+snew.snippet_id+'/history/' + oldversion, function(err, snippet){
+			if(err){
+				fatal(err);
+			}else{
+				if( snippet )
+					diffContent( snew, snippet );
+			}
+		});	
+	}
+}
+
 $(function () {
 	start_time = Date.now();
 	loadingElement('vm');
@@ -58,6 +132,7 @@ $(function () {
 			fatal(err);
 		}else{
 			initVM( snippet );
+			loadLastVersion( snippet);
 		}
 	});
 	setDefButton('passbutton');
@@ -73,10 +148,9 @@ $(function () {
 {% block content %}
 <div id="content-block" class="dv-container x-content">
 	<div id="vm" class="dv-container">
-		<h2 class="x-title">{{ _(__form.name) }}</h2>
-		{% if ! __id %}
-		<div style="text-align:right"><a href="" class="dv-link">{{ _('Create snippet module') }}</a></div>
-		{% endif %}
+		<h2 v-if="version!==0" class="x-title">{{ _(__form.name) }}</h2>
+		<h2 v-else class="x-title">{{ _('Check new') }}</h2>
+		<div style="text-align:right"><a onclick="showDiff()" class="dv-link">{{ _('Show/Hide difference') }}</a></div>
 		<hr style="margin-top:2px">
 		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
 			<div class="uk-alert uk-alert-danger uk-hidden"></div>
@@ -145,10 +219,12 @@ $(function () {
 		    </div>
 		    <div class="uk-form-row" style="margin-top:20px">
 		    	<label class="uk-form-label">{{ _('Code snippet') }}</label>
-		    	<div class="uk-form-controls uk-hidden">
+		    	<!--div class="uk-form-controls uk-hidden">
 		        	<textarea v-model="code" cols="" rows="" placeholder="{{ _('Paste the code') }}" class="uk-width-1-1" style="height:300px" disabled ></textarea>
+		        </div-->
+		        <div>
+		        	<div id="codeAnddoc" name="code"></div>
 		        </div>
-		        <div id="codeAnddoc"></div>
 		        <div class="uk-accordion" data-uk-accordion="{showfirst:false}">
 				    <label class="uk-accordion-title uk-form-label uk-text-muted" style="font-size: 14px;" >{{ _('Raw Code')}} <i class="uk-icon-caret-square-o-down"></i></label>
 					<pre id="rawcode" class="uk-accordion-content"></pre>
@@ -156,7 +232,8 @@ $(function () {
 		    </div>
 		    <div class="uk-form-row" style="margin-top:20px">
 		        <label class="uk-form-label">{{ _('Help') }}</label>
-		        <div class="uk-form-controls dv-snippet-view" id="help" >
+		        <div class="uk-form-controls">
+		        	<div id="help" name="help" class="dv-snippet-view"></div>
 		        	<!--textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" disabled></textarea-->
 		        </div>
 		        

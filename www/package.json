@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "co-request": "^1.0.0",
+    "diff": "^2.2.1",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
     "gulp-jslint": "^0.2.2",
