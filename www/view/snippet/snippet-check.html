@@ -1,13 +1,6 @@
 {% extends './snippet_base.html' %}
 
-{% block css %}
-<link rel="stylesheet" href="/static/css/codemirror.css"/>
-{% endblock %}
-
 {% block head %}
-<script src="/static/js/codemirror.js"></script>
-<script src="/static/js/marked.js"></script>
-<script src="/static/js/uikit/components/htmleditor.js"></script>
 <script src="/static/js/uikit/components/accordion.js"></script>
 <script type="text/javascript">
 var start_time;
@@ -49,10 +42,6 @@ function initVM( data ){
 		}
 	});
 	
-	/*var htmleditor = UIkit.htmleditor($('#help').get(0), {
-    markdown: true,
-    maxsplitsize: 600
-    });*/
 	$('#help').html( marked(data.help));
 
     var html = codeToHtml(data.code, 'dv-snippet-view');
@@ -62,7 +51,9 @@ function initVM( data ){
 
 $(function () {
 	start_time = Date.now();
+	loadingElement('vm');
 	getJSON( '/api/snippet/pending/{{ __id }}', function(err, snippet){
+		readyElement('vm');
 		if(err){
 			fatal(err);
 		}else{

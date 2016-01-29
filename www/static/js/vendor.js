@@ -304,7 +304,7 @@ function codeToHtml( src, cls ){
             html += '</dl>';
         }
     }
-    html += '<div><dl><dt>代码:</dt><dd><pre>' + codeobj.code.trim()  +'</dd></dl></pre></div>';
+    html += '<div><dl><dt>代码:</dt><dd><pre><code>' + codeobj.code.trim()  +'</code></pre></dd></dl></div>';
     html += '</div>';
     return html;
 }
@@ -372,7 +372,7 @@ function decodeURL(str) {
 }
 
 function loadingElement(eid){
-    $('#'+eid).prepend('<div id="loading_'+ eid + '" class="uk-modal-spinner">请稍候</div>');
+    $('#'+eid).before('<div id="loading_'+ eid + '" class="uk-modal-spinner">请稍候</div>');
 }
 
 function readyElement(eid){

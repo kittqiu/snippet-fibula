@@ -1,3 +1,20 @@
 {
-	"/snippet/s/creation": "[create.hlp]"
+	"/snippet": "[index.md]",
+	"/snippet/s":"[all.md]",
+	"/snippet/s/creation": "[create.md]",
+	"/snippet/s/:id": "[view.md]",
+	"/snippet/s/:id/edit":"[create.md]",
+	"/snippet/s/:id/history":"[history.md]",
+	"/snippet/s/:id/history/:version": "[history_view.md]",
+	"/snippet/mine/index": "[mine.md]",
+	"/snippet/mine/own": "[mine_list.md]",
+	"/snippet/mine/edit": "[mine_list.md]",
+	"/snippet/pending": "[pending.md]",
+	"/snippet/pending/:id/check": "[check.md]",
+	"/snippet/pending/:id/edit": "[create.md]",
+	"/snippet/pending/lang/:lang": "[pending_list.md]",
+	"/snippet/wiki":"[wiki.md]",
+	"/snippet/wiki/:title/edit": "[wiki_edit.md]",
+	"/snippet/wiki/:title/history": "[wiki_history_list.md]",
+	"/snippet/wiki/:title/history/:version": "[wiki_history.md]"
 }

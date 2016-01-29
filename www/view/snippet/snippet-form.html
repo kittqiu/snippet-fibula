@@ -7,7 +7,6 @@
 
 {% block head %}
 <script src="/static/js/codemirror.js"></script>
-<script src="/static/js/marked.js"></script>
 <script src="/static/js/uikit/components/htmleditor.js"></script>
 <script src="/static/js/uikit/components/upload.js"></script>
 <script src="/static/js/base64.min.js"></script>
@@ -167,7 +166,9 @@ function initVM( data ){
 
 $(function () {
 	{% if __id %}
+	loadingElement('vm');
 	getJSON( '{{ __form.src }}', function(err, snippet){
+		readyElement('vm');
 		if(err){
 			fatal(err);
 		}else{
@@ -225,7 +226,7 @@ snippet修改成功
 	<div id="vm" class="dv-container">
 		<h2 class="x-title">{{ _(__form.name) }}</h2>
 		{% if ! __id %}
-		<div style="text-align:right"><a href="" class="dv-link">{{ _('Create snippet module') }}</a></div>
+		<div style="text-align:right"><a onclick="showHelp()" class="dv-link" >{{ _('Help')}}</a></div>
 		{% endif %}
 		<hr style="margin-top:2px">
 		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">

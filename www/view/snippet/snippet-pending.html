@@ -1,14 +1,31 @@
 {% extends './snippet_base.html' %}
 
-
+{% block css %}
+<style>
+    .uk-nav-menu {
+        position: fixed;
+        top: 200px;
+        right: 40px;
+        border-left: 2px solid #ccc;
+        padding-left: 10px
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<ul class="uk-nav uk-nav-menu uk-nav-side" data-uk-scrollspy-nav="{closest:'li', smoothscroll:false}">
+	<li>快捷导航</li>
+	{% for n, lang in __languages %}
+	<li><a href="#listlang{{n}}" class="dv-link">{{lang}}</a></li>
+	{% endfor %}
+</ul>
+
 <div id="content-block" class="dv-container x-content">
 	<div id="vm" class="dv-container">
 		<h2 class="x-title">{{ _('Pending to check') }}</h2>
 		{% for n, lang in __languages %}
-		<div style="margin-bottom: 50px">
-			<h3 class="dv-title">{{ lang }}</h3>
+		<div id="listlang{{ n }}" style="margin-bottom: 50px">
+			<h3  class="dv-title" style="margin-bottom:0">{{ lang }}</h3>
 			<div style="text-align:right"><a href="/snippet/pending/lang/{{ lang }}?page=1" class="dv-link">{{ _('More') }}({{ __counts[n] }})</a></div>			
 			<hr style="margin-top:2px;border-top:2px solid #888;">
 			{% if __counts[n] > 0 %}

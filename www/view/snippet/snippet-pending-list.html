@@ -16,7 +16,9 @@ function initVM( data ){
 }
 
 $(function () {
+	loadingElement('vm');
 	getJSON( '/api/snippet/pending/lang/{{ __language }}', { page: {{ __page }}}, function(err, data){
+		readyElement('vm');
 		if(err){
 			fatal(err);
 		}else{

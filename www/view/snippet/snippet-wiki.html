@@ -3,14 +3,20 @@
 {% block wikihead %}
 <script type="text/javascript">
 function initPage( data ){
-	$('#wiki-content').html( marked(data.content));
-	$('.wiki-content >:header').each(function(i,el){
-		$(el).append('<span class="wiki-section">[<a href="/snippet/wiki/{{ title }}/edit?section=' + (i+1) +'">编辑</a>]</span>');
-	});
+	if( data.content ){
+		$('#wiki-content').html( marked(data.content));
+		$('.wiki-content >:header').each(function(i,el){
+			$(el).append('<span class="wiki-section">[<a href="/snippet/wiki/{{ title }}/edit?section=' + (i+1) +'">编辑</a>]</span>');
+		});
+	}else{
+		$('#wiki-content').html('<p>当前还没有内容</p>');
+	}
 }
 
 $(function () {
+	loadingElement('wiki-content');
 	getJSON( '/api/snippet/wiki/{{ title|url }}', function(err, wiki){
+		readyElement('wiki-content');
 		if(err){
 			fatal(err);
 		}else{

@@ -1,6 +1,11 @@
 {% extends './snippet-wiki-base.html' %}
 
+{% block css %}
+<link rel="stylesheet" href="/static/css/codemirror.css"/>
+{% endblock %}
+
 {% block wikihead %}
+<script src="/static/js/codemirror.js"></script>
 <script src="/static/js/uikit/components/htmleditor.js"></script>
 <script type="text/javascript">
 function initPage( data ){
@@ -41,8 +46,10 @@ function initPage( data ){
 }
 
 $(function () {
+	loadingElement('vm');
 	var param = { section:{{ section }} }
 	getJSON( '/api/snippet/wiki/{{ title }}', param, function(err, wiki){
+		readyElement('vm');
 		if(err){
 			fatal(err);
 		}else{

@@ -9,7 +9,7 @@ const
 /*global vars*/
 var help = {};//{'path':{re:regexp,lang1:"help text", ....}}
 
-var RE_HELP_FILENAME = /^\[(\w+\.hlp)\]$/;
+var RE_HELP_FILENAME = /^\[(\w+\.md)\]$/;
 
 function loadHelp(file){
 	var fstats = fs.statSync( file );
@@ -56,19 +56,16 @@ function MODULE_init(){
 MODULE_init();
 
 function getHelpText(urlpath, acceptLanguage ){
-	console.log( urlpath );
-	console.log(help);
-	console.log( acceptLanguage);
-	var h, p;
+	var el, h, p;
 	for( p in help ){
 		if( help.hasOwnProperty(p)){
-			h =  help[p];
-			if( h.re.test(urlpath)){
+			el =  help[p];
+			if( el.re.test(urlpath)){
+				h = el;
 				break;
 			}
 		}
 	}
-	console.log(h);
 
 	if( h ){
 		// header like: zh-CN,zh;q=0.8,en;q=0.6,en-US;q=0.4,ru;q=0.2,zh-TW;q=0.2

@@ -4,7 +4,8 @@ var
     _ = require('lodash'),
     base = require('./base'),
     cache = require('../../cache'),
-    contrib = require('./contribute');
+    contrib = require('./contribute'),
+    co = require('co');
 
 var 
     model = base.model,
@@ -31,14 +32,7 @@ var
     pendingCountKeys = [],// ['pending/language/0', 'pending/language/1'...]
     pendingFirstPageKeys= [];
 
-function __init(){
-    _.each( Languages, function(lang){
-        pendingCountKeys.push( keyLangCount(lang)  );
-        pendingFirstPageKeys.push( keyLangFirstPage(lang));
-    } );
-}
 
-__init();
 
 
 function* $__getPendingCount(lang){
@@ -173,6 +167,24 @@ function* $_getBestSnippet(size){
         return [];
     });
 }
+
+function MODULE_init(){
+    _.each( Languages, function(lang){
+        pendingCountKeys.push( keyLangCount(lang)  );
+        pendingFirstPageKeys.push( keyLangFirstPage(lang));
+    } );
+
+    var init_gens = [ $_getAllPendingFirstPage, $_getStatistics, $_getLastestSnippet,  $_getBestSnippet, $_getAllPendingCount ];
+    for( var i = 0; i < init_gens.length; i++ ){
+        co( init_gens[i] ).then( function (val) {
+        }, function (err) {
+          console.error(err.stack);
+        });
+    }
+}
+
+MODULE_init();
+
 
 module.exports = {
     $getAllPendingCount: $_getAllPendingCount,

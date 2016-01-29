@@ -1,12 +1,7 @@
 {% extends './snippet_base.html' %}
 {% block title %} {{ _('Revision history')}} {% endblock %}
-{% block css %}
-<link rel="stylesheet" href="/static/css/codemirror.css"/>
-{% endblock %}
 
 {% block head %}
-<script src="/static/js/codemirror.js"></script>
-<script src="/static/js/marked.js"></script>
 <script src="/static/js/clipboard.min.js"></script>
 <script src="/static/js/uikit/components/accordion.js"></script>
 <script type="text/javascript">
@@ -50,7 +45,9 @@ function initVM( data ){
 }
 
 $(function () {
+	loadingElement('vm');
 	getJSON( '/api/snippet/s/{{id}}/history/{{version}}', function(err, snippet){
+		readyElement('vm');
 		if(err){
 			fatal(err);
 		}else{

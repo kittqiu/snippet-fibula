@@ -21,7 +21,9 @@ function initPage( data ){
 }
 
 $(function () {
+	loadingElement('wiki-content');
 	getJSON( '/api/snippet/wiki/{{ title|url }}/history/{{version}}', function(err, wiki){
+		readyElement('wiki-content');
 		if(err){
 			fatal(err);
 		}else{
