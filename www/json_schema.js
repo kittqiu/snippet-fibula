@@ -281,6 +281,13 @@ var schemas = {
         },
         required:['id', 'type', 'advice','timeused']
     },
+    confirmemail: {
+        type: 'object',
+        properties: {
+            email: PROPERTY.EMAIL
+        },
+        required:['email']
+    },
     createAccount:{
         type: 'object',
         properties: {

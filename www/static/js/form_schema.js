@@ -85,6 +85,13 @@ var SCHEMA_PROPERTY = {
 };
 
 var SCHEMAS = {
+	confirmemail: {
+		type: 'object',
+		properties: {
+			email: SCHEMA_PROPERTY.EMAIL
+		},
+		required:['email']
+	},
 	signup: {
 		type: 'object',
 		properties: {
@@ -92,7 +99,7 @@ var SCHEMAS = {
 			username: SCHEMA_PROPERTY.USERNAME,
 			password: SCHEMA_PROPERTY.PASSWORD,
 			verifypassword: SCHEMA_PROPERTY.PASSWORDVERIFY,
-			email: SCHEMA_PROPERTY.EMAIL,
+			email: SCHEMA_PROPERTY.EMAIL
 		},
 		required:['name', 'username', 'password', 'email']
 	},

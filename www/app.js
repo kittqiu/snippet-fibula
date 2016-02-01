@@ -8,7 +8,7 @@ var
 	koa = require("koa"),
 	route = require('koa-route'),
 	bodyParser = require('koa-bodyparser'),
-	swig = require('swig'),
+	swig = require('swig'),	
 	config = require('./config'),
 	i18n = require('./i18n'),
 	cache = require( './cache'),
@@ -105,6 +105,13 @@ function swTimeToDate(input,str) {
     return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDay();
 }
 swig.setFilter('time2Date', swTimeToDate);
+
+function swTimeToTime(input,str) {
+	var date = new Date(input);
+    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDay() 
+    		+ ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+}
+swig.setFilter('time2time', swTimeToTime);
 
 /*define template render function, log execution time and catch the exception*/
 app.use( function* theMiddleWare(next){

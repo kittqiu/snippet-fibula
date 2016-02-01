@@ -13,6 +13,7 @@
     name: 'My Website',
      // server domain name:
     domain: 'www.example.com',
+    ip: '',
     // the theme used, default to 'default':
     theme: 'default',
     security: {
@@ -62,6 +63,17 @@
     // NOT USED NOW:
     cdn: {
         static_prefix: ''
+    },
+
+    smtp:{
+        host: 'mail.example.com',
+        port: 25,
+        secure: true,   //set true if support ssl
+        ignoreTLS: true,//if this is true and secure is false, TLS will not be used 
+        //user name and password
+        authuser:'admin@example.com',
+        authpassword:'example',
+        admin: 'admin@example.com'
     },
 
     search:{

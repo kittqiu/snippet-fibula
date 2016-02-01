@@ -11,11 +11,16 @@ var
     constants = require('../constants'),
     auth = require('../auth'),
     api = require('../api'),
-    i18n = require('../i18n');
+    i18n = require('../i18n'),
+    smtp = require('./system/email'),
+    swig = require('swig'),
+    requestIp = require('request-ip');
 
 var 
 	User = db.user,
-	LocalUser = db.localuser, 
+	LocalUser = db.localuser,
+    EmailAuth = db.email_auth,
+    warp = db.warp,
 	next_id = db.next_id;
 
 var 
@@ -58,6 +63,23 @@ function _makeSessionCooike(localuser, cookies){
     });
 }
 
+function _genEmailConfirm( context, user, verify){
+    var request = context.request,
+        origin = 'http://' + (config.ip||config.domain),
+        model = {
+            ip: requestIp.getClientIp(context.request),
+            system: config.name,
+            username: user.username,
+            confirmurl: origin + '/auth/ConfirmEmail/' + verify.id, 
+            cancelurl: origin + '/auth/CancelEmail/' + verify.id,
+            deadline: verify.expired
+        },
+        renderHtml = swig.renderFile( __dirname + '/../view/system/confirmemail.html', model );
+    console.log( model );
+    smtp.sendHtml(null, user.email, context.translate('Confirm email'), renderHtml );
+    console.log(request.socket.address() );
+}
+
 module.exports = {
 
 	'POST /api/signup': function* (){
@@ -68,6 +90,7 @@ module.exports = {
 			name, 
 			username, 
 			password,
+            verify, 
 			data = this.request.body;
 
 		//validate data
@@ -100,8 +123,15 @@ module.exports = {
         	user_id: user.id,
         	passwd: auth.generatePassword(email, password)
         };
+        verify = {
+            id: next_id(),
+            user_id: user.id,
+            expired: Date.now() + 24 * 3600000
+        };
         yield User.$create(user);
-        yield LocalUser.$create(localuser);
+        yield LocalUser.$create(localuser);        
+        yield EmailAuth.$create(verify);
+        _genEmailConfirm( this, user, verify );        
 
         this.body = {
         	id: user.id
@@ -136,6 +166,9 @@ module.exports = {
         if (user.locked_until > Date.now()) {
             throw api.authFailed('locked', this.translate('User is locked.'));
         }
+        if( !user.verified ){
+            throw api.authFailed('Unverified', this.translate('Please verify your email first.'));
+        }
 
         //reset 
         email = user.email;
@@ -167,6 +200,66 @@ module.exports = {
         this.body = user;
     },
 
+    'GET /auth/CancelEmail/:id': function*(id){
+        var user, localuser
+            v = yield EmailAuth.$find(id);
+        if( v === null ){
+            throw api.authFailed('unknown', this.translate('Please verify your email first.'));
+        }
+        if( Date.now() > v.expired ){
+            yield v.$destroy();
+            this.body = "Verify expired";
+            return;
+        }
+        
+        user = yield User.$find( v.user_id );
+        if( user === null ){
+            throw api.authFailed('unknown', this.translate('User not found.'));
+        }
+        localuser = yield LocalUser.$find({
+            where:'`user_id`=?',
+            params: [user.id]
+        })
+        if( localuser === null ){
+            throw api.authFailed('unknown', this.translate('User not found.'));
+        }
+        yield v.$destroy();
+        yield user.$destroy();
+        yield localuser.$destroy();
+
+        this.body = 'Email Confirm has been cancel.'
+    },
+
+    'GET /auth/ConfirmEmail/:id': function*(id){
+        var user,
+            v = yield EmailAuth.$find(id);
+        if( v === null ){
+            throw api.authFailed('unknown', this.translate('Please verify your email first.'));
+        }
+        user = yield User.$find( v.user_id );
+        console.log( user );
+        if( user === null ){
+            throw api.authFailed('unknown', this.translate('User not found.'));
+        }
+        if( Date.now() > v.expired ){
+            yield v.$destroy();
+            this.body = "Verify expired";
+            return;
+        }
+        if( !user.verified ){
+            user.verified = true;
+            yield user.$update(['verified']);
+            yield v.$destroy();
+        }else{
+            throw api.authFailed('notAllowed', this.translate('Not Repeat.'));  
+        }
+        this.render( 'system/verifypass.html', {} );
+    },
+
+    'GET /auth/ConfirmEmail': function*(){
+        this.render( 'system/reconfirmemail.html', {} );
+    }, 
+
     'GET /auth/signout': function* () {
         this.cookies.set(COOKIE_NAME, 'deleted', {
             path: '/',
@@ -177,6 +270,33 @@ module.exports = {
         console.log('Signout, goodbye!');
         this.response.redirect(redirect);
     },
+
+    'POST /api/auth/ConfirmEmail': function*(){
+        var email, user, verify,
+            data = this.request.body;
+        json_schema.validate('confirmemail', data);
+        email = data.email;
+        user = yield $getUserByEmail(email);
+        if( user === null ){
+            throw api.notFound('email', this.translate('User not found.'));
+        }
+        if( user.verified ){
+            throw api.notAllowed('email', this.translate('Email has been verified.'));
+        }
+        yield warp.$query( 'delete from sys_email_auth where `user_id`=?', [user.id] );
+
+        verify = {
+            id: next_id(),
+            user_id: user.id,
+            expired: Date.now() + 24 * 3600000
+        };
+        yield EmailAuth.$create(verify);
+        _genEmailConfirm( this, user, verify );
+        this.body = {
+            result: 'ok'
+        }
+    },
+
     'POST /api/user/changepwd': function* (){
         var 
             user,

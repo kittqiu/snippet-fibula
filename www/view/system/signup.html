@@ -46,14 +46,8 @@ $(function () {
 
 				form.postJSON( '/api/signup', data, function(err, result){
 					if( !err ){
-						var alertdlg = UIkit.modal.alert('用户创建成功，请稍后登录您的邮箱完成认证，之后您便可正常登录系统。\n稍后页面将自动跳转到主页...');
-						setTimeout( function(){
-						 if(alertdlg.isActive()){
-						 	alertdlg.hide();
-						 }
-						 location.assign('/login');
-						}, 3000 );
-						
+						$('#content-block').addClass('uk-hidden');
+						jumpTo( '/login', "{{ _('Login')}}", 5 );							
 					}
 				});
 			}
@@ -65,10 +59,10 @@ $(function () {
 {% endblock %}
 
 {% block title %} {{ _('sign up')}} {% endblock %}
-{% block jump-title  %}用户创建成功{% endblock %}
+{% block jump-title  %}用户创建成功。请稍后登录您的邮箱完成认证，之后您便可正常登录系统。{% endblock %}
 
 {% block content %}
-<div class="dv-container x-content">
+<div id="content-block" class="dv-container x-content">
 	<div id="vm" class="dv-container x-narrow">
 		<h2 class="x-title">{{ _('sign up') }}</h2>
 		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">

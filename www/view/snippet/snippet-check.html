@@ -36,7 +36,7 @@ function initVM( data ){
 				form.postJSON( '/api/snippet/pending/{{ __id }}/check', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
-						jumpTo( result.redirect, "{{ _('History Page')}}", 3 );
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
 						//jumpTo( '{{ __form.redirect }}', "{{ _('History Page')}}", 3 );
 					}
 				});
@@ -51,7 +51,147 @@ function initVM( data ){
 	$('#rawcode').text(data.code);
 }
 
+function diffChars(sn, so){
+	var fields = ['name', 'brief', 'keywords'];
+
+	for( var i = 0; i < fields.length; i++ ){
+		var name = fields[i],
+			nstr = sn[name], 
+			ostr = so[name];
+		if( nstr !== ostr ){
+			var diff = JsDiff.diffChars(ostr, nstr );
+			$("[name='" + name + "']").parent().prev().append('<span id="' + name + '_diff" style="color:red">(已修改)</span>');
+			var display = $("[name='" + name + "']").parent(),
+				diffcontent = '';
+			diff.forEach(function(part){
+				  // green for additions, red for deletions
+				  // grey for common parts
+				var color = part.added ? 'green' :
+				    part.removed ? 'red' : 'grey';
+				var eln = color === 'grey' ? 'span' : 'b';
+				diffcontent += '<' + eln + ' style="color:' + color +'" class="diff">' + part.value + '</' + eln + '>';
+			});
+			display.append(diffcontent);
+		}	
+	}
+}
+
+function diffLines(sn, so){
+	var fields = ['code', 'help'];
+
+	for( var i = 0; i < fields.length; i++ ){
+		var name = fields[i],
+			nstr = sn[name], 
+			ostr = so[name];
+		if( nstr !== ostr ){
+			var diff = JsDiff.diffLines(ostr, nstr, {newlineIsToken:true});
+			$("[name='" + name + "']").parent().prev().append('<span id="' + name + '_diff" style="color:red">(已修改)</span>');
+			var display = $("[name='" + name + "']").parent(),
+				diffcontent = '';
+			diff.forEach(function(part){
+				var color = part.added ? 'green' :
+			    	part.removed ? 'red' : 'grey';
+			 	var eln = color === 'grey' ? 'span' : 'b';
+			  	if( color === 'grey' ){
+			  		diffcontent += part.value;
+			  	}else{
+			  		diffcontent += '<' + eln + ' style="color:' + color +'" class="diff">' + part.value + '</' + eln + '>\n';	
+			  	}	  
+			});
+			if( name === 'help'){
+				display.append( '<div class="diff">' + marked(diffcontent) + '</div>');
+			}else if(name === 'code'){
+				display.append(codeToHtml(diffcontent, 'dv-snippet-view diff'));
+			}
+		}	
+	}
+}
+
+function diffEntity(sn, so){
+	var fields = [ 'language', 'environment'];
+
+	for( var i = 0; i < fields.length; i++ ){
+		var name = fields[i],
+			nstr = sn[name], 
+			ostr = so[name];
+		if( nstr !== ostr ){			
+			$("[name='" + name + "']").parent().prev().append('<span id="' + name + '_diff" style="color:red">(已修改)</span>');
+			var display = $("[name='" + name + "']").parent();
+			display.append( '<div class="diff">原始值为' + ostr + '</div>');			
+		}	
+	}
+}
+
+function diffAttachment(sn,so){
+	var removeList = [],
+		addList = [],
+		i, j, fid, 
+		nas = sn.attachments,
+		oas = so.attachments;
+	for( i = 0; i < nas.length; i++ ){
+		found = false;
+		for( j = 0; j < oas.length; j++){
+			if( oas[j].id === nas[i].id ){
+				found = true;
+				break;
+			}
+		}
+		if( !found ){
+			addList.push(nas[i]);
+		}
+	}
+
+	for( i = 0; i < oas.length; i++ ){
+		found = false;
+		for( j = 0; j < nas.length; j++){
+			if( nas[j].id === oas[i].id ){
+				found = true;
+				break;
+			}
+		}
+		if( !found ){
+			removeList.push(oas[i]);
+		}
+	}
+	if( removeList.length > 0 || addList.length > 0 ){
+		$("#attachments").parent().prev().append('<span id="attachments_diff" style="color:red">(已修改)</span>');
+
+		var att, display = $("#attachments").parent(), 
+			content = '<div class="diff">';
+		if( removeList.length > 0 ){
+			content += '删除附件: ';
+			for( i = 0; i < removeList.length; i++){
+				att = removeList[i];
+				if( i !== 0 )
+					content += ', ';
+				content += att.name;
+			}
+		}
+		if( addList.length > 0 ){
+			if( removeList.length > 0 ) content += '. '
+			content += '增加附件: ';
+			for( i = 0; i < addList.length; i++){
+				att = addList[i];
+				if( i !== 0 )
+					content += ', ';
+				content += att.name;
+			}
+		}
+		content += '</div>';
+		display.append( content );	
+	}
+
+}
+
 function diffContent(sn, so){
+	diffChars(sn,so);
+	diffLines(sn,so);
+	diffEntity(sn,so);
+	diffAttachment(sn,so);
+	showDiff();
+}
+
+/*function diffContent(sn, so){
 	var fields = ['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help'];
 
 	for( var i = 0; i < fields.length; i++ ){
@@ -98,14 +238,18 @@ function diffContent(sn, so){
 		}	
 	}
 	showDiff();
-}
+}*/
+
+
 var shown = true;
 function showDiff(){
 	shown = !shown;
 	if( shown ){
 		$('.diff').show();
+		$('#marktip').show();
 	}else{
 		$('.diff').hide();
+		$('#marktip').hide();
 	}
 }
 
@@ -148,9 +292,10 @@ $(function () {
 {% block content %}
 <div id="content-block" class="dv-container x-content">
 	<div id="vm" class="dv-container">
-		<h2 v-if="version!==0" class="x-title">{{ _(__form.name) }}</h2>
-		<h2 v-else class="x-title">{{ _('Check new') }}</h2>
+		<div v-if="version!==0"><h2  class="x-title">{{ _(__form.name) }}</h2>
 		<div style="text-align:right"><a onclick="showDiff()" class="dv-link">{{ _('Show/Hide difference') }}</a></div>
+		</div>
+		<h2 v-else class="x-title">{{ _('Check new') }}</h2>		
 		<hr style="margin-top:2px">
 		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
 			<div class="uk-alert uk-alert-danger uk-hidden"></div>
@@ -267,6 +412,14 @@ $(function () {
 		        </button>
 		    </div>
 		</form>
+		<div id="marktip" style="display:none;position: fixed;top:200px;right:40px;">
+			<b>修改标记提示：</b>
+			<ul class="uk-list">
+				<li><span style="color:red">红色: 被删除的内容</span></li>
+				<li><span style="color:green">绿色: 新增的内容</span></li>
+				<li><span style="color:grey">灰色: 未修改的内容</span></li>
+			</ul>
+		</div>
 	</div>
 </div>
 {% endblock %}

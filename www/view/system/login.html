@@ -59,6 +59,8 @@ $(function () {
 <div id="content-block" class="dv-container x-content">
 	<div id="vm" class="dv-container x-narrow">
 		<h2 class="x-title">{{ _('log in') }}</h2>
+		<div style="text-align:right"><a href="/auth/ConfirmEmail" class="dv-link">{{ _('Confirm email again') }}</a></div>
+		<hr style="margin-top:2px">
 		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
 			<fieldset>
 				<div class="uk-alert uk-alert-danger uk-hidden"></div>
