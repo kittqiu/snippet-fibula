@@ -28,22 +28,37 @@ function defineModel(warp, name, cols, opts) {
         defaultValue: next_id
     });
     // add created_at, updated_at and version:
-    columns.push({
-        name: 'created_at',
-        type: 'bigint',
-        index: true
-    });
-    columns.push({
-        name: 'updated_at',
-        type: 'bigint',
-        index: true
-    });
-    columns.push({
-        name: 'version',
-        type: 'bigint',
-        defaultValue: 0
-    });
     fnBeforeCreate = options.beforeCreate;
+    if( opts.no_column_created_at ){
+        delete options['no_column_created_at'];
+    }else{
+        columns.push({
+            name: 'created_at',
+            type: 'bigint',
+            index: true
+        });         
+    }
+    
+     if( opts.no_column_updated_at ){
+        delete options['no_column_updated_at'];
+     }else{
+        columns.push({
+            name: 'updated_at',
+            type: 'bigint',
+            index: true
+        });
+    }
+
+    if( opts.no_column_version ){
+        delete options['no_column_version'];
+     }else{
+        columns.push({
+            name: 'version',
+            type: 'bigint',
+            defaultValue: 0
+        });
+    }
+    
     options.beforeCreate = function (obj) {
         if (fnBeforeCreate) {
             fnBeforeCreate(obj);
@@ -59,7 +74,7 @@ function defineModel(warp, name, cols, opts) {
             fnBeforeUpdate(obj);
         }
         obj.updated_at = Date.now();
-        obj.version++;
+        if( obj.hasOwnProperty('versoin'))obj.version++;
     };
     return warp.define(name, columns, options);
 }

@@ -60,8 +60,17 @@ function* $_addEditContribution( snippet_id, user_id ){
 }
 
 function* $_addReferContribution( snippet_id, user_id ){
-    yield $_addContribution( snippet_id, user_id, CONTRIB_REFER );
-    yield modelRefer.$create({snippet_id: snippet_id, user_id: user_id});
+    //refer on the same snippet, it can be done once everyday.
+    var time = helper.getDateTimeAt0(),
+        r = yield modelRefer.$find({
+                    where: '`snippet_id`=? and `user_id`=? and `created_at`>=?',
+                    params: [snippet_id, user_id, time ], 
+                    limit: 1
+                });
+    if( r === null ){
+        yield $_addContribution( snippet_id, user_id, CONTRIB_REFER );
+        yield modelRefer.$create({snippet_id: snippet_id, user_id: user_id});
+    }
 }
 
 function* $_getContribution(snippet_id, type){
