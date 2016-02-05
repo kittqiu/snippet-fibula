@@ -1,0 +1,112 @@
+{% extends '../req_base.html' %}
+
+{% block head %}
+
+<script type="text/javascript">
+
+function initVM( data ){
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: data.name || ''
+		},
+		methods:{
+			getPostData: function(){
+				var data = {
+					name: this.name,
+					sid: '{{series.id}}'
+				};
+				if(validateJsonObj('createProduct', data)){
+					return data;
+				}	
+			},
+			submit: function(){						
+				var data,
+					form = $('#vm').find('form');
+				try{
+					data = this.getPostData();
+					form.showFormError();//clear error tip
+				}catch(e){
+					form.showFormError(e);
+					return;
+				}
+
+				form.postJSON( '{{ __form.action }}', data, function(err, result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
+						{% if __id %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% else %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% endif %}	
+					}
+				});
+			}
+		}
+	});
+	
+}
+
+$(function () {
+	{% if __id %}
+	loadingElement('vm');
+	getJSON( '{{ __form.src }}', function(err, product ){
+		readyElement('vm');
+		if(err){
+			fatal(err);
+		}else{
+			initVM( product );
+		}
+	});
+
+	{% else %}	
+	var data = {};
+	initVM( data );
+	{% endif %}
+
+});
+
+</script>
+{% endblock %}
+
+{% block jump-title  %}
+{% if ! __id %}
+产品创建成功
+{% else %}
+产品修改成功
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container" style="max-width:600px">
+		<h2 class="x-title">{{ _(__form.name) }}</h2>
+		<hr style="margin-top:2px">
+		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
+			<fieldset>
+				<div class="uk-alert uk-alert-danger uk-hidden"></div>
+			    <div class="uk-form-row" style="margin-top:20px">
+			        <label class="uk-form-label">{{ _('Name') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="name" name="name"  type="text" class="uk-width-1-1" autofocus>
+			        </div>
+			        <p class="help-text">3-50字符</p>
+			    </div>
+			    <div class="uk-form-row" style="margin-top:20px">
+			    	<label class="uk-form-label">{{ _('Series belong to') }}</label>
+			    	<div class="uk-form-controls">
+			        	<input type="radio" name="series_name" value="{{series.name}}" checked>{{series.name}}</input>
+			        </div>
+			    </div>
+			    <div class="uk-form-row uk-clearfix" style="margin-top:60px">
+			        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
+			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.submit) }}
+			        </button>
+			    </div>
+	    	</fieldset>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+

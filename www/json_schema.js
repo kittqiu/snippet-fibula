@@ -320,6 +320,21 @@ var schemas = {
         },
         required:['section', 'content']
     },
+    product:{
+        type: 'object',
+        properties: {
+            name: PROPERTY.NAME,
+            sid: PROPERTY.ID,
+        },
+        required:['name', 'sid']
+    },
+    productSeries:{
+        type: 'object',
+        properties: {
+            name: PROPERTY.NAME,
+        },
+        required:['name']
+    },
     updateWebsiteSettings: {
         type: 'object',
         properties: {
@@ -343,6 +358,14 @@ var schemas = {
             content_top: PROPERTY.SETTING,
             content_bottom: PROPERTY.SETTING
         }
+    },
+    version:{
+        type: 'object',
+        properties: {
+            name: PROPERTY.NAME,
+            pid: PROPERTY.ID,
+        },
+        required:['name', 'pid']
     }
 }
 

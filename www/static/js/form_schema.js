@@ -30,6 +30,10 @@ var SCHEMA_PROPERTY = {
 		minLength: 1,
 		desc: '帮助'
 	},
+	ID: {
+        type: 'string',
+        pattern: '^[0-9a-f]{50}$'
+    },
 	KEYWORD:{
 		type: 'string',
 		minLength: 3,
@@ -119,6 +123,29 @@ var SCHEMAS = {
 			verifypassword:SCHEMA_PROPERTY.PASSWORDVERIFY
 		},
 		required:['oldpassword', 'newpassword', 'verifypassword']
+	},
+	createProduct:{
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME,
+			sid: SCHEMA_PROPERTY.ID,
+		},
+		required:['name', 'sid']
+	},
+	createSeries:{
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME
+		},
+		required:['name']
+	},
+	createVersion:{
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME,
+			pid: SCHEMA_PROPERTY.ID,
+		},
+		required:['name', 'pid']
 	},
 	createSnippet:{
 		type: 'object',

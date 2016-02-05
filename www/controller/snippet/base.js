@@ -25,7 +25,7 @@ var models = {
 
 var 
     MODEL_PATH = __dirname + '/../../model/snippet',
-    DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires;;
+    DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires;
 
 function loadFixedModels(){
     var files = fs.readdirSync( MODEL_PATH );
@@ -74,7 +74,7 @@ function setHistoryUrl( context, url ){
         url = context.request.url;
     }
     context.cookies.set( 'HISTORYURL', url, {
-        path: '/',
+        path: '/snippet',
         httpOnly: true,
         expires: new Date(Date.now()+DEFAULT_EXPIRES_IN_MS)
     });

@@ -24,8 +24,11 @@
 	"Contribution": "贡献",
 	"Copy": "复制",
 	"Copy content": "复制内容",
-	"Create": "创建",	
+	"Create": "创建",
+	"Create product": "创建产品",
+	"Create product series": "创建产品系列",
 	"Create snippet module": "创建模块",
+	"Create version": "创建新版本",
 	"Created at": "创建于",	
 
 	"depend on": "依赖于",
@@ -35,6 +38,9 @@
 	"Discard": "丢弃",
 
 	"Edit": "编辑",
+	"Edit product": "编辑产品",
+	"Edit series": "编辑产品系列",
+	"Edit version": "编辑版本",
 	"email": "邮箱",
 	"Environment": "运行环境",
 
@@ -64,6 +70,7 @@
 
 	"Name": "名称",
 	"new password":"新密码",
+	"New Version": "新版本",
 	"Next revision": "下版次",
 	"No record": "无记录",
 	"None": "无",
@@ -73,11 +80,16 @@
 	"or": "或",
 	"old password":"原始密码",
 	"Overview": "概览",
+	"Our products": "我们的产品",
 	
 	"Pass": "通过",
 	"password": "密码",
 	"Paste the code": "粘贴代码块",
 	"Pending to check": "待审核",
+	"Please create product series": "请先创建新产品系列",
+	"Product belong to": "所属的产品",
+	"Product Manage": "产品管理",
+	"Product series": "产品系列",
 	"Program language": "编程语言",
 
 	"Raw Code": "原始代码",
@@ -87,6 +99,7 @@
 	"Revision": "版次",
 	"Revision history":"版次历史",
 
+	"Series belong to":"所属的系列",
 	"Save": "保存",
 	"Select a file": "选择一个文件",
 	"Show/Hide difference": "显示或隐藏差异",
