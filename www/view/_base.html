@@ -34,9 +34,10 @@
 		{% block header %}
 		<ul class="dv-navbar-nav uk-navbar-nav">
 			<li><a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a></li>
-	        <li class="uk-active"><a href="/snippet/" >snippet</a></li>
+	        <li><a href="/snippet/">snippet</a></li>
 	        <li><a href="">project</a></li>
 	        <li><a href="/req/">requirement</a></li>
+	        <li><a href="/team/">team</a></li>
     	</ul> 
     	{% endblock %}   					
 		<ul class="dv-navbar-nav uk-navbar-nav" style="float:right;">
@@ -150,6 +151,12 @@
 			}
 		});
 	}
+
+	$(function(){
+		var paths = location.pathname.split('/'),
+			subsys = '/' + paths[1] + '/';
+		$("a[href='" + subsys + "']").parent().addClass('uk-active');
+	});
 	</script>
 	{% block readyscript %} {% endblock %}
 </body>

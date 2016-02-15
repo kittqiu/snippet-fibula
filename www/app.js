@@ -19,6 +19,8 @@ var
 var 
 	db = require('./db');
 
+global.__base = __dirname + '/';
+
 app.name = 'snippet-fibula';
 app.proxy = true;
 
