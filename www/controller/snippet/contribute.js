@@ -210,7 +210,7 @@ function* $statsSnippets(){
                 select: ['id'],
                 where: '`created_at`>?',
                 params: [lasttime],
-                order: '`created_at` inc',
+                order: '`created_at` asc',
                 limit: page_size,
                 offset: i
             });

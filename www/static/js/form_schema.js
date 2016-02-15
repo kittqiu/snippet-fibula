@@ -139,6 +139,13 @@ var SCHEMAS = {
 		},
 		required:['name']
 	},
+	createTplModule:{
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME
+		},
+		required:['name']
+	},
 	createVersion:{
 		type: 'object',
 		properties: {

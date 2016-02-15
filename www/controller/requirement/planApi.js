@@ -10,6 +10,7 @@ var
 	modelSeries = model.series,
 	modelProduct = model.product,
 	modelVersion = model.version,
+	modelTplModule = model.tplModule,
 	$render = base.$render;
 
 function mergeFixedModel(pageModel){
@@ -27,12 +28,18 @@ function* $_render( context, pageModel, view ){
 /req/plan/product/:id/edit
 /req/plan/series/creation
 /req/plan/series/:id/edit
+/req/plan/tpl/module
+/req/plan/tpl/module/creation
+/req/plan/tpl/module/:id/edit
+/req/plan/tpl/module/child/creation
+/req/plan/tpl/module/child/:id/edit
 /req/plan/version/creation?product=id
 /req/plan/version/:id
 /req/plan/version/:id/edit
 
 /api/req/plan/product/:id
 /api/req/plan/series/:id
+/api/req/plan/tpl/module/:id
 /api/req/plan/version/:id
 
 
@@ -41,6 +48,10 @@ function* $_render( context, pageModel, view ){
 /api/req/plan/product/:id
 /api/req/plan/series
 /api/req/plan/series/:id
+/api/req/plan/tpl/module
+/api/req/plan/tpl/module/:id
+/api/req/plan/tpl/module/child
+/api/req/plan/tpl/module/child/:id/delete
 /api/req/plan/version
 /api/req/plan/version/:id
 */
@@ -53,7 +64,7 @@ module.exports = {
 				size: tree.length
 			};
 		base.setHistoryUrl(this);
-		yield $render(this, model, 'req_plan.html' );
+		yield $render(this, model, 'plan/req_plan.html' );
 	},
 
 	'GET /req/plan/product/creation': function* (){
@@ -121,6 +132,66 @@ module.exports = {
 		yield $render(this, model, 'plan/req_series_form.html')
 	},
 
+	'GET /req/plan/tpl/module': function* (){
+		var mods = yield base.$getAllTplModule(),
+			model = {
+				mods: mods
+			};
+		yield $render( this, model, 'plan/req_tpl_module.html' );
+		base.setHistoryUrl(this);
+	},
+	'GET /req/plan/tpl/module/creation': function* (){
+		var form = {
+				name: this.translate('Create template'),
+				submit: this.translate('Save'),
+				action: '/api/req/plan/tpl/module'
+			},
+			model = {
+				__form: form
+			};
+		yield $render( this, model, 'plan/req_tpl_module_form.html');
+	},
+	'GET /req/plan/tpl/module/child/creation': function* (){
+		var query = this.request.query,
+			parent = query.parent,
+			before = query.before || '',
+			form = {
+				name: this.translate('Create module'),
+				submit: this.translate('Save'),
+				action: '/api/req/plan/tpl/module/child?parent=' + parent + ( before ? '&before='+before : '' )
+			},
+			model = {
+				__form: form
+			};
+		yield $render( this, model, 'plan/req_tpl_module_form.html');
+	},
+	'GET /req/plan/tpl/module/child/:id/edit': function* (id){
+		var form = {
+				name: this.translate('Edit module'),
+				submit: this.translate('Save'),
+				action: '/api/req/plan/tpl/module/' + id,
+				src: '/api/req/plan/tpl/module/'+id
+			},
+			model = {
+				__id: id,
+				__form: form
+			};
+		yield $render( this, model, 'plan/req_tpl_module_form.html');
+	},
+	'GET /req/plan/tpl/module/:id/edit': function* (id){
+		var form = {
+				name: this.translate('Edit template'),
+				submit: this.translate('Save'),
+				action: '/api/req/plan/tpl/module/' + id,
+				src: '/api/req/plan/tpl/module/'+id
+			},
+			model = {
+				__id: id,
+				__form: form
+			};
+		yield $render( this, model, 'plan/req_tpl_module_form.html');
+	},
+
 	'GET /req/plan/version/creation': function* (){
 		var pid = this.request.query.product || '',
 			product = yield modelProduct.$find(pid), 
@@ -163,6 +234,10 @@ module.exports = {
 
 	'GET /api/req/plan/series/:id': function* (id){
 		this.body = yield modelSeries.$find(id);
+	},
+
+	'GET /api/req/plan/tpl/module/:id': function* (id){
+		this.body = yield modelTplModule.$find(id);
 	},
 
 	'GET /api/req/plan/version/:id': function* (id){
@@ -224,6 +299,69 @@ module.exports = {
 		r.name = data.name;
 		yield r.$update( ['name'] );
 		yield cache.$removeVersionTree();
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+
+	'POST /api/req/plan/tpl/module': function* (){
+		var r,
+			data = this.request.body;
+		json_schema.validate('tplModule', data);
+
+		r = {
+			name: data.name, 
+			parent: base.PARENT_ROOT,
+			order: 0
+		};
+		yield modelTplModule.$create( r );
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+	'POST /api/req/plan/tpl/module/child': function* (){
+		var query = this.request.query,
+			parent = query.parent,
+			before = query.before || null,
+			r,
+			data = this.request.body;
+		json_schema.validate('tplModule', data);
+
+		r = {
+			name: data.name, 
+			parent: parent,
+			order: yield base.$getTplModuleNextOrder(parent)
+		};
+		if( before ){
+			r.order = yield base.$shiftTplModule(before);
+		}
+		yield modelTplModule.$create( r );
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+
+	'POST /api/req/plan/tpl/module/:id': function* (id){
+		var r = yield modelTplModule.$find(id),
+			data = this.request.body;
+
+		json_schema.validate('tplModule', data);
+		r.name = data.name;
+		yield r.$update( ['name'] );
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}	
+	},
+
+	'POST /api/req/plan/tpl/module/child/:id/delete': function* (id){
+		var r = yield modelTplModule.$find(id);
+		if( r !== null ){
+			yield r.$destroy();
+		}
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)

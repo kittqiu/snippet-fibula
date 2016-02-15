@@ -1,4 +1,5 @@
 {
+	"Add module": "添加模块",
 	"Advice": "修改建议",
 	"All": "所有的",
 	"Any More": "更多",
@@ -25,12 +26,15 @@
 	"Copy": "复制",
 	"Copy content": "复制内容",
 	"Create": "创建",
+	"Create module": "创建模块",
 	"Create product": "创建产品",
 	"Create product series": "创建产品系列",
 	"Create snippet module": "创建模块",
+	"Create template": "创建模板",
 	"Create version": "创建新版本",
 	"Created at": "创建于",	
 
+	"Delete": "删除",
 	"depend on": "依赖于",
 	"dependence": "依赖",
 	"description": "简述",
@@ -38,8 +42,10 @@
 	"Discard": "丢弃",
 
 	"Edit": "编辑",
+	"Edit module": "编辑模块",
 	"Edit product": "编辑产品",
 	"Edit series": "编辑产品系列",
+	"Edit template": "编辑模板",
 	"Edit version": "编辑版本",
 	"email": "邮箱",
 	"Environment": "运行环境",
@@ -55,6 +61,7 @@
 
 	"I Created": "我创建的",
 	"I Edited": "我编辑的",
+	"Insert Module": "插入模块",
 
 	"Keywords": "关键字",
 
@@ -65,6 +72,7 @@
 
 	"Menu": "目录",
 	"Mine": "我的",
+	"Module template": "模块模板",
 	"More": "查看更多",
 	"My Contribution":"我的贡献",
 

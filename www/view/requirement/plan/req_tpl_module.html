@@ -1,0 +1,57 @@
+{% extends './req_plan_base.html' %}
+
+{% block req_plan_toolbar %}
+<a href="/req/plan/tpl/module/creation" class="dv-link" style="margin-right:15px">{{ _('Create template') }}</a>
+{% endblock %}
+
+{% block head %}
+
+<script type="text/javascript">
+
+function deleteModule( id ){	
+	postJSON( '/api/req/plan/tpl/module/child/' + id +'/delete', function(err, result){
+		if( !err ){
+			$('#vm').addClass('uk-hidden');
+			location.assign(result.redirect);
+		}
+	});
+}
+
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content" style="max-width:800px">
+	<div id="vm" >
+		<h2 class="x-title">{{ _('Module template') }}</h2>
+		{% for tn,t in mods %}
+		<div style="margin-top:60px;margin-bottom:5px;">
+			<span style="color:#000" class="dv-title"><a href="/req/plan/tpl/module/{{t.id}}/edit" style="color:#333">{{ t.name }}</a></span>
+			<div style="text-align:right;float:right">
+				<a href="/req/plan/tpl/module/child/creation?parent={{t.id}}" class="dv-link">{{ _('Add module') }}</a>
+			</div>
+			<hr style="margin-top:2px;border-top:2px solid #888;">
+			<table class="uk-width-1-1 uk-table">
+				{% for mn, m in t.mods %}
+				<tr>
+					<td class="uk-width-1-10 uk-text-left"><b><a href="/req/plan/tpl/module/child/{{m.id}}/edit"  style="color:#333">{{ m.name }}</a></b></td>
+					<td class="uk-width-1-10 uk-text-right">
+						<a href="/req/plan/tpl/module/child/creation?before={{m.id}}&parent={{t.id}}" class="dv-link">{{ _('Insert Module')}}</a>
+						<a onclick="deleteModule('{{ m.id }}')" class="dv-link" style="margin-left:10px">{{ _('Delete')}}</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+			{% if t.mods.length == 0 %}
+				{{ _('None')}}
+			{% endif %}
+		</div>
+		{% endfor %}
+
+		{% if mods.length == 0 %}
+				{{ _('None')}}
+		{% endif %}	
+	</div>
+</div>
+{% endblock %}

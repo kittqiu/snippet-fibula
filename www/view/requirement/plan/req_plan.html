@@ -1,8 +1,4 @@
-{% extends './req_base.html' %}
-
-{% block req_right_toolbar %}
-	<a href="/req/plan/series/creation" class="dv-link" style="margin-right:15px">{{ _('Create product series') }}</a>
-{% endblock %}
+{% extends './req_plan_base.html' %}
 
 {% block content %}
 <div id="content-block" class="dv-container x-content" style="max-width:1080px">
@@ -10,16 +6,15 @@
 		<h2 class="x-title">{{ _('Our products') }}</h2>
 		{% for sn,s in tree %}
 		<div style="margin-top:60px;margin-bottom:5px;">
-			<span style="color:#000" class="dv-title">{{ s.name }}</span>
+			<span style="color:#000" class="dv-title"><a href="/req/plan/series/{{s.id}}/edit" style="color:#333">{{ s.name }}</a></span>
 			<div style="text-align:right;float:right">
 				<a href="/req/plan/product/creation?series={{s.id}}" class="dv-link">{{ _('Create product') }}</a>
-				<a href="/req/plan/series/{{s.id}}/edit" class="dv-link" style="padding-left:10px">{{ _('Edit')}}</a>
 			</div>
 			<hr style="margin-top:2px;border-top:2px solid #888;">
 			<table class="uk-width-1-1 uk-table">
 				{% for pn, p in s.products %}
 				<tr>
-					<td class="uk-width-1-10 uk-text-left">{{ p.name }}</td>
+					<td class="uk-width-1-10 uk-text-left"><b><a href="/req/plan/product/{{p.id}}/edit"  style="color:#333">{{ p.name }}</a></b></td>
 					<td class="uk-width-8-10">
 						{% for vn, v in p.versions %}
 							<span style="margin-left:20px;"><a href="/req/plan/version/{{v.id}}" class="dv-link">{{ v.name }}</a></span>
@@ -27,7 +22,6 @@
 					</td>
 					<td class="uk-width-1-10">
 						<a href="/req/plan/version/creation?product={{p.id}}" class="dv-link">{{ _('New Version')}}</a>
-						<a href="/req/plan/product/{{p.id}}/edit" class="dv-link" style="padding-left:10px">{{ _('Edit')}}</a>
 					</td>
 				</tr>
 				{% endfor %}

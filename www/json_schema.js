@@ -335,6 +335,13 @@ var schemas = {
         },
         required:['name']
     },
+    tplModule:{
+        type: 'object',
+        properties: {
+            name: PROPERTY.NAME,
+        },
+        required:['name']
+    },
     updateWebsiteSettings: {
         type: 'object',
         properties: {
