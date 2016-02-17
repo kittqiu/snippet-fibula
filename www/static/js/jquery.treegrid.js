@@ -6,6 +6,33 @@
  * Licensed under the MIT licenses.
  */
 (function($) {
+    var Utils = {};
+    Utils.str2json = function(str, notevil) {
+        try {
+            if (notevil) {
+                return JSON.parse(str
+                    // wrap keys without quote with valid double quote
+                    .replace(/([\$\w]+)\s*:/g, function(_, $1){return '"'+$1+'":';})
+                    // replacing single quote wrapped ones to double quote
+                    .replace(/'([^']+)'/g, function(_, $1){return '"'+$1+'"';})
+                );
+            } else {
+                return (new Function("", "var json = " + str + "; return JSON.parse(JSON.stringify(json));"))();
+            }
+        } catch(e) { return false; }
+    };
+
+    Utils.options = function(string) {
+            if ($.isPlainObject(string)) return string;
+            var start = (string ? string.indexOf("{") : -1), options = {};
+            if (start != -1) {
+                try {
+                    options = Utils.str2json(string.substr(start));
+                } catch (e) {}
+            }
+
+            return options;
+        };
 
     var methods = {
         /**
@@ -35,9 +62,25 @@
                 var $this = $(this);
                 $this.treegrid('setTreeContainer', settings.getTreeGridContainer.apply(this));
                 $this.treegrid('getChildNodes').treegrid('initNode', settings);
-                $this.treegrid('initExpander').treegrid('initIndent').treegrid('initEvents').treegrid('initState').treegrid('initChangeEvent').treegrid("initSettingsEvents");
+                $this.treegrid('initExpander').treegrid('initIndent').treegrid('initDrag').treegrid('initEvents').treegrid('initState').treegrid('initChangeEvent').treegrid("initSettingsEvents");
             });
         },
+        initDrag: function(){
+            var $this = $(this);
+            if( $this.treegrid('getSetting', 'draggable' )){
+                var options = {},
+                    drag = {droppable:true, draggable:true }, 
+                    optstr = $this.attr('data-treegrid-drag');
+                if( optstr !== undefined ){
+                    options = Utils.options(optstr);
+                }
+                $.extend(drag, options);
+                $this.data('dragOptions', drag);
+                $this.attr('draggable', true );        
+            }
+            return $this;
+        },
+
         initChangeEvent: function() {
             var $this = $(this);
             //Save state on change
@@ -70,7 +113,82 @@
                 $this.addClass('treegrid-expanded');
             });
 
+            if( $this.treegrid('isDraggable') ){
+                this.on("dragstart", function(ev) {
+                    var $this = $(this);
+                    ev.originalEvent.dataTransfer.setData("src_id", $this.treegrid('getNodeId'));
+                });
+            }
+            if( $this.treegrid('isDroppable') ){
+                this.on("dragover", function(ev){
+                    ev.preventDefault();
+                });
+                this.on( "drop", function(ev){
+                    ev.preventDefault();
+                    var id = ev.originalEvent.dataTransfer.getData("src_id"), 
+                        $this = $(this);
+                    $(this).treegrid('appendChild', id );
+                    $this.treegrid('getSetting', 'onMove').apply($this, [id,$this.treegrid('getNodeId')]);
+                });
+            }
+
             return $this;
+        },
+
+        appendChild: function(id){
+            var $this = $(this),
+                parentId = $this.treegrid('getNodeId'),
+                $child = $(this).treegrid('getSetting', 'getNodeById').apply(this, [id, $(this).treegrid('getTreeContainer')]),
+                childIsLeaf = $child.treegrid('isLeaf'),
+                childDepth = $child.treegrid('getDepth'),
+                orgParentId = $child.treegrid('getParentNodeId'),
+                $orgParent = $child.treegrid('getParentNode'),
+                $son, $sons=[];
+
+            if( parentId === id ){
+                return;
+            }
+            if( $child.treegrid('isAncestor', parentId)){
+                return;
+            }
+
+            if( !childIsLeaf ){
+                $son = $child.next();
+                while( $son.length > 0 ){
+                    var depth = $son.treegrid('getDepth');
+                    if(depth <= childDepth ){
+                        break;
+                    }
+                    $sons.push($son);
+                    $son = $son.next();
+                }
+            }
+
+            $child.removeClass('treegrid-parent-' + orgParentId);
+            $child.addClass('treegrid-parent-' + parentId);
+            $this.after($child);
+            
+            $child.treegrid('initIndent');
+            $this.trigger("change");            
+            if(!$this.treegrid('isExpanded')){
+                $this.treegrid('expand')  
+            }
+            $this.treegrid('initIndent');
+
+            $orgParent.trigger("change");
+            if( $orgParent.treegrid('isLeaf')){
+                $orgParent.treegrid('initExpander');
+                $orgParent.treegrid('initIndent');
+            }
+
+            if( !childIsLeaf ){
+                var $prenode = $child;
+                $.each($sons, function(i,$s){
+                    $prenode.after($s);
+                    $prenode = $s;
+                    $s.treegrid('initIndent');
+                });  
+            }
         },
         /**
          * Initialize events from settings
@@ -121,9 +239,11 @@
                 $($(this).closest('tr')).treegrid('toggle');
             });
 
-            var type = $this.attr('data-type');
+            var type = $this.attr('data-treegrid-type');
             if( type !== undefined ){
                 $this.find('.treegrid-expander').addClass($this.treegrid('getSetting', 'nodeClasses')[type]);
+            }else{
+                $this.find('.treegrid-expander').addClass($this.treegrid('getSetting', 'expanderCollapsedClass'));
             }
             //expander = $this.find('.treegrid-expander');
             //$this.treegrid('getSetting', 'expanderTemplate');
@@ -299,6 +419,7 @@
          * @returns {String}
          */
         getParentNodeId: function() {
+            //console.log($(this));
             return $(this).treegrid('getSetting', 'getParentNodeId').apply(this);
         },
         /**
@@ -423,6 +544,37 @@
                 }
             }
         },
+        isDraggable: function(){
+            var $this = $(this);
+            if( $this.treegrid('getSetting', 'draggable' )){
+                return $this.data('dragOptions').draggable;
+            }
+            return false;
+        },
+        isDroppable: function(){
+            var $this = $(this);
+            if( $this.treegrid('getSetting', 'draggable' )){
+                return $this.data('dragOptions').droppable;
+            }
+            return false;
+        },
+        isAncestor: function(childid){
+            var $this = $(this),
+                id = $this.treegrid('getNodeId'),
+                $child = $this.treegrid('getSetting', 'getNodeById').apply(this, [childid, $(this).treegrid('getTreeContainer')]),
+                $parent, pid;
+
+            $parent = $child.treegrid('getParentNode');
+            while( $parent !== null ){
+                pid = $parent.treegrid('getNodeId');
+                if( pid === id ){
+                    return true;
+                }  
+                $parent = $parent.treegrid('getParentNode');
+            }
+            return false;
+        }, 
+
         /**
          * Expand node
          *
@@ -578,6 +730,7 @@
         expanderExpandedClass: 'treegrid-expander-expanded',
         expanderCollapsedClass: 'treegrid-expander-collapsed',
         treeColumn: 0,
+        draggable: false,
         getExpander: function() {
             return $(this).find('.treegrid-expander');
         },
@@ -626,7 +779,8 @@
         //Events
         onCollapse: null,
         onExpand: null,
-        onChange: null
+        onChange: null,
+        onMove: null
 
     };
 })(jQuery);

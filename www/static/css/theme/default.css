@@ -10817,6 +10817,14 @@ a.uk-datepicker-table-muted {
 @button-primary-hover-background:               rgba(203, 56, 55, 0.8);
 @button-primary-active-background:              #cb3837;*/
 /*icon*/
+.uk-icon-manage:before {
+  content: "\f007";
+  color: #D50000;
+}
+.uk-icon-manage-deputy:before {
+  content: "\f007";
+  color: #1565C0;
+}
 /*navbar*/
 /*@navbar-background:                             #cb3837;
 @navbar-nav-color:                              #E5BAD3;
@@ -10979,9 +10987,6 @@ form p.help-text {
   margin-bottom: 0px;
   color: #CC525E;
   text-decoration: none;
-}
-.wiki-content > :header {
-  font-weight: bold;
 }
 .wiki-content > h1 {
   font-size: 1.8em;

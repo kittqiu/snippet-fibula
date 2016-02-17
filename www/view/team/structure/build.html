@@ -16,9 +16,11 @@
 {% endblock %}
 
 {% block content %}
-<div id="content-block" class="dv-container x-content" style="max-width:1080px">
+<div id="content-block" class="dv-container x-content" style="max-width:800px">
+    <h2 class="x-title">{{ _('department structure') }}</h2>        
+    <hr style="margin-top:2px">
 	<table class="tree">
-	<tr id="node0" class="treegrid-a" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true" >
+	<!--tr id="node0" class="treegrid-a" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true" >
 		<td>Root node</td><td>Additional info</td>
 	</tr>
 	<tr id="node1" class="treegrid-2 treegrid-parent-a" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true">
@@ -33,15 +35,43 @@
 	<tr id="node8" class="treegrid-8 treegrid-parent-3" ondragstart="drag(event)" data-type="manager" draggable="true">
 		<td>user_manage</td><td>Additional info</td>
 	</tr>
+    <tr id="node8" class="treegrid-8 treegrid-parent-3" data-treegrid-type="manager" data-treegrid-drag="{droppable:false}">
+        <td>user_manage</td><td>Additional info</td>
+    </tr>
 	<tr id="node4" class="treegrid-4 treegrid-parent-3" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true">
 		<td>group1</td><td>Additional info</td>
 	</tr>
-	<tr id="node6" id="node6" class="treegrid-6 treegrid-parent-4" data-type="manager_duputy" draggable="true" ondragstart="drag(event)">
+	<tr id="node6" id="node6" class="treegrid-6 treegrid-parent-4" data-treegrid-type="manager_duputy" draggable="true" ondragstart="drag(event)">
 		<td>user1</td><td>Additional info</td>
 	</tr>
-	<tr id="node7" class="treegrid-7 treegrid-parent-4" ondragstart="drag(event)" data-type="user" draggable="true">
+	<tr id="node7" class="treegrid-7 treegrid-parent-4" ondragstart="drag(event)" data-treegrid-type="user" draggable="true">
 		<td>user2</td><td>Additional info</td>
-	</tr>
+	</tr-->
+
+    <tr class="treegrid-a" ondragover="allowDrop(event)">
+        <td>Root node</td><td>Additional info</td>
+    </tr>
+    <tr class="treegrid-2 treegrid-parent-a">
+        <td>Node 2</td><td>Additional info</td>
+    </tr>
+    <tr class="treegrid-5 treegrid-parent-2" >
+        <td>Node 5</td><td>Additional info</td>
+    </tr>
+    <tr class="treegrid-3 treegrid-parent-a">
+        <td>Node 3</td><td>Additional info</td>
+    </tr>
+    <tr class="treegrid-8 treegrid-parent-3" data-treegrid-type="manager" data-treegrid-drag="{droppable:false}">
+        <td>user_manage</td><td>Additional info</td>
+    </tr>
+    <tr class="treegrid-4 treegrid-parent-3">
+        <td>group1</td><td>Additional info</td>
+    </tr>
+    <tr class="treegrid-6 treegrid-parent-4" data-treegrid-type="manager_duputy"  data-treegrid-drag="{droppable:false}">
+        <td>user1</td><td>Additional info</td>
+    </tr>
+    <tr class="treegrid-7 treegrid-parent-4"  data-treegrid-type="user" data-treegrid-drag="{droppable:false}">
+        <td>user2</td><td>Additional info</td>
+    </tr>
 	
 </table>
 </div>
@@ -56,11 +86,16 @@ $('.tree').treegrid({
 		user:'uk-icon-user',
 		manager: 'uk-icon-manage',
 		manager_duputy: 'uk-icon-manage-deputy'
-	}
+	},
+    draggable: true, 
+    onMove: function(from,to){
+        console.log('from "' + from + '" to "' + to + '"');
+    }
 });
 
 function allowDrop(ev) {
     ev.preventDefault();
+    //console.log(this);
 }
 
 function drag(ev) {
@@ -90,7 +125,7 @@ function drop(ev) {
     	
     $child.removeClass('treegrid-parent-' + orgParentId);
     $child.addClass('treegrid-parent-' + parentId);
-    $parent.after($child);
+    $parent.after(child);
     $parent.trigger("change");
     $parent.treegrid('initIndent');
     $child.treegrid('initIndent');
