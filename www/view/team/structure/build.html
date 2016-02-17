@@ -1,26 +1,106 @@
 {% extends '../team_base.html' %}
 
+{% block css %}
+<style>
+.uk-icon-manage:before {
+  content: "\f007";
+  color: #D50000;
+}
+
+.uk-icon-manage-deputy:before {
+  content: "\f007";
+  color: #1565C0;
+}
+
+</style>
+{% endblock %}
+
 {% block content %}
 <div id="content-block" class="dv-container x-content" style="max-width:1080px">
 	<table class="tree">
-	<tr class="treegrid-1">
+	<tr id="node0" class="treegrid-a" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true" >
 		<td>Root node</td><td>Additional info</td>
 	</tr>
-	<tr class="treegrid-2 treegrid-parent-1">
+	<tr id="node1" class="treegrid-2 treegrid-parent-a" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true">
 		<td>Node 1-1</td><td>Additional info</td>
 	</tr>
-	<tr class="treegrid-3 treegrid-parent-1">
+	<tr id="node5" class="treegrid-5 treegrid-parent-2" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true">
 		<td>Node 1-2</td><td>Additional info</td>
 	</tr>
-	<tr class="treegrid-4 treegrid-parent-3">
-		<td>Node 1-2-1</td><td>Additional info</td>
+	<tr id="node3" class="treegrid-3 treegrid-parent-a" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true">
+		<td>Node 1-2</td><td>Additional info</td>
 	</tr>
+	<tr id="node8" class="treegrid-8 treegrid-parent-3" ondragstart="drag(event)" data-type="manager" draggable="true">
+		<td>user_manage</td><td>Additional info</td>
+	</tr>
+	<tr id="node4" class="treegrid-4 treegrid-parent-3" ondragstart="drag(event)" ondragover="allowDrop(event)" ondrop="drop(event)" draggable="true">
+		<td>group1</td><td>Additional info</td>
+	</tr>
+	<tr id="node6" id="node6" class="treegrid-6 treegrid-parent-4" data-type="manager_duputy" draggable="true" ondragstart="drag(event)">
+		<td>user1</td><td>Additional info</td>
+	</tr>
+	<tr id="node7" class="treegrid-7 treegrid-parent-4" ondragstart="drag(event)" data-type="user" draggable="true">
+		<td>user2</td><td>Additional info</td>
+	</tr>
+	
 </table>
 </div>
 {% endblock %}
 
 {% block readyscript %}
 <script type="text/javascript">
-$('.tree').treegrid();
+$('.tree').treegrid({
+	expanderExpandedClass: 'uk-icon-folder-open-o',
+	expanderCollapsedClass: 'uk-icon-folder-o',
+	nodeClasses: {
+		user:'uk-icon-user',
+		manager: 'uk-icon-manage',
+		manager_duputy: 'uk-icon-manage-deputy'
+	}
+});
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+	console.log(ev.target);
+    ev.dataTransfer.setData("src_id", ev.target.id);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var 
+    	id = ev.dataTransfer.getData("src_id"),
+    	$parent =  $(ev.target).closest('tr'),
+    	parentId = $parent.treegrid('getNodeId'),
+    	child = document.getElementById(id),
+    	$child = $(child),
+    	orgParentId = $child.treegrid('getParentNodeId'),
+    	$orgParent = $child.treegrid('getParentNode');
+    /*var id = ev.dataTransfer.getData("src_id");
+    console.log('id:'+id);
+    var $parent =  $(ev.target).closest('tr');
+    console.log($parent);
+    var parentId = $parent.treegrid('getNodeId');
+    console.log(parentId);
+    var child = document.getElementById(id);
+    var $child = $(child);
+    var orgParentId = $child.treegrid('getParentNodeId');*/
+    	
+    $child.removeClass('treegrid-parent-' + orgParentId);
+    $child.addClass('treegrid-parent-' + parentId);
+    $parent.after($child);
+    $parent.trigger("change");
+    $parent.treegrid('initIndent');
+    $child.treegrid('initIndent');
+    if(!$parent.treegrid('isExpanded')){
+    	$parent.treegrid('expand')	
+    }
+    $orgParent.trigger("change");
+    if( $orgParent.treegrid('isLeaf')){
+    	$orgParent.treegrid('initExpander');
+    }
+}
 </script>
 {% endblock %}
