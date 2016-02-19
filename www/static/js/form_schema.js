@@ -34,6 +34,10 @@ var SCHEMA_PROPERTY = {
         type: 'string',
         pattern: '^[0-9a-f]{50}$'
     },
+    IDEx: {
+        type: 'string',
+        pattern: '^[0-9a-z]{1,50}$'
+    },
 	KEYWORD:{
 		type: 'string',
 		minLength: 3,
@@ -123,6 +127,14 @@ var SCHEMAS = {
 			verifypassword:SCHEMA_PROPERTY.PASSWORDVERIFY
 		},
 		required:['oldpassword', 'newpassword', 'verifypassword']
+	},
+	createDepartment:{
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME,
+			pid: SCHEMA_PROPERTY.IDEx,
+		},
+		required:['name', 'pid']
 	},
 	createProduct:{
 		type: 'object',

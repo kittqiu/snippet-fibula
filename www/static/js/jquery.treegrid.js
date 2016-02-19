@@ -120,30 +120,48 @@
                 });
             }
             if( $this.treegrid('isDroppable') ){
-                this.on("dragover", function(ev){
-                    ev.preventDefault();
+                this.on("dragover", function(ev){                    
+                   ev.preventDefault();
                 });
                 this.on( "drop", function(ev){
                     ev.preventDefault();
                     var id = ev.originalEvent.dataTransfer.getData("src_id"), 
-                        $this = $(this);
+                        $this = $(this),
+                        nid = $this.treegrid('getNodeId'),
+                        $srcNode = $(this).treegrid('getSetting', 'getNodeById').apply(this, [id, $(this).treegrid('getTreeContainer')]),
+                        orgParentId = $srcNode.treegrid('getParentNodeId');
+                    if( id === nid || $srcNode.treegrid('isAncestor', nid)){
+                        return;
+                    }
                     $(this).treegrid('appendChild', id );
-                    $this.treegrid('getSetting', 'onMove').apply($this, [id,$this.treegrid('getNodeId')]);
+                    $this.treegrid('getSetting', 'onMove').apply($this, [id,$this.treegrid('getNodeId'),orgParentId]);
                 });
+            }
+
+            if( $this.treegrid('getSetting', 'selectable' )){
+               this.on("click", function(ev){
+                    var $this = $(this),
+                        cls = $this.treegrid('getSetting', 'selectedClass');
+                    $('.'+cls).removeClass(cls);
+                    $this.addClass( cls );
+                    $this.treegrid('getSetting', 'onSelected').apply($this, [$this.treegrid('getNodeId')]);
+               });
             }
 
             return $this;
         },
 
-        appendChild: function(id){
+        appendChild: function(id, isprepend){
             var $this = $(this),
                 parentId = $this.treegrid('getNodeId'),
-                $child = $(this).treegrid('getSetting', 'getNodeById').apply(this, [id, $(this).treegrid('getTreeContainer')]),
+                $child = $(this).treegrid('getSetting', 'getNodeById').apply(this, [id, $(this).treegrid('getTreeContainer')]),         
                 childIsLeaf = $child.treegrid('isLeaf'),
                 childDepth = $child.treegrid('getDepth'),
+                parentDepth = $this.treegrid('getDepth'),
                 orgParentId = $child.treegrid('getParentNodeId'),
                 $orgParent = $child.treegrid('getParentNode'),
-                $son, $sons=[];
+                $beforenode, $son, 
+                $sons=$child.treegrid('getDescendant');
 
             if( parentId === id ){
                 return;
@@ -152,21 +170,23 @@
                 return;
             }
 
-            if( !childIsLeaf ){
-                $son = $child.next();
-                while( $son.length > 0 ){
-                    var depth = $son.treegrid('getDepth');
-                    if(depth <= childDepth ){
-                        break;
-                    }
-                    $sons.push($son);
-                    $son = $son.next();
-                }
-            }
-
             $child.removeClass('treegrid-parent-' + orgParentId);
             $child.addClass('treegrid-parent-' + parentId);
-            $this.after($child);
+            $beforenode = $this;
+            if( !isprepend ){
+                if( !$this.treegrid('isLeaf')){
+                    var $sibling = $this.next();                
+                    while( $sibling.length > 0 ){
+                       var depth = $sibling.treegrid('getDepth'); 
+                       if( depth <= parentDepth ){
+                            break;
+                       }
+                       $beforenode = $sibling;
+                       $sibling = $sibling.next();
+                    }
+                }
+            }
+            $beforenode.after($child);
             
             $child.treegrid('initIndent');
             $this.trigger("change");            
@@ -175,21 +195,188 @@
             }
             $this.treegrid('initIndent');
 
-            $orgParent.trigger("change");
-            if( $orgParent.treegrid('isLeaf')){
-                $orgParent.treegrid('initExpander');
-                $orgParent.treegrid('initIndent');
+            if( $orgParent !== null ){
+                $orgParent.trigger("change");
+                if( $orgParent.treegrid('isLeaf')){
+                    $orgParent.treegrid('initExpander');
+                    $orgParent.treegrid('initIndent');
+                }  
             }
-
+            
             if( !childIsLeaf ){
-                var $prenode = $child;
+                $child.after($sons);
                 $.each($sons, function(i,$s){
-                    $prenode.after($s);
-                    $prenode = $s;
                     $s.treegrid('initIndent');
-                });  
+                });
             }
         },
+
+        getSelectedId: function(){
+            var $this = $(this),
+                cls = $this.treegrid('getSetting', 'selectedClass'),
+                $node = $this.treegrid('getTreeContainer').find('tr.'+cls);
+            if( $node )
+                return $node.treegrid('getNodeId');
+            else 
+                return null;
+        },
+
+        newNode: function(id){
+            var $this = $(this),
+                $node = $(this).treegrid('getSetting', 'getNodeById').apply(this, [id, $(this).treegrid('getTreeContainer')]);
+            $node.treegrid('initNode', $this.treegrid('getTreeContainer').data('settings'));
+        },
+
+        remove: function(){
+            var $this = $(this),
+                $parent = $(this).treegrid('getParentNode');
+            $this.remove();
+            if($parent){
+                $parent.trigger("change");
+                if( $parent.treegrid('isLeaf')){
+                    $parent.treegrid('initExpander');
+                    $parent.treegrid('initIndent');
+                }  
+            }
+        },
+
+        up: function(){
+            var $this = $(this);
+            if( $this.treegrid('isFirst')){
+                return;
+            }
+
+            var $prev = $this.treegrid('prev'),
+                $descendant = $this.treegrid('getDescendant');
+            $prev.before($this);
+            $prev.before($descendant);
+        },
+
+        down: function(){
+            var $this = $(this);
+            if( $this.treegrid('isLast')){
+                return;
+            }
+
+            var $next = $this.treegrid('next'),
+                $descendant = $this.treegrid('getDescendant'),
+                $nextchild = $next.treegrid('getDescendant');
+            if( $next.treegrid('isLeaf') ){
+                $next.after($descendant);
+                $next.after($this);
+            }else{
+                var $last = $nextchild.pop();
+                $last.after($descendant);
+                $last.after($this);
+            }            
+        },
+
+        upgrade: function(){
+            var $this = $(this),
+                $parentNode = $this.treegrid('getParentNode'),
+                parentId = $this.treegrid('getParentNodeId'), 
+                $descendant = $this.treegrid('getDescendant'),
+                id =  $this.treegrid('getNodeId'),
+                $sibling = [], $tmp, i;
+            if( $parentNode === null ){
+                return;
+            }
+            $tmp = $this;
+            while($tmp = $tmp.treegrid('next')){
+                $sibling.push($tmp);                
+            }
+
+            var $grandNode = $parentNode.treegrid('getParentNode');
+            $this.removeClass('treegrid-parent-' + parentId);
+            if( $grandNode !== null ){
+                $this.addClass('treegrid-parent-' + $grandNode.treegrid('getNodeId'));
+            }
+            $this.treegrid('initIndent');
+            $.each($descendant, function(i,$s){
+                $s.treegrid('initIndent');
+            });
+
+            $parentNode.trigger("change");
+            if( $parentNode.treegrid('isLeaf')){
+                $parentNode.treegrid('initExpander');
+                $parentNode.treegrid('initIndent');
+            }
+
+            for( i = 0; i < $sibling.length; i++ ){
+                var $s = $sibling[i],
+                    nid = $s.treegrid('getNodeId');
+                $s.removeClass('treegrid-parent-' + parentId);
+                $s.addClass('treegrid-parent-' + id);
+                $s.treegrid('getSetting', 'onMove').apply($s, [nid,id]);   
+            }                 
+        },
+
+        prev: function(){
+            var $this = $(this);
+            if( $this.treegrid('isFirst')){
+                return null;
+            }
+
+            var parentNode = $(this).treegrid('getParentNode'),
+                nodes, i, $prev,
+                id = $this.treegrid('getNodeId');
+            if (parentNode === null) {
+                nodes = $(this).treegrid('getRootNodes');
+            }else{
+                nodes = parentNode.treegrid('getChildNodes');
+            }
+
+            for( i = 0; i < nodes.length; i++ ){
+                var n = nodes[i];
+                if($(n).treegrid('getNodeId')===id){
+                    break;
+                }
+                $prev = $(n);
+            }
+            return $prev;
+        },
+
+        next: function(){
+            var $this = $(this);
+            if( $this.treegrid('isLast')){
+                return null;
+            }
+
+            var parentNode = $(this).treegrid('getParentNode'),
+                nodes, i, $next,
+                id = $this.treegrid('getNodeId');
+            if (parentNode === null) {
+                nodes = $(this).treegrid('getRootNodes');
+            }else{
+                nodes = parentNode.treegrid('getChildNodes');
+            }
+
+            for( i = 0; i < nodes.length; i++ ){
+                var n = nodes[i];
+                if($(n).treegrid('getNodeId')===id){
+                    $next = $(nodes[i+1]);
+                    break;
+                }
+            }
+            return $next;
+        },
+
+        getDescendant: function(){
+            var $this = $(this),
+                depth = $this.treegrid('getDepth'),
+                $s, $descendant = [];
+            $s = $this.next();
+            while( $s.length > 0 ){
+                var childdepth = $s.treegrid('getDepth');
+                if(childdepth <= depth ){
+                    break;
+                }
+                $descendant.push($s);
+                $s = $s.next();
+            }
+            return $descendant;
+        },
+
         /**
          * Initialize events from settings
          *
@@ -731,6 +918,8 @@
         expanderCollapsedClass: 'treegrid-expander-collapsed',
         treeColumn: 0,
         draggable: false,
+        selectable: false,
+        selectedClass: 'treegrid-selected',
         getExpander: function() {
             return $(this).find('.treegrid-expander');
         },
@@ -780,7 +969,8 @@
         onCollapse: null,
         onExpand: null,
         onChange: null,
-        onMove: null
+        onMove: function(){},
+        onSelected: function(){}
 
     };
 })(jQuery);

@@ -94,6 +94,10 @@ var PROPERTY = {
         type: 'string',
         pattern: '^([0-9a-f]{50})?$'
     },
+    ID_EXT: {
+        type: 'string',
+        pattern: '^([0-9a-z]{1,50})?$'
+    },
     POSITIVE_INTEGER: {
         type: 'integer',
         minimum: 1,
@@ -334,6 +338,14 @@ var schemas = {
             name: PROPERTY.NAME,
         },
         required:['name']
+    },
+    simpleDepartment:{
+        type: 'object',
+        properties: {
+            name: PROPERTY.NAME,
+            pid: PROPERTY.ID_EXT,
+        },
+        required:['name', 'pid']
     },
     tplModule:{
         type: 'object',

@@ -169,6 +169,9 @@ module.exports = {
         if( !user.verified ){
             throw api.authFailed('Unverified', this.translate('Please verify your email first.'));
         }
+        if( !user.actived ){
+            throw api.authFailed('Unactived', this.translate('User has been forbidden.'));
+        }
 
         //reset 
         email = user.email;
