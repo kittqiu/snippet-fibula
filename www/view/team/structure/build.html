@@ -236,7 +236,7 @@ function removeUser(id){
     flushFreeUserList();
 }
 
-function addUser(id, depid){
+function addUser(id, depid, onlyui){
     var $tree = $('.tree'),
         depId = depid || $tree.treegrid('getSelectedId'),
         u = Users[id];
@@ -255,14 +255,15 @@ function addUser(id, depid){
         $dep.treegrid('appendChild', u.id, true );
         //console.log(depId);
 
-        postJSON( '/api/team/member/u/'+u.id + '?department='+ depId, function(err,result){
-            if( err !== null )console.log(err);
-            else{
-               $('#u-' + u.id).remove();
-               flushFreeUserList();
-            }
-        });
-        
+        if(!onlyui){
+            postJSON( '/api/team/member/u/'+u.id + '?department='+ depId, function(err,result){
+                if( err !== null )console.log(err);
+                else{
+                   $('#u-' + u.id).remove();
+                   flushFreeUserList();
+                }
+            });
+        }        
     }else{
         UIkit.modal.alert('{{_("Select department first!")}}');
     }
@@ -289,7 +290,7 @@ function initUserList(users){
 function initDepUser(users){
     saveUsers(users);
     $.each(users, function(i,u){
-        addUser(u.id, u.department );
+        addUser(u.id, u.department, true );
     })
 }   
 
