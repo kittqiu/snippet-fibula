@@ -1,0 +1,37 @@
+{% extends '../_base.html' %}
+
+{% block title %} Project {% endblock %}
+
+{% block pagehead %}
+<script src="/static/js/jquery.treegrid.js"></script>
+<link rel="stylesheet" href="/static/css/jquery.treegrid.css"/>	
+{% block head %}<!-- head  -->{% endblock %}
+
+
+{% endblock %}
+
+
+{% block mainheader %}
+<div id="main-header" class="uk-grid">
+	<div class="uk-width-1-1 uk-block uk-block-muted uk-flex x-toolbar" >
+		<div class="uk-flex-item-auto " style="padding:10px 20px;">
+			<!--a href="/req/plan" class="dv-link" style="margin-right:15px">{{ _('Product Manage') }}</a-->
+		{% block toolbar %}
+		{% endblock %}
+		</div>
+		<div class="uk-flex-item-none " style="padding:10px 20px;">
+		{% if __user__ %}
+		{% block right_toolbar %}
+		{% endblock %}
+		<a onclick="showHelp()" class="dv-link" >{{ _('Help')}}</a>
+		{% else %}					
+		{% endif %}
+		</div>			
+	</div>
+</div>
+{% endblock %}
+
+{% block readyscript %}
+<script type="text/javascript">
+</script>
+{% endblock %}

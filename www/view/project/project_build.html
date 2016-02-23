@@ -1,0 +1,122 @@
+{% extends './project_base.html' %}
+
+{% block head %}
+<script src="/static/js/uikit/components/datepicker.js"></script>
+
+<script type="text/javascript">
+
+function initVM( data ){
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: data.name || '',
+			start_time: data.start_time || formatNow(),
+			master: data.master_id || '{{ __user__.name }}',
+			end_time: data.start_time || '',
+			details: data.details || ''
+		},
+		error_msgs:{
+			end_time: '请选择结束时间',
+			master: '请选择项目负责人'
+		},
+		methods:{
+			correctErrMsg: function(err){
+				_.each(err, function(e,n){
+					var options = vm.$options;
+					if(options.error_msgs.hasOwnProperty(e.data) && !e.message){
+						e.message = options.error_msgs[e.data];
+					}
+				});
+			},
+			getPostData: function(){
+				var data = {
+					name: this.name,
+					start_time: toDateTime(this.start_time),
+					end_time: toDateTime(this.end_time),
+					master: $("#master").find('option:selected').attr('id'),
+					details: this.details
+				};
+				//console.log(data)
+				if(validateJsonObj('createProject', data)){
+					if(data.start_time >= data.end_time){
+						throw  { error:'invalid parameter', data:'end_time', message:"结束时间应该大于开始时间"}; 
+					}
+					return data;
+				}
+			},
+			submit: function(){						
+				var data,
+					form = $('#vm').find('form');
+				try{
+					data = this.getPostData();
+					form.showFormError();//clear error tip
+				}catch(e){
+					this.correctErrMsg(e);
+					form.showFormError(e);
+					return;
+				}
+
+				form.postJSON( '{{ __form.action }}', data, function(err, result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
+						{% if __id %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% else %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% endif %}	
+					}
+				});
+			}
+		}
+	});
+	
+}
+
+$(function () {
+    loadingElement('content-block');
+    getJSON( '/api/team/department/list', function(err, deps){
+        //readyElement('content-block');
+        if(err){
+            fatal(err);
+        }else{
+            //$('#content-block').show();
+            initTree(deps);
+            loadDepUsers();            
+        }
+    }); 
+    
+
+    /*$('.users').find('tr').on('click', function(ev){
+        $('.user-active').removeClass('user-active');
+        $(this).addClass('user-active');
+    });*/
+
+});
+
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container" style="max-width:1480px">
+		<h2 class="x-title">项目: {{project.name}}</h2>
+		<hr style="margin-top:2px">
+		<div class="uk-grid uk-width-1-1">
+			<div class="uk-width-1-2" style="border-right:1px solid #ddd">
+				<table id="tree" class="tree uk-table uk-table-hover uk-width-1-1 uk-table-condensed">
+	                <tr class="treegrid-root">
+			            <td>{{project.name}}</td>
+			        </tr>
+	            </table>
+			</div>
+			<div class="uk-width-1-2">
+				{% block content_right %}
+				{% endblock %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+

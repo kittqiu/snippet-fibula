@@ -1,0 +1,161 @@
+{% extends './project_base.html' %}
+
+{% block head %}
+<script src="/static/js/uikit/components/datepicker.js"></script>
+
+<script type="text/javascript">
+
+function initVM( data ){
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: data.name || '',
+			start_time: data.start_time || formatNow(),
+			master: data.master_id || '{{ __user__.name }}',
+			end_time: data.start_time || '',
+			details: data.details || ''
+		},
+		error_msgs:{
+			end_time: '请选择结束时间',
+			master: '请选择项目负责人'
+		},
+		methods:{
+			correctErrMsg: function(err){
+				_.each(err, function(e,n){
+					var options = vm.$options;
+					if(options.error_msgs.hasOwnProperty(e.data) && !e.message){
+						e.message = options.error_msgs[e.data];
+					}
+				});
+			},
+			getPostData: function(){
+				var data = {
+					name: this.name,
+					start_time: toDateTime(this.start_time),
+					end_time: toDateTime(this.end_time),
+					master: $("#master").find('option:selected').attr('id'),
+					details: this.details
+				};
+				//console.log(data)
+				if(validateJsonObj('createProject', data)){
+					if(data.start_time >= data.end_time){
+						throw  { error:'invalid parameter', data:'end_time', message:"结束时间应该大于开始时间"}; 
+					}
+					return data;
+				}
+			},
+			submit: function(){						
+				var data,
+					form = $('#vm').find('form');
+				try{
+					data = this.getPostData();
+					form.showFormError();//clear error tip
+				}catch(e){
+					this.correctErrMsg(e);
+					form.showFormError(e);
+					return;
+				}
+
+				form.postJSON( '{{ __form.action }}', data, function(err, result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
+						{% if __id %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% else %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% endif %}	
+					}
+				});
+			}
+		}
+	});
+	
+}
+
+$(function () {
+	{% if __id %}
+	loadingElement('vm');
+	getJSON( '{{ __form.src }}', function(err, version ){
+		readyElement('vm');
+		if(err){
+			fatal(err);
+		}else{
+			initVM( version );
+		}
+	});
+
+	{% else %}	
+	var data = {};
+	initVM( data );
+	{% endif %}
+
+});
+
+</script>
+{% endblock %}
+
+{% block jump-title  %}
+{% if ! __id %}
+项目创建成功
+{% else %}
+项目修改成功
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container" style="max-width:600px">
+		<h2 class="x-title">{{ __form.name }}</h2>
+		<hr style="margin-top:2px">
+		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
+			<fieldset>
+				<div class="uk-alert uk-alert-danger uk-hidden"></div>
+			    <div class="uk-form-row uk-width-1-2" style="margin-top:20px">
+			        <label class="uk-form-label">{{ _('Name') }}</label>
+			        <div class="uk-form-controls">
+			        	<input v-model="name" name="name"  type="text" class="uk-width-1-1" autofucus>
+			        </div>
+			        <p class="help-text">3-50字符</p>
+			    </div>
+			    <div class="uk-form-row uk-width-1-3" style="margin-top:20px">
+			    	<label class="uk-form-label">PM</label>
+			    	<div class="uk-form-controls">
+			        	<select v-model="master" name="master" id="master" class="uk-width-1-1">
+			        		{% for n, u in users %}
+			        			<option id="{{u.id}}">{{ u.name }}</option>
+			        		{% endfor %}
+			        	</select>
+			        </div>
+			        <p class="help-text">请选择项目负责人</p>
+			    </div>
+			    <div class="uk-form-row" style="margin-top:20px">
+			    	<label class="uk-form-label">{{ _('Start time')}}</label>
+			    	<div class="uk-form-controls">
+			        	<input type="text" v-model="start_time" name="start_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"/>
+			        </div>
+			    </div>
+			    <div class="uk-form-row" style="margin-top:20px">
+			    	<label class="uk-form-label">{{ _('End time')}}</label>
+			    	<div class="uk-form-controls">
+			        	<input type="text" v-model="end_time" name="end_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"/>
+			        </div>
+			    </div>
+			    <div class="uk-form-row uk-width-1-1" style="margin-top:20px">
+			    	<label class="uk-form-label">{{ _('Explanation')}}</label>
+			    	<div class="uk-form-controls">
+			    		<textarea v-model="details" name="details" class="uk-width-1-1" style="height:120px">
+			    		</textarea>
+			    	</div>
+			    </div>
+			    <div class="uk-form-row uk-clearfix" style="margin-top:60px">
+			        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
+			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.submit) }}
+			        </button>
+			    </div>
+	    	</fieldset>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+

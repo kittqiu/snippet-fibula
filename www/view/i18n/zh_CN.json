@@ -32,6 +32,7 @@
 	"Create module": "创建模块",
 	"Create product": "创建产品",
 	"Create product series": "创建产品系列",
+	"Create project": "创建项目",
 	"Create department on level 1": "创建顶级部门",
 	"Create snippet module": "创建模块",
 	"Create template": "创建模板",
@@ -56,7 +57,9 @@
 	"Edit template": "编辑模板",
 	"Edit version": "编辑版本",
 	"email": "邮箱",
+	"End time": "结束时间",
 	"Environment": "运行环境",
+	"Explanation": "说明",
 
 	"Found": "找到",
 
@@ -97,6 +100,7 @@
 	"old password":"原始密码",
 	"Overview": "概览",
 	"Our products": "我们的产品",
+	"Our projects": "我们的项目",
 	
 	"Pass": "通过",
 	"password": "密码",
@@ -107,6 +111,7 @@
 	"Product Manage": "产品管理",
 	"Product series": "产品系列",
 	"Program language": "编程语言",
+	"Project": "项目",
 
 	"Raw Code": "原始代码",
 	"Rearch result": "搜索结果",
@@ -122,6 +127,7 @@
 	"SignUp": "注册",
 	"sign up": "注册",
 	"sign up so": "立即注册",
+	"Start time": "开始时间",
 	"submit your request": "正在提交您的请求",
 	"sub-department": "子部门",
 

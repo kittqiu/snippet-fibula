@@ -122,6 +122,11 @@ function* $_member_create(uid, dep){
 	return m.id;
 }
 
+function* $_member_getUsers(){
+	var sql = "select u.id, u.name from users as u where u.actived=1 and u.verified=1";
+	return yield warp.$query(sql);
+}
+
 function setHistoryUrl( context, url ){
     if( arguments.length === 1){
         url = context.request.url;
@@ -150,6 +155,10 @@ module.exports = {
 	$member_getUser: $_member_getUser,
 	$member_create: $_member_create,
 	$member_getDepUsers: $_member_getDepUsers,
+
+	member: {
+		$getUsers: $_member_getUsers
+	},
 
 	setHistoryUrl: setHistoryUrl,
 	getHistoryUrl: getHistoryUrl

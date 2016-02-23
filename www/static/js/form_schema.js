@@ -18,6 +18,11 @@ var SCHEMA_PROPERTY = {
 		maxLength: 20,
 		desc: '开发环境'
 	},
+	EXPLANATION:{
+		type: 'string',
+		minLength: 1,
+		desc: '说明'
+	},
 	FUNCTIONNAME:{
 		type: 'string',
 		minLength: 3,
@@ -76,6 +81,11 @@ var SCHEMA_PROPERTY = {
 		minLength: 1,
 		desc: '源代码'
 	},
+	TIMESTAMP: {
+        type: 'integer',
+        minimum: 0,
+        maximum: 32506358400000 // 3000-1-1 0:0:0 UTC
+    },
 	USERNAME:{
 		type: 'string',
 		minLength: 3,
@@ -165,6 +175,17 @@ var SCHEMAS = {
 			pid: SCHEMA_PROPERTY.ID,
 		},
 		required:['name', 'pid']
+	},
+	createProject:{
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME,
+			start_time: SCHEMA_PROPERTY.TIMESTAMP,
+			end_time:SCHEMA_PROPERTY.TIMESTAMP,
+			master:SCHEMA_PROPERTY.ID,
+			details:SCHEMA_PROPERTY.EXPLANATION
+		},
+		required:['name', 'start_time', 'end_time', 'master', 'details']
 	},
 	createSnippet:{
 		type: 'object',

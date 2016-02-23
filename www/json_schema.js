@@ -339,6 +339,17 @@ var schemas = {
         },
         required:['name']
     },
+    project:{
+        type: 'object',
+        properties: {
+            name: PROPERTY.NAME,
+            start_time: PROPERTY.TIMESTAMP,
+            end_time:PROPERTY.TIMESTAMP,
+            master:PROPERTY.ID,
+            details:PROPERTY.TEXT
+        },
+        required:['name', 'start_time', 'end_time', 'master', 'details']
+    },
     simpleDepartment:{
         type: 'object',
         properties: {

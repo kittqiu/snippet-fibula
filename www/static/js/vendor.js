@@ -325,7 +325,15 @@ function info(msg){
 
 function formatDate(second){
     var date = new Date(second);
-    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDay();
+    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate();
+}
+
+function formatNow(){
+    return formatDate( Date.now());
+}
+
+function toDateTime(strdate){
+    return new Date(strdate).getTime();
 }
 
 function arrayToMatrix(array, columns){

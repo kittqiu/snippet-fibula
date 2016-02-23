@@ -1,0 +1,36 @@
+{% extends './project_base.html' %}
+
+{% block right_toolbar %}
+<a href="/project/p/creation" class="dv-link" style="margin-right:15px">{{ _('Create project') }}</a-->
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content" style="max-width:1080px">
+	<div id="vm" >
+		<h2 class="x-title">{{ _('Our projects') }}</h2>		
+		<div style="margin-top:60px;margin-bottom:5px;">			
+			<table class="uk-width-1-1 uk-table">
+				<thead>
+					<tr>
+						<td>项目名称</td>
+						<td>负责人</td>
+						<td>开始时间</td>
+						<td>结束时间</td>
+					</tr>
+				</thead>
+				{% for pn,p in projects %}
+				<tr>
+					<td class="uk-width-3-10 uk-text-left"><b><a href="/project/p/{{p.id}}/build"  style="color:#333">{{ p.name }}</a></b></td>
+					<td class="uk-width-2-10">{{ p.master_name }}</td>
+					<td class="uk-width-2-10">{{ p.start_time|time2Date }}</td>
+					<td class="uk-width-2-10">{{ p.end_time|time2Date }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		{% if projects.length == 0 %}
+			<p>{{ _('None') }}</p>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}

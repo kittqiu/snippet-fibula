@@ -104,13 +104,13 @@ swig.setFilter('url', swURL);
 
 function swTimeToDate(input,str) {
 	var date = new Date(input);
-    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDay();
+    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate();
 }
 swig.setFilter('time2Date', swTimeToDate);
 
 function swTimeToTime(input,str) {
 	var date = new Date(input);
-    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDay() 
+    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate() 
     		+ ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 }
 swig.setFilter('time2time', swTimeToTime);
