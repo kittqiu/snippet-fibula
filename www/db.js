@@ -10,7 +10,8 @@ var
 	next_id = require('./model/_id'),
 	config = require('./config'),
 	thunkify = require('thunkify'),
-	fs = require('fs');
+	fs = require('fs'),
+	op = require('./model/_operate');
 
 // init database:
 var warp = Warp.create(config.db);
@@ -32,7 +33,8 @@ baseModel.$destroy = thunkify(baseModel.destroy);
 // export warp and all model objects:
 var dict = {
     warp: warp,
-    next_id: next_id
+    next_id: next_id,
+    $update_record: op.$updateRecord
 };
 
 var MODELPATHS = [

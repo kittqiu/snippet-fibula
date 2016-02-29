@@ -137,7 +137,6 @@
                     $this.treegrid('getSetting', 'onMove').apply($this, [id,$this.treegrid('getNodeId'),orgParentId]);
                 });
             }
-
             if( $this.treegrid('getSetting', 'selectable' )){
                this.on("click", function(ev){
                     var $this = $(this),

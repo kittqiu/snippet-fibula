@@ -1,0 +1,42 @@
+{% extends '../project_base.html' %}
+
+{% block head %}
+<script src="/static/js/uikit/components/datepicker.js"></script>
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+		var view = '{{ __request__.query.view }}' || 'task';
+		$("#view_"+view).parent().addClass('uk-active');
+});
+/*($.on('change.uk.tab', function(){
+	console.log(this);
+});*/
+
+</script>
+
+{% block ProjectHead %}
+{% endblock %}
+{% endblock %}
+
+
+{% block content %}
+<div id="content-block" class="dv-container x-content" style="max-width:1480px">
+	<div id="vm" class="dv-container uk-width-1-1" >
+		<h2 class="x-title">项目: {{project.name}}</h2>
+		<!--hr style="margin-top:2px"-->
+		<div id="tab_views" class="uk-width-1-1">
+			<ul class="uk-tab" data-uk-tab>
+				<li id="tab_view_task"><a id="view_task" href="{{ __request__.path }}?view=task">任务分解</a></li>
+				<li id="tab_view_res"><a id="view_res" href="{{ __request__.path }}?view=res">资源</a></li>
+			</ul>
+			{% block MainView %}
+			{% endblock %}
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+

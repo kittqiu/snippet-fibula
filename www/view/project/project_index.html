@@ -16,16 +16,25 @@
 						<td>负责人</td>
 						<td>开始时间</td>
 						<td>结束时间</td>
+						<td>操作</td>
 					</tr>
 				</thead>
-				{% for pn,p in projects %}
-				<tr>
-					<td class="uk-width-3-10 uk-text-left"><b><a href="/project/p/{{p.id}}/build"  style="color:#333">{{ p.name }}</a></b></td>
-					<td class="uk-width-2-10">{{ p.master_name }}</td>
-					<td class="uk-width-2-10">{{ p.start_time|time2Date }}</td>
-					<td class="uk-width-2-10">{{ p.end_time|time2Date }}</td>
-				</tr>
-				{% endfor %}
+				<tbody>
+					{% for pn,p in projects %}
+					<tr>
+						<td class="uk-width-3-10 uk-text-left"><b><a href="/project/p/{{p.id}}/build"  style="color:#333">{{ p.name }}</a></b></td>
+						<td class="uk-width-1-10">{{ p.master_name }}</td>
+						<td class="uk-width-1-10">{{ p.start_time|time2Date }}</td>
+						<td class="uk-width-1-10">{{ p.end_time|time2Date }}</td>
+						<td class="uk-width-4-10">
+							<a href="/project/p/{{p.id}}" class="dv-link">查看</a>
+							{% if p.master_id == __request__.user.id %}
+							<a href="/project/p/{{p.id}}/edit" class="dv-link">修改</a>
+							{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
 			</table>
 		</div>
 		{% if projects.length == 0 %}

@@ -7,12 +7,14 @@
 <script src="/static/js/browser.min.js"></script>
 
 <script type="text/babel">
+
 var UkTab = React.createClass({
 	getInitialState: function() {
 	    return {view: 'view_task'};
 	},
 	handleClick: function(ev){
-		if(ev.target.id.indexof('view_')===0){
+		var id = ev.target.id;
+		if( id && id.indexOf('view_')===0){
 			this.setState({ view: ev.target.id });
 		}
 	},
@@ -28,31 +30,26 @@ var UkTab = React.createClass({
 					}
 				</ul>
 				<ResourceView display={this.state.view == "view_res"?'':'uk-hidden'}/>
+				<TaskView display={this.state.view == "view_task"?'':'uk-hidden'}/>
 			</div>
 		);
 	}
 });
 
-var ResourceView = React.createClass({
-	render: function(){
-		return (
-			<div className={ 'uk-grid uk-width-1-1 ' + this.props.display}>
-				<div className="uk-width-1-2 dv-border-right">
-				dddd
-				</div>
-				<div className="uk-width-1-2">
-				ddfff
-				</div>
-			</div>
-			);
-	}
-});
+{% include './project_res.js' %}
+{% include './project_task.js' %}
+
 ReactDOM.render(
 	<UkTab>
-		<a id="view_task">任务</a>
-		<a id="view_res">资源</a>
+		<a id="view_task" >任务</a>
+		<a id="view_res" >资源</a>
 	</UkTab>, 
 	document.getElementById('tab_views'));
+</script>
+<script type="text/javascript">
+var Tasks = {
+	root:{ id:'root', name:'{{project.name}}', parent: 'none' }
+};
 </script>
 
 {% endblock %}
@@ -60,7 +57,7 @@ ReactDOM.render(
 
 {% block content %}
 <div id="content-block" class="dv-container x-content" style="max-width:1480px">
-	<div id="vm" class="dv-container uk-width-1-1" >
+	<div id="vm" class="dv-container uk-width-1-1"  style="max-width:1480px">
 		<h2 class="x-title">项目: {{project.name}}</h2>
 		<!--hr style="margin-top:2px"-->
 		<div id="tab_views" class="uk-width-1-1">

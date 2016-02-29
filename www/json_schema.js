@@ -345,10 +345,10 @@ var schemas = {
             name: PROPERTY.NAME,
             start_time: PROPERTY.TIMESTAMP,
             end_time:PROPERTY.TIMESTAMP,
-            master:PROPERTY.ID,
+            master_id:PROPERTY.ID,
             details:PROPERTY.TEXT
         },
-        required:['name', 'start_time', 'end_time', 'master', 'details']
+        required:['name', 'start_time', 'end_time', 'master_id', 'details']
     },
     simpleDepartment:{
         type: 'object',

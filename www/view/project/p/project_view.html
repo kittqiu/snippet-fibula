@@ -1,0 +1,102 @@
+{% extends '../project_base.html' %}
+
+{% block head %}
+<script src="/static/js/uikit/components/datepicker.js"></script>
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
+
+{% endblock %}
+
+
+{% block content %}
+<div id="content-block" class="dv-container x-content" style="max-width:1080px">
+	<div id="vm" class="dv-container uk-width-1-1"  style="max-width:1080px">
+		<h2 class="x-title">项目: {{project.name}}</h2>
+		<hr style="margin-top:2px">
+		<table class="uk-table uk-width-1-1 dv-snippet-view">
+			<tbody>
+				<tr>
+					<td class="uk-width-1-10 uk-block-muted">负责人：</td>
+					<td class="uk-width-4-10">{{project.master_name}}</td>
+					<td class="uk-width-1-10 uk-block-muted">创建人：</td>
+					<td class="uk-width-4-10">{{project.creator_name}}</td>
+				</tr>
+				<tr>
+					<td class="uk-block-muted">开始时间：</td>
+					<td>{{project.start_time|time2Date}}</td>
+					<td class="uk-block-muted">创建时间：</td>
+					<td>{{project.created_at|time2Date}}</td>
+				</tr>
+					<td class="uk-block-muted">结束时间：</td>
+					<td>{{project.end_time|time2Date}}</td>					
+					<td class="uk-block-muted">状态：</td>
+					<td>正在执行</td>
+				</tr>
+				<tr>
+					<td class="uk-block-muted">参与成员：</td>
+					<td colspan="3">
+						<div class="uk-width-1-2">
+							<table class="uk-table uk-table-condensed">
+								<tr>
+									<td colspan="4">硬件组</td>
+								</tr>
+								<tr>
+									<td class="uk-width-1-6">用户1</td>
+									<td class="uk-width-1-6">组责任人</td>
+									<td class="uk-width-3-6">负责PCB</td>									
+									<td class="uk-width-1-6">工时：2小时</td>
+								</tr>
+								<tr>
+									<td>用户1</td>
+									<td>执行成员</td>
+									<td>负责PCB</td>									
+									<td>工时：8小时</td>
+								</tr>
+								<tr>
+									<td colspan="4">软件组</td>
+								</tr>
+								<tr>
+									<td>用户1</td>
+									<td>组责任人</td>
+									<td>负责Android系统、内核驱动开发</td>									
+									<td>工时：9小时</td>
+								</tr>
+								<tr>
+									<td>用户1</td>
+									<td>管理兼执行</td>
+									<td>负责PCB</td>									
+									<td>工时：8小时</td>
+								</tr>
+							</table>
+						</div>
+						<div class="uk-width-1-2">
+							<table class="uk-table uk-table-condensed">
+								<caption>软件组</caption>
+								<tr>
+									<td>用户1</td>
+									<td>组责任人</td>
+									<td>负责Android系统、内核驱动开发</td>									
+									<td>工时：9小时</td>
+								</tr>
+								<tr>
+									<td>用户1</td>
+									<td>管理兼执行</td>
+									<td>负责PCB</td>									
+									<td>工时：8小时</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="uk-block-muted">描述：</td>
+					<td colspan="3">{{project.details}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}
+
+

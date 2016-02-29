@@ -10996,6 +10996,10 @@ form p.help-text {
   color: #CC525E;
   text-decoration: none;
 }
+.dv-border-right {
+  border-right: 1px solid #ddd;
+  padding-right: 10px;
+}
 .wiki-content > h1 {
   font-size: 1.8em;
   font-weight: bold;
@@ -11019,6 +11023,9 @@ form p.help-text {
 .dv-text-selected {
   color: #fff;
   background: #a42b2b;
+}
+.dv-form-label-small {
+  width: 60px;
 }
 /*heart animation*/
 #devohub-loves-you {

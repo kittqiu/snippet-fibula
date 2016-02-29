@@ -182,10 +182,10 @@ var SCHEMAS = {
 			name: SCHEMA_PROPERTY.NAME,
 			start_time: SCHEMA_PROPERTY.TIMESTAMP,
 			end_time:SCHEMA_PROPERTY.TIMESTAMP,
-			master:SCHEMA_PROPERTY.ID,
+			master_id:SCHEMA_PROPERTY.ID,
 			details:SCHEMA_PROPERTY.EXPLANATION
 		},
-		required:['name', 'start_time', 'end_time', 'master', 'details']
+		required:['name', 'start_time', 'end_time', 'master_id', 'details']
 	},
 	createSnippet:{
 		type: 'object',

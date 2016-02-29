@@ -1,0 +1,218 @@
+{% extends '../project_base.html' %}
+
+{% block head %}
+<script src="/static/js/uikit/components/datepicker.js"></script>
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
+
+<script type="text/javascript">
+
+function initVM( data ){
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: data.name || '',
+			start_time: formatDate(data.start_time) || formatNow(),
+			master: data.master_name || '',
+			end_time: formatDate(data.end_time) || '',
+			details: data.details || ''
+		},
+		error_msgs:{
+			end_time: '请选择结束时间',
+			master: '请选择项目负责人'
+		},
+		methods:{
+			correctErrMsg: function(err){
+				_.each(err, function(e,n){
+					var options = vm.$options;
+					if(options.error_msgs.hasOwnProperty(e.data) && !e.message){
+						e.message = options.error_msgs[e.data];
+					}
+				});
+			},
+			getPostData: function(){
+				var data = {
+					name: this.name,
+					start_time: toDateTime(this.start_time),
+					end_time: toDateTime(this.end_time),
+					master_id: $("#master").find('option:selected').attr('id'),
+					details: this.details
+				};
+				//console.log(data)
+				if(validateJsonObj('createProject', data)){
+					if(data.start_time >= data.end_time){
+						throw  { error:'invalid parameter', data:'end_time', message:"结束时间应该大于开始时间"}; 
+					}
+					return data;
+				}
+			},
+			submit: function(){						
+				var data,
+					form = $('#vm').find('form');
+				try{
+					data = this.getPostData();
+					form.showFormError();//clear error tip
+				}catch(e){
+					this.correctErrMsg(e);
+					form.showFormError(e);
+					return;
+				}
+
+				form.postJSON( '{{ __form.action }}', data, function(err, result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
+						{% if __id %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% else %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% endif %}	
+					}
+				});
+			}
+		}
+	});
+	
+}
+
+$(function () {
+	{% if __id %}
+	loadingElement('vm');
+	getJSON( '{{ __form.src }}', function(err, data ){
+		readyElement('vm');
+		if(err){
+			fatal(err);
+		}else{
+			initVM( data );
+		}
+	});
+
+	{% else %}	
+	var data = {};
+	initVM( data );
+	{% endif %}
+
+});
+</script>
+
+{% endblock %}
+
+{% block jump-title  %}
+{% if ! __id %}
+项目创建成功
+{% else %}
+项目修改成功
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content" style="max-width:1080px">
+	<div id="vm" class="dv-container uk-width-1-1"  style="max-width:1080px">
+		<h2 class="x-title" v-text="'项目：' + name"></h2>
+		<hr style="margin-top:2px">
+		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
+			<div class="uk-alert uk-alert-danger uk-hidden"></div>
+			<table class="uk-table uk-width-1-1 dv-snippet-view">
+				<tbody>
+					<tr>
+						<td class="uk-width-1-10 uk-block-muted">名称：</td>
+						<td class="uk-width-4-10"><input v-model="name" name="name"  type="text" class="uk-width-1-1" autofucus></td>
+						<td class="uk-block-muted">状态：</td>
+						<td>正在执行</td>
+					</tr>
+					<tr>
+						<td class="uk-width-1-10 uk-block-muted">负责人：</td>
+						<td class="uk-width-4-10">
+							<select v-model="master" name="master" id="master" class="uk-width-1-1">
+				        		{% for n, u in users %}
+				        			<option id="{{u.id}}">{{ u.name }}</option>
+				        		{% endfor %}
+				        	</select>
+						</td>
+						<td class="uk-width-1-10 uk-block-muted">创建人：</td>
+						<td class="uk-width-4-10">{{project.creator_name}}</td>
+					</tr>
+					<tr>
+						<td class="uk-block-muted">开始时间：</td>
+						<td><input type="text" v-model="start_time" name="start_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"></td>
+						<td class="uk-block-muted">创建时间：</td>
+						<td>{{project.created_at|time2Date}}</td>
+					</tr>
+						<td class="uk-block-muted">结束时间：</td>
+						<td><input type="text" v-model="end_time" name="end_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"></td>					
+						<td class="uk-block-muted">状态：</td>
+						<td>正在执行</td>
+					</tr>
+					<tr>
+						<td class="uk-block-muted">参与成员：</td>
+						<td colspan="3">
+							<div class="uk-width-1-2">
+								<table class="uk-table uk-table-condensed">
+									<tr>
+										<td colspan="4">硬件组</td>
+									</tr>
+									<tr>
+										<td class="uk-width-1-6">用户1</td>
+										<td class="uk-width-1-6">组责任人</td>
+										<td class="uk-width-3-6">负责PCB</td>									
+										<td class="uk-width-1-6">工时：2小时</td>
+									</tr>
+									<tr>
+										<td>用户1</td>
+										<td>执行成员</td>
+										<td>负责PCB</td>									
+										<td>工时：8小时</td>
+									</tr>
+									<tr>
+										<td colspan="4">软件组</td>
+									</tr>
+									<tr>
+										<td>用户1</td>
+										<td>组责任人</td>
+										<td>负责Android系统、内核驱动开发</td>									
+										<td>工时：9小时</td>
+									</tr>
+									<tr>
+										<td>用户1</td>
+										<td>管理兼执行</td>
+										<td>负责PCB</td>									
+										<td>工时：8小时</td>
+									</tr>
+								</table>
+							</div>
+							<div class="uk-width-1-2">
+								<table class="uk-table uk-table-condensed">
+									<caption>软件组</caption>
+									<tr>
+										<td>用户1</td>
+										<td>组责任人</td>
+										<td>负责Android系统、内核驱动开发</td>									
+										<td>工时：9小时</td>
+									</tr>
+									<tr>
+										<td>用户1</td>
+										<td>管理兼执行</td>
+										<td>负责PCB</td>									
+										<td>工时：8小时</td>
+									</tr>
+								</table>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td class="uk-block-muted">描述：</td>
+						<td colspan="3">
+							<textarea v-model="details" name="details" class="uk-width-1-1" style="height:120px">
+				    		</textarea></td>
+					</tr>					
+				</tbody>
+			</table>
+			<button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
+			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.submit) }}
+			        </button>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+

@@ -12,7 +12,7 @@ function initVM( data ){
 			name: data.name || '',
 			start_time: data.start_time || formatNow(),
 			master: data.master_id || '{{ __user__.name }}',
-			end_time: data.start_time || '',
+			end_time: data.end_time || '',
 			details: data.details || ''
 		},
 		error_msgs:{
@@ -33,7 +33,7 @@ function initVM( data ){
 					name: this.name,
 					start_time: toDateTime(this.start_time),
 					end_time: toDateTime(this.end_time),
-					master: $("#master").find('option:selected').attr('id'),
+					master_id: $("#master").find('option:selected').attr('id'),
 					details: this.details
 				};
 				//console.log(data)
