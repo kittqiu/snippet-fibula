@@ -34,7 +34,9 @@ baseModel.$destroy = thunkify(baseModel.destroy);
 var dict = {
     warp: warp,
     next_id: next_id,
-    $update_record: op.$updateRecord
+    op: {
+    	$update_record: op.$updateRecord
+    }
 };
 
 var MODELPATHS = [

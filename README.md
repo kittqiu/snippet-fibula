@@ -12,6 +12,7 @@ Nodejs: v4.2.2
 Run `npm install` to install all required packages.
 
 	$ npm install
+	$ npm install gulp -g
 
 
 

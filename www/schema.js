@@ -13,12 +13,13 @@ var
 var keys = _.filter(_.map(db, function (value, key) {
     return key;
 }), function (key) {
-    return key !== 'warp' && key !== 'next_id';
+    return key !== 'warp' && key !== 'next_id' && key !== 'op';
 });
 
 function log(s) {
     console.log(s);
     console.log('\n');
+
     return s + '\n';
 }
 

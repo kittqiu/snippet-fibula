@@ -17,17 +17,22 @@ function* $_render( context, model, view ){
 /******
 GET METHOD:
 /project
+/project/group/:id/edit
 /project/p/creation
 /project/p/:id/build
 /project/p/:id/edit
 /project/p/:id
 
+
 /api/project/p/:id
+/api/project/group/:id
 
 POST METHOD:
 
 /api/project/p
 /api/project/p/:id
+/api/project/p/:id/group
+/api/project/group/:id
 
 ********/
 
@@ -37,9 +42,24 @@ module.exports = {
 		var model = {
 			projects: yield base.project.$list( 0, 20 )
 		};
-		console.log(model)
 		yield $_render( this, model, 'project_index.html');
 		base.setHistoryUrl(this);
+	},
+
+	'GET /project/group/:id/edit': function* (id){
+		var group = yield base.modelGroup.$find(id),
+			model = {
+				__id: id,
+				__project_id: group.project_id,
+				__form: {
+					src: '/api/project/group/' + id,
+					action: '/api/project/group/' + id,
+					submit: this.translate('Save')
+			},
+			roles: base.project.roleOptions(),
+			users: yield base.project.$listOptionalUsers(group.project_id||'none')
+		};
+		yield $_render( this, model, 'p/group_form.html');
 	},
 
 	'GET /project/p/creation': function*(){
@@ -69,6 +89,7 @@ module.exports = {
 				__id: id,
 				project: project,
 				statusOptions: base.project.statusOptions(),
+				roleOptions: base.project.roleOptions(),
 				users: yield base.user.$list(),
 				__form: {
 					src: '/api/project/p/' + id,
@@ -82,13 +103,59 @@ module.exports = {
 	'GET /project/p/:id': function* (id){
 		var project = yield base.project.$get(id) || {},
 			model = {
-				project: project
+				__id: id,
+				project: project,
+				statusOptions: base.project.statusOptions(),
+				roleOptions: base.project.roleOptions()
 			};
 		yield $_render( this, model, 'p/project_view.html');
 	},
 
+	'GET /api/project/group/:id': function* (id){
+		this.body = yield base.group.$get(id);
+	},
+
 	'GET /api/project/p/:id': function* (id){
 		this.body = yield base.project.$get(id) || {};
+	},
+
+	'POST /api/project/group/:id': function* (id){
+		var r = yield base.modelGroup.$find(id), 
+			data = this.request.body || {}, 
+			members = data.members;
+		if( !data.name ){
+			throw api.invalidParam('name');
+		}
+		if( r === null ){
+			throw api.notFound('group', this.translate('Record not found'));
+		}
+		yield db.op.$update_record( r, data, ['name']);
+
+		if( members ){
+			for( var i = 0; i < members.length; i++ ){
+				var m = members[i];
+				if( m.id ){//update
+					var mr = yield base.modelMember.$find(m.id);
+					if( mr !== null ){
+						yield db.op.$update_record( mr, m, ['role', 'responsibility']);
+					}
+				}else{//add new member
+					var user = {
+						project_id: r.project_id,
+						user_id: m.user_id,
+						group_id: r.id,
+						responsibility: m.responsibility,
+						role: m.role
+					};
+					yield base.modelMember.$create(user);
+				}
+			}
+		}
+
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
 	},
 
 	'POST /api/project/p': function* (){
@@ -110,6 +177,22 @@ module.exports = {
 			redirect: base.getHistoryUrl(this)
 		}
 	},
+	'POST /api/project/p/:id/group': function* (id){
+		var r, 
+			data = this.request.body || {},
+			name = data.name;
+		if( !name ){
+			throw api.invalidParam('name');
+		}
+		
+		r = {
+			id: db.next_id(),
+			project_id: id,
+			name: name
+		}
+		yield base.modelGroup.$create(r);		
+		this.body = { result: 'ok', data: r };
+	},
 	'POST /api/project/p/:id': function* (id){
 		var r, cols = [],
 			data = this.request.body;
@@ -120,29 +203,7 @@ module.exports = {
 			throw api.notFound('project', this.translate('Record not found'));
 		}
 
-		/*
-		if( data.name !== r.name ){
-			r.name = data.name;
-			cols.push('name');			
-		}
-		if( data.start_time !== r.start_time ){
-			r.start_time = data.start_time;
-			cols.push('start_time');			
-		}
-		if( data.end_time !== r.end_time ){
-			r.end_time = data.end_time;
-			cols.push('end_time');			
-		}
-		if( data.details !== r.details ){
-			r.details = data.details;
-			cols.push('details');			
-		}
-		if
-
-		if( cols.length > 0 ){
-			yield r.$update(cols);
-		}*/
-		yield db.$update_record( r, data, ['name', 'start_time', 'end_time', 'details', 'master_id'])
+		yield db.op.$update_record( r, data, ['name', 'start_time', 'end_time', 'details', 'master_id'])
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)

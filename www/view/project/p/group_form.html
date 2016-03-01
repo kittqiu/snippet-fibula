@@ -1,0 +1,233 @@
+{% extends '../project_base.html' %}
+
+{% block head %}
+<script src="/static/js/uikit/components/datepicker.js"></script>
+
+<script type="text/javascript">
+var orgUsers;
+function validateUserUniform(members){
+	var ids = [];
+	members.forEach(function(m){
+		if( ids.indexOf(m.user_id) !== -1){
+			throw { error:'invalid parameter', data:'g_user', message:"请不要选择重复的用户" + m.user_name}
+		}else{
+			ids.push(m.user_id);
+		}		
+	});
+}
+
+function getOrgMembers(members){
+	orgUsers.forEach(function(m){
+		var $tr = $('#u-'+m.id);
+		m.role = $tr.find("[name='g_user_role_" + m.id + "']").val()
+		m.responsibility = $tr.find("[name='g_user_res_" + m.id + "']").val();
+		if( !m.responsibility ){
+			throw { error:'invalid parameter', data:'g_user_res_' + m.id, message:"请填写用户" + m.name + "的职责！"}
+		}
+		members.push(m);
+	});
+}
+
+function getPostMembers(){
+	var members = [];
+		$blk = $('.block_member');
+	$blk.each(function(n, el){
+		var $user = $(this).find("[name='g_user_" + n + "']"),
+			uid = $user.val(),
+			uname = $user.find("option[value='" + uid +"']").text();
+		if( uid ){
+			var user = { user_id: uid, user_name:uname};
+			user.role = $(this).find("[name='g_user_role_" + n + "']").val();
+			user.responsibility = $(this).find("[name='g_user_res_" + n + "']").val();
+			if( !user.responsibility ){
+				throw { error:'invalid parameter', data:'g_user_res_' + n, message:"请填写用户" + uname + "的职责！"}
+			}
+			members.push(user);
+		}		
+	});
+	getOrgMembers(members);
+	validateUserUniform(members);
+	console.log(members);
+	return members;	
+}
+
+function initVM( data ){
+	orgUsers = data.members;
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: data.name || '',
+			members: data.members,
+			emptycnt: 5,
+		},
+		error_msgs:{
+			end_time: '请选择结束时间',
+			master: '请选择项目负责人'
+		},
+		methods:{
+			correctErrMsg: function(err){
+				_.each(err, function(e,n){
+					var options = vm.$options;
+					if(options.error_msgs.hasOwnProperty(e.data) && !e.message){
+						e.message = options.error_msgs[e.data];
+					}
+				});
+			},
+			onAddMember: function(event){
+				event.preventDefault();
+				this.emptycnt += 1;
+			},
+			getPostData: function(){
+				var data = {
+					name: this.name,
+					members: this.members
+				};
+				
+				if( !this.name ){
+					throw  { error:'invalid parameter', data:'name', message:"名称不可为空"}
+				}
+				data.members = data.members.concat(getPostMembers());
+				console.log(data)
+				return data;
+			},
+			submit: function(){						
+				var data,
+					form = $('#vm').find('form');
+				try{
+					data = this.getPostData();
+					form.showFormError();//clear error tip
+				}catch(e){
+					this.correctErrMsg(e);
+					form.showFormError(e);
+					return;
+				}
+
+				form.postJSON( '{{ __form.action }}', data, function(err, result){
+					if( !err ){
+						$('#content-block').addClass('uk-hidden');
+						{% if __id %}
+						jumpTo( '/project/p/{{__project_id}}/edit', "{{ _('History Page')}}", 2 );
+						{% else %}
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						{% endif %}	
+
+					}
+				});
+			}
+		}
+	});
+	
+}
+
+$(function () {
+	{% if __id %}
+	loadingElement('vm');
+	getJSON( '{{ __form.src }}', function(err, data ){
+		readyElement('vm');
+		if(err){
+			fatal(err);
+		}else{
+			initVM( data );
+		}
+	});
+
+	{% else %}	
+	var data = {};
+	initVM( data );
+	{% endif %}
+
+});
+
+</script>
+{% endblock %}
+
+{% block jump-title  %}
+{% if ! __id %}
+项目成员组创建成功
+{% else %}
+项目的成员组修改成功
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content">
+	<div id="vm" class="dv-container" style="max-width:800px">
+		<h2 class="x-title" v-text="'项目成员组：'+ name"></h2>
+		<hr style="margin-top:2px">
+		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
+			<fieldset>
+				<div class="uk-alert uk-alert-danger uk-hidden"></div>
+				<div class="uk-form-row uk-width-1-2" style="margin-top:20px">
+					<label class="uk-form-label">{{ _('Name') }}</label>
+					<div class="uk-form-controls">
+						<input v-model="name" name="name"  type="text" class="uk-width-1-1" autofucus>
+					</div>
+					<p class="help-text">3-50字符</p>
+				</div>
+				<div class="uk-form-row uk-width-1-1" style="margin-top:20px">
+					<label class="uk-form-label">成员</label>
+					<div class="uk-form-controls uk-width-1-1">
+						<table class="uk-table uk-width-1-1">
+							<thead>
+								<tr>
+									<th class="uk-width-1-5">用户</th>
+									<th class="uk-width-1-5">角色</th>
+									<th class="uk-width-2-5">职责</th>
+									<th class="uk-width-1-5">操作</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="m in members" v-bind:id="'u-'+m.id">
+									<td><span v-text="m.name" class="uk-width-1-1" /></td>
+									<td>
+										<select v-bind:name="'g_user_role_'+m.id" class="uk-width-1-1" v-bind:value="m.role" >
+											{% for nr, r in roles %}
+												<option value="{{r.value}}">{{ r.title }}</option>
+											{% endfor %}
+										</select>
+									</td>
+									<td class="uk-width-1-1">为<input v-bind:name="'g_user_res_'+m.id" type="text" style="width:300px;" v-bind:value="m.responsibility">承担责任</td>
+								</tr>
+								<tr v-for="n in emptycnt" class="block_member" >
+									<td>
+										<select v-bind:name="'g_user_'+n"  class="uk-width-1-1">
+											<option selected value="">请选择</option>
+											{% for nu, u in users %}
+												<option value="{{u.id}}">{{ u.name }}</option>
+											{% endfor %}
+										</select>
+									</td>
+									<td>
+										<select v-bind:name="'g_user_role_'+n" class="uk-width-1-1" >
+											{% for nr, r in roles %}
+												{% if loop.last %}
+												<option value="{{r.value}}" selected>{{ r.title }}</option>
+												{% else %}
+												<option value="{{r.value}}">{{ r.title }}</option>
+												{% endif %}
+												
+											{% endfor %}
+										</select>
+									</td>
+									<td class="uk-width-1-1" >为<input v-bind:name="'g_user_res_'+n" type="text" style="width:300px;" placeholder="最多30个字符">承担责任</td>
+									<td>										
+										<button v-if="n== emptycnt-1" v-on:click="onAddMember" class="uk-button-link uk-icon-user-plus dv-link uk-icon-small" title="添加新成员" ></button>
+									</td>
+								</tr>
+
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="uk-form-row uk-clearfix" style="margin-top:60px">
+					<button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
+						<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.submit) }}
+					</button>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</div>
+{% endblock %}
+
+

@@ -1,10 +1,71 @@
 {% extends '../project_base.html' %}
 
 {% block head %}
-<script src="/static/js/uikit/components/datepicker.js"></script>
-<script src="/static/js/react.js"></script>
-<script src="/static/js/react-dom.js"></script>
-<script src="/static/js/browser.min.js"></script>
+
+<script type="text/javascript">
+var roles = {{ roleOptions|json|safe }};
+function getRoleName(v){
+	for(var i = 0; i < roles.length; i++ ){
+		var r = roles[i];
+		if( r.value === v){
+			return r.title;
+		}
+	}
+	return '';
+}
+function groupMember( groups, members ){
+	groups.forEach( function(g){
+		g.members = [];
+	});
+	members.forEach(function(m){
+		for(var i = 0; i < groups.length; i++ ){
+			var g = groups[i];
+			if(g.id === m.group_id){
+				g.members.push(m);
+				break;
+			}
+		}
+		m.role_name = getRoleName(m.role);
+	})
+}
+function initVM( data ){
+	groupMember(data.groups || [], data.members|| []);
+	var vm = new Vue({
+		el: '#vm',
+		data:{
+			name: data.name || '',
+			start_time: formatDate(data.start_time) || formatNow(),
+			master: data.master_name || '',
+			end_time: formatDate(data.end_time) || '',			
+			details: data.details || '',
+			groups: data.groups || [],
+			members: data.members || [],
+			newgroup: ''
+		},
+		error_msgs:{
+			end_time: '请选择结束时间',
+			master: '请选择项目负责人'
+		},
+		methods:{
+		}
+	});
+	
+}
+
+
+$(function () {
+	loadingElement('vm');
+	getJSON( '/api/project/p/{{__id}}', function(err, data ){
+		readyElement('vm');
+		if(err){
+			fatal(err);
+		}else{
+			initVM( data );
+		}
+	});
+
+});
+</script>
 
 {% endblock %}
 
@@ -12,13 +73,13 @@
 {% block content %}
 <div id="content-block" class="dv-container x-content" style="max-width:1080px">
 	<div id="vm" class="dv-container uk-width-1-1"  style="max-width:1080px">
-		<h2 class="x-title">项目: {{project.name}}</h2>
+		<h2 class="x-title" v-text="'项目：'+ name"></h2>
 		<hr style="margin-top:2px">
 		<table class="uk-table uk-width-1-1 dv-snippet-view">
 			<tbody>
 				<tr>
 					<td class="uk-width-1-10 uk-block-muted">负责人：</td>
-					<td class="uk-width-4-10">{{project.master_name}}</td>
+					<td class="uk-width-4-10" v-text="master"></td>
 					<td class="uk-width-1-10 uk-block-muted">创建人：</td>
 					<td class="uk-width-4-10">{{project.creator_name}}</td>
 				</tr>
@@ -36,56 +97,20 @@
 				<tr>
 					<td class="uk-block-muted">参与成员：</td>
 					<td colspan="3">
-						<div class="uk-width-1-2">
-							<table class="uk-table uk-table-condensed">
-								<tr>
-									<td colspan="4">硬件组</td>
-								</tr>
-								<tr>
-									<td class="uk-width-1-6">用户1</td>
-									<td class="uk-width-1-6">组责任人</td>
-									<td class="uk-width-3-6">负责PCB</td>									
-									<td class="uk-width-1-6">工时：2小时</td>
-								</tr>
-								<tr>
-									<td>用户1</td>
-									<td>执行成员</td>
-									<td>负责PCB</td>									
-									<td>工时：8小时</td>
-								</tr>
-								<tr>
-									<td colspan="4">软件组</td>
-								</tr>
-								<tr>
-									<td>用户1</td>
-									<td>组责任人</td>
-									<td>负责Android系统、内核驱动开发</td>									
-									<td>工时：9小时</td>
-								</tr>
-								<tr>
-									<td>用户1</td>
-									<td>管理兼执行</td>
-									<td>负责PCB</td>									
-									<td>工时：8小时</td>
-								</tr>
-							</table>
-						</div>
-						<div class="uk-width-1-2">
-							<table class="uk-table uk-table-condensed">
-								<caption>软件组</caption>
-								<tr>
-									<td>用户1</td>
-									<td>组责任人</td>
-									<td>负责Android系统、内核驱动开发</td>									
-									<td>工时：9小时</td>
-								</tr>
-								<tr>
-									<td>用户1</td>
-									<td>管理兼执行</td>
-									<td>负责PCB</td>									
-									<td>工时：8小时</td>
-								</tr>
-							</table>
+						<div class="uk-width-1-1">
+							<div>
+								<table v-for="group in groups"  v-bind:id="'g-'+group.id" class="uk-table uk-table-condensed">
+									<caption>
+										<span v-text="group.name"></span>
+									</caption>
+									<tr v-for="m in group.members" v-bind:id="'u-'+m.id">
+										<td v-text="m.name"></td>
+										<td v-text="m.role_name"></td>
+										<td v-text="'为'+m.responsibility+'负责'"></td>
+										<td v-text="'工时：' + m.time_cost/60"></td>
+									</tr>
+								</table>
+							</div>
 						</div>
 					</td>
 				</tr>

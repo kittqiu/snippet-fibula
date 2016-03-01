@@ -7,16 +7,44 @@
 <script src="/static/js/browser.min.js"></script>
 
 <script type="text/javascript">
-
+var roles = {{ roleOptions|json|safe }};
+function getRoleName(v){
+	for(var i = 0; i < roles.length; i++ ){
+		var r = roles[i];
+		if( r.value === v){
+			return r.title;
+		}
+	}
+	return '';
+}
+function groupMember( groups, members ){
+	groups.forEach( function(g){
+		g.members = [];
+	});
+	members.forEach(function(m){
+		for(var i = 0; i < groups.length; i++ ){
+			var g = groups[i];
+			if(g.id === m.group_id){
+				g.members.push(m);
+				break;
+			}
+		}
+		m.role_name = getRoleName(m.role);
+	})
+}
 function initVM( data ){
+	groupMember(data.groups || [], data.members|| []);
 	var vm = new Vue({
 		el: '#vm',
 		data:{
 			name: data.name || '',
 			start_time: formatDate(data.start_time) || formatNow(),
 			master: data.master_name || '',
-			end_time: formatDate(data.end_time) || '',
-			details: data.details || ''
+			end_time: formatDate(data.end_time) || '',			
+			details: data.details || '',
+			groups: data.groups || [],
+			members: data.members || [],
+			newgroup: ''
 		},
 		error_msgs:{
 			end_time: '请选择结束时间',
@@ -30,6 +58,23 @@ function initVM( data ){
 						e.message = options.error_msgs[e.data];
 					}
 				});
+			},
+			onAddGroup: function(event){
+				event.preventDefault();
+				var name = this.newgroup;
+				console.log('ondAdd')
+				if( name ){
+					postJSON('/api/project/p/{{__id}}/group', {name:name}, function(err,result){
+						if( err ){
+							fatal(err);
+						}else{
+							vm.newgroup = '';
+							var g = result.data;
+							g.members = [];
+							vm.groups.push(g);
+						}
+					});
+				}
 			},
 			getPostData: function(){
 				var data = {
@@ -58,7 +103,7 @@ function initVM( data ){
 					form.showFormError(e);
 					return;
 				}
-
+				
 				form.postJSON( '{{ __form.action }}', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
@@ -74,6 +119,7 @@ function initVM( data ){
 	});
 	
 }
+
 
 $(function () {
 	{% if __id %}
@@ -124,10 +170,10 @@ $(function () {
 						<td class="uk-width-1-10 uk-block-muted">负责人：</td>
 						<td class="uk-width-4-10">
 							<select v-model="master" name="master" id="master" class="uk-width-1-1">
-				        		{% for n, u in users %}
-				        			<option id="{{u.id}}">{{ u.name }}</option>
-				        		{% endfor %}
-				        	</select>
+								{% for n, u in users %}
+									<option id="{{u.id}}">{{ u.name }}</option>
+								{% endfor %}
+							</select>
 						</td>
 						<td class="uk-width-1-10 uk-block-muted">创建人：</td>
 						<td class="uk-width-4-10">{{project.creator_name}}</td>
@@ -145,57 +191,25 @@ $(function () {
 					</tr>
 					<tr>
 						<td class="uk-block-muted">参与成员：</td>
-						<td colspan="3">
-							<div class="uk-width-1-2">
-								<table class="uk-table uk-table-condensed">
-									<tr>
-										<td colspan="4">硬件组</td>
-									</tr>
-									<tr>
-										<td class="uk-width-1-6">用户1</td>
-										<td class="uk-width-1-6">组责任人</td>
-										<td class="uk-width-3-6">负责PCB</td>									
-										<td class="uk-width-1-6">工时：2小时</td>
-									</tr>
-									<tr>
-										<td>用户1</td>
-										<td>执行成员</td>
-										<td>负责PCB</td>									
-										<td>工时：8小时</td>
-									</tr>
-									<tr>
-										<td colspan="4">软件组</td>
-									</tr>
-									<tr>
-										<td>用户1</td>
-										<td>组责任人</td>
-										<td>负责Android系统、内核驱动开发</td>									
-										<td>工时：9小时</td>
-									</tr>
-									<tr>
-										<td>用户1</td>
-										<td>管理兼执行</td>
-										<td>负责PCB</td>									
-										<td>工时：8小时</td>
-									</tr>
-								</table>
-							</div>
-							<div class="uk-width-1-2">
-								<table class="uk-table uk-table-condensed">
-									<caption>软件组</caption>
-									<tr>
-										<td>用户1</td>
-										<td>组责任人</td>
-										<td>负责Android系统、内核驱动开发</td>									
-										<td>工时：9小时</td>
-									</tr>
-									<tr>
-										<td>用户1</td>
-										<td>管理兼执行</td>
-										<td>负责PCB</td>									
-										<td>工时：8小时</td>
-									</tr>
-								</table>
+						<td colspan="3">												
+							<div class="uk-width-1-1">
+								<div>
+									<table v-for="group in groups"  v-bind:id="'g-'+group.id" class="uk-table uk-table-condensed">
+										<caption>
+											<a v-bind:href="'/project/group/'+ group.id + '/edit'" v-text="group.name" class="dv-link"></a>
+										</caption>
+										<tr v-for="m in group.members" v-bind:id="'u-'+m.id">
+											<td v-text="m.name"></td>
+											<td v-text="m.role_name"></td>
+											<td v-text="'为'+m.responsibility+'负责'"></td>
+											<td v-text="'工时：' + m.time_cost/60"></td>
+										</tr>
+									</table>
+								</div>
+								<div>
+									<input v-model="newgroup" id="new_group_name" type="text" name="new_group_name">
+									<button v-on:click="onAddGroup" class="uk-button-link dv-link " title="添加新成员组" >添加新成员组</button>
+								</div>
 							</div>
 						</td>
 					</tr>
@@ -203,13 +217,13 @@ $(function () {
 						<td class="uk-block-muted">描述：</td>
 						<td colspan="3">
 							<textarea v-model="details" name="details" class="uk-width-1-1" style="height:120px">
-				    		</textarea></td>
+							</textarea></td>
 					</tr>					
 				</tbody>
 			</table>
 			<button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
-			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.submit) }}
-			        </button>
+						<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.submit) }}
+					</button>
 		</form>
 	</div>
 </div>

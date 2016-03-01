@@ -27,7 +27,7 @@
 						<td class="uk-width-1-10">{{ p.start_time|time2Date }}</td>
 						<td class="uk-width-1-10">{{ p.end_time|time2Date }}</td>
 						<td class="uk-width-4-10">
-							<a href="/project/p/{{p.id}}" class="dv-link">查看</a>
+							<a href="/project/p/{{p.id}}" class="dv-link">概况</a>
 							{% if p.master_id == __request__.user.id %}
 							<a href="/project/p/{{p.id}}/edit" class="dv-link">修改</a>
 							{% endif %}
