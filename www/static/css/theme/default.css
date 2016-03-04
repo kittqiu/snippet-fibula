@@ -3498,12 +3498,12 @@ select.uk-form-width-mini {
 /* Desktop and bigger */
 @media (min-width: 960px) {
   .uk-form-horizontal .uk-form-label {
-    width: 200px;
+    width: 100px;
     margin-top: 5px;
     float: left;
   }
   .uk-form-horizontal .uk-form-controls {
-    margin-left: 215px;
+    margin-left: 115px;
   }
   /* Better vertical alignment if controls are checkboxes and radio buttons with text */
   .uk-form-horizontal .uk-form-controls-text {
@@ -10816,6 +10816,7 @@ a.uk-datepicker-table-muted {
 /*@button-primary-background:                     #cb3837;
 @button-primary-hover-background:               rgba(203, 56, 55, 0.8);
 @button-primary-active-background:              #cb3837;*/
+/*form*/
 /*icon*/
 .uk-icon-manage:before {
   content: "\f007";

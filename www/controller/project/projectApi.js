@@ -24,14 +24,20 @@ GET METHOD:
 /project/p/:id
 
 
+/api/project/p/:id/tasklist
 /api/project/p/:id
+
 /api/project/group/:id
+/api/project/task/:id
+
+
 
 POST METHOD:
 
 /api/project/p
 /api/project/p/:id
 /api/project/p/:id/group
+/api/project/p/:id/task
 /api/project/group/:id
 
 ********/
@@ -79,8 +85,7 @@ module.exports = {
 	'GET /project/p/:id/build': function* (id){
 		var project = yield base.project.$get(id) || {},
 			model = {
-				__id: id,
-				project: project
+				__id: id
 			};
 		yield $_render( this, model, 'p/project_build.html');
 	},
@@ -112,8 +117,16 @@ module.exports = {
 		this.body = yield base.group.$get(id);
 	},
 
+	'GET /api/project/p/:id/tasklist': function* (id){
+		this.body = yield base.project.$listTasks(id);
+	},
+
 	'GET /api/project/p/:id': function* (id){
 		this.body = yield base.project.$get(id) || {};
+	},
+
+	'GET /api/project/task/:id': function* (id){
+		this.body = yield base.modelTask.$find(id);
 	},
 
 	'POST /api/project/group/:id': function* (id){
@@ -187,9 +200,42 @@ module.exports = {
 			project_id: id,
 			name: name
 		}
-		yield base.modelGroup.$create(r);		
+		yield base.modelGroup.$create(r);
 		this.body = { result: 'ok', data: r };
 	},
+	'POST /api/project/p/:id/task': function* (id){
+		var t, order,
+			data = this.request.body || {},
+			pid = data.parent || 'root';
+		json_schema.validate('simpleTask', data);
+		
+		order = yield base.task.$maxOrder(pid);
+		order++;
+		t = {
+			id: db.next_id(),
+			project_id: id,
+			parent: pid,
+			name: data.name,
+			automode: data.automode==0?true:false,
+			number: 0,
+			order: order,
+			rely_to: data.rely_to,
+			duration: data.duration,
+			plan_start_time: data.start_time,
+			plan_end_time: data.end_time,
+			difficulty: data.difficulty,
+			closed: 0,
+			details: data.details,
+			executor_id: data.executor,
+			manager_id: '',
+			start_time:data.start_time,
+			end_time:data.end_time,
+			status: 'created'
+		};
+		yield base.modelTask.$create(t);		
+		this.body = { result: 'ok', id: t.id };
+	},
+
 	'POST /api/project/p/:id': function* (id){
 		var r, cols = [],
 			data = this.request.body;

@@ -21,6 +21,7 @@ var
 	modelProject = db.project,
 	modelMember = db.project_member,
 	modelGroup = db.project_member_group,
+	modelTask = db.project_task,
 	warp = models.warp;
 
 
@@ -61,6 +62,7 @@ function* $project_list(offset, limit){
 	return yield warp.$query(sql, [limit, offset]);
 }
 
+/* get: project record, creator name, master name, groups, members*/
 function* $project_get(id){
 	var sql,
 		p = yield modelProject.$find(id);
@@ -144,6 +146,24 @@ function* $project_listOptionalUsers(id){
 	return target;
 }
 
+function* $project_listTasks(id){
+	/*var sql = 'select t.*, u.name as executor_name from project_task as t , users as u where t.executor_id = u.id and t.project_id=?';
+	return yield warp.$query(sql, [id]);*/
+	return yield modelTask.$findAll({
+		select: '*',
+		where: '`project_id`=?',
+		order: '`order` asc',
+		params: [id]
+	});
+}
+
+function* $task_maxOrder(pid){
+	var sql = 'select MAX(`order`) AS maxorder from project_task where parent=?',
+    	rs = yield warp.$query( sql, [pid] ),
+    	maxorder = rs[0].maxorder;
+    return maxorder === null ? -1 : maxorder;
+}
+
 
 function* $group_getMembers(id){
 	var sql = 'select m.*, u.`name` from project_member as m, users as u where m.user_id = u.id and m.group_id=?';
@@ -173,6 +193,7 @@ module.exports = {
 	modelProject: modelProject,
 	modelGroup: modelGroup,
 	modelMember: modelMember,
+	modelTask: modelTask,
 
 	$render: $_render,
 	setHistoryUrl: setHistoryUrl,
@@ -190,12 +211,17 @@ module.exports = {
 		$get: $project_get,
 		statusOptions: project_optionStatus,
 		roleOptions: project_optionRole,
-		$listOptionalUsers: $project_listOptionalUsers
+		$listOptionalUsers: $project_listOptionalUsers,
+		$listTasks : $project_listTasks
 	},
 
 	group: {
 		$getMembers: $group_getMembers,
 		$get: $group_get		
+	},
+
+	task: {
+		$maxOrder: $task_maxOrder
 	},
 
 	user: {

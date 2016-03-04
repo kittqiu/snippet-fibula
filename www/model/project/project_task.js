@@ -14,8 +14,8 @@ module.exports = function(warp){
 		base.column_bigint('duration', {defaultValue:1}),//hour
 		base.column_bigint('plan_start_time', {defaultValue:0}),//validate on automode is false
 		base.column_bigint('plan_end_time', {defaultValue:0}),//validate on automode is false
-		base.column_bigint('difficulty', {defaultValue:0}),//0:simple, 1:general, 2: di
-		base.column_boolean('closed', {defaultValue:'false'}),		
+		base.column_bigint('difficulty', {defaultValue:0}),//0:simple, 1:general, 2: difficulte
+		base.column_boolean('closed', {defaultValue:false}),		
 		base.column_text('details'),
 		/*executor*/
 		base.column_id('executor_id', {index:true}),
@@ -24,7 +24,7 @@ module.exports = function(warp){
 		base.column_bigint('end_time', {defaultValue:0}),
 		base.column_bigint('percent', {defaultValue:0}),//0-100
 		base.column_bigint('qulity', {defaultValue:0}),//0:bad, 1:not bad, 2: good, 3: very good
-		base.column_varchar_20('status', {defaultValue:'ready'})//options: created,accept, pending, cancel, commit, completed
+		base.column_varchar_20('status', {defaultValue:'created'})//options: created,accept, pending, cancel, commit, completed
 		], {
 			table: 'project_task'
 		});

@@ -8,9 +8,9 @@ var SCHEMA_PROPERTY = {
 	},
 	EMAIL:{
 		type: 'string',
-        maxLength: 100,
-        pattern: '^(?:[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+\\.)*[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+@(?:(?:(?:[a-z0-9](?:[a-z0-9\\-](?!\\.)){0,61}[a-z0-9]?\\.)+[a-z0-9](?:[a-z0-9\\-](?!$)){0,61}[a-z0-9]?)|(?:\\[(?:(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\.){3}(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\]))$',
-        desc: '邮箱'
+		maxLength: 100,
+		pattern: '^(?:[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+\\.)*[\\w\\!\\#\\$\\%\\&\\\'\\*\\+\\-\\/\\=\\?\\^\\\`\\{\\|\\}\\~]+@(?:(?:(?:[a-z0-9](?:[a-z0-9\\-](?!\\.)){0,61}[a-z0-9]?\\.)+[a-z0-9](?:[a-z0-9\\-](?!$)){0,61}[a-z0-9]?)|(?:\\[(?:(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\.){3}(?:[01]?\\d{1,2}|2[0-4]\\d|25[0-5])\\]))$',
+		desc: '邮箱'
 	},
 	ENVIRONMENT:{
 		type: 'string',
@@ -36,13 +36,13 @@ var SCHEMA_PROPERTY = {
 		desc: '帮助'
 	},
 	ID: {
-        type: 'string',
-        pattern: '^[0-9a-f]{50}$'
-    },
-    IDEx: {
-        type: 'string',
-        pattern: '^[0-9a-z]{1,50}$'
-    },
+		type: 'string',
+		pattern: '^[0-9a-f]{50}$'
+	},
+	IDEx: {
+		type: 'string',
+		pattern: '^[0-9a-z]{1,50}$'
+	},
 	KEYWORD:{
 		type: 'string',
 		minLength: 3,
@@ -54,6 +54,11 @@ var SCHEMA_PROPERTY = {
 		minLength: 1,
 		maxLength: 20,
 		desc: '编程语言'
+	},
+	MINIINTEGER: {
+		type: 'integer',
+		minimum: 0,
+		maximum: 256
 	},
 	NAME:{
 		type: 'string',
@@ -82,10 +87,10 @@ var SCHEMA_PROPERTY = {
 		desc: '源代码'
 	},
 	TIMESTAMP: {
-        type: 'integer',
-        minimum: 0,
-        maximum: 32506358400000 // 3000-1-1 0:0:0 UTC
-    },
+		type: 'integer',
+		minimum: 0,
+		maximum: 32506358400000 // 3000-1-1 0:0:0 UTC
+	},
 	USERNAME:{
 		type: 'string',
 		minLength: 3,
@@ -199,6 +204,18 @@ var SCHEMAS = {
 			help:SCHEMA_PROPERTY.HELP
 		},
 		required:['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help']
+	},
+	createTask: {
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME,
+			executor: SCHEMA_PROPERTY.ID,
+			duration:SCHEMA_PROPERTY.MINIINTEGER,
+			start_time:SCHEMA_PROPERTY.TIMESTAMP,
+			end_time:SCHEMA_PROPERTY.TIMESTAMP,
+			automode:SCHEMA_PROPERTY.MINIINTEGER
+		},
+		required:['name', 'executor', 'duration', 'start_time', 'automode']
 	}
 };
 
@@ -208,15 +225,15 @@ $.each( SCHEMAS, function(k, v){
 });
 
 var code2Message = {
-    required: '参数不能为空',
-    email: '无效的电子邮件',
-    pattern: '格式无效',
-    minLength: '不满足最少字符',
-    maxLength: '超过了允许最大字符',
-    minimum: '超出了最小允许范围',
-    exclusiveMinimum: '超出了最小允许范围',
-    maximum: '超出了最大允许范围',
-    exclusiveMaximum: '超出了最大允许范围',
+	required: '参数不能为空',
+	email: '无效的电子邮件',
+	pattern: '格式无效',
+	minLength: '不满足最少字符',
+	maxLength: '超过了允许最大字符',
+	minimum: '超出了最小允许范围',
+	exclusiveMinimum: '超出了最小允许范围',
+	maximum: '超出了最大允许范围',
+	exclusiveMaximum: '超出了最大允许范围',
 };
 
 function getPropertyDesc(schema,property){
@@ -225,28 +242,28 @@ function getPropertyDesc(schema,property){
 
 function translateFormError(schema, errors){
 	if (!errors.validation) {
-        throw {error:'Invalid JSON request.'};
-    }
-    exps = [];
-    $.each(errors.validation, function(property,invalids){    	
-    	var msg = '无效的值：' + property;
-    	if( invalids.length !== 0) {
-    		var cond = Object.keys(invalids)[0];
-	    	msg = getPropertyDesc(schema, property) + code2Message[cond];
-	    }
-	    exps.push( {error:'Invalid parameters', data: property, message: msg});
-    });
-    if( exps.length === 1 ){
-    	throw exps[0];
-    }else{
-    	throw exps;
-    }
+		throw {error:'Invalid JSON request.'};
+	}
+	exps = [];
+	$.each(errors.validation, function(property,invalids){    	
+		var msg = '无效的值：' + property;
+		if( invalids.length !== 0) {
+			var cond = Object.keys(invalids)[0];
+			msg = getPropertyDesc(schema, property) + code2Message[cond];
+		}
+		exps.push( {error:'Invalid parameters', data: property, message: msg});
+	});
+	if( exps.length === 1 ){
+		throw exps[0];
+	}else{
+		throw exps;
+	}
 }
 
 function validateJsonObj(schemaName, data){
 	var errors = formjjv.validate(schemaName, data);
-    if (errors !== null) {
-        throw translateFormError(schemaName, errors);
-    }
-    return true;
+	if (errors !== null) {
+		throw translateFormError(schemaName, errors);
+	}
+	return true;
 }
