@@ -10873,6 +10873,9 @@ a.uk-datepicker-table-muted {
   margin: 0 auto;
   padding: 0 20px;
 }
+.dv-hr {
+  margin-top: 2px;
+}
 .x-content {
   padding: 20px;
 }
@@ -10999,6 +11002,9 @@ form p.help-text {
 .dv-border-right {
   border-right: 1px solid #ddd;
   padding-right: 10px;
+}
+.dv-border {
+  border: 1px solid #ddd;
 }
 .wiki-content > h1 {
   font-size: 1.8em;

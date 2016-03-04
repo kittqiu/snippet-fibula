@@ -35,8 +35,10 @@ function initVM( data ){
 		data:{
 			name: data.name || '',
 			start_time: formatDate(data.start_time) || formatNow(),
+			creator: data.creator_name,
 			master: data.master_name || '',
-			end_time: formatDate(data.end_time) || '',			
+			end_time: formatDate(data.end_time) || '',
+			created_at: formatDate(data.created_at),			
 			details: data.details || '',
 			groups: data.groups || [],
 			members: data.members || [],
@@ -81,16 +83,16 @@ $(function () {
 					<td class="uk-width-1-10 uk-block-muted">负责人：</td>
 					<td class="uk-width-4-10" v-text="master"></td>
 					<td class="uk-width-1-10 uk-block-muted">创建人：</td>
-					<td class="uk-width-4-10">{{project.creator_name}}</td>
+					<td class="uk-width-4-10" v-text="creator"></td>
 				</tr>
 				<tr>
 					<td class="uk-block-muted">开始时间：</td>
-					<td>{{project.start_time|time2Date}}</td>
+					<td v-text="start_time"></td>
 					<td class="uk-block-muted">创建时间：</td>
-					<td>{{project.created_at|time2Date}}</td>
+					<td v-text="created_at"></td>
 				</tr>
 					<td class="uk-block-muted">结束时间：</td>
-					<td>{{project.end_time|time2Date}}</td>					
+					<td v-text="end_time"></td>					
 					<td class="uk-block-muted">状态：</td>
 					<td>正在执行</td>
 				</tr>
@@ -116,7 +118,7 @@ $(function () {
 				</tr>
 				<tr>
 					<td class="uk-block-muted">描述：</td>
-					<td colspan="3">{{project.details}}</td>
+					<td colspan="3" v-text="details"></td>
 				</tr>
 			</tbody>
 		</table>

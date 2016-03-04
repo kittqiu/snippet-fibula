@@ -4,6 +4,7 @@ var base = require('../_base');
 
 module.exports = function(warp){
 	return base.defineModel(warp, 'ProjectTaskExec', [
+		base.column_id('project_id', {index:true}),
 		base.column_id('task_id', {index:true}),
 		base.column_id('executor_id', {index:true}),
 		base.column_id('manager_id', {index:true}),

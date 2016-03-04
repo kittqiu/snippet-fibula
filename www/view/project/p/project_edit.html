@@ -40,7 +40,9 @@ function initVM( data ){
 			name: data.name || '',
 			start_time: formatDate(data.start_time) || formatNow(),
 			master: data.master_name || '',
-			end_time: formatDate(data.end_time) || '',			
+			creator: data.creator_name,
+			end_time: formatDate(data.end_time) || '',
+			created_at: formatDate(data.created_at),			
 			details: data.details || '',
 			groups: data.groups || [],
 			members: data.members || [],
@@ -176,13 +178,13 @@ $(function () {
 							</select>
 						</td>
 						<td class="uk-width-1-10 uk-block-muted">创建人：</td>
-						<td class="uk-width-4-10">{{project.creator_name}}</td>
+						<td class="uk-width-4-10" v-text="creator"></td>
 					</tr>
 					<tr>
 						<td class="uk-block-muted">开始时间：</td>
 						<td><input type="text" v-model="start_time" name="start_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"></td>
 						<td class="uk-block-muted">创建时间：</td>
-						<td>{{project.created_at|time2Date}}</td>
+						<td v-text="created_at"></td>
 					</tr>
 						<td class="uk-block-muted">结束时间：</td>
 						<td><input type="text" v-model="end_time" name="end_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"></td>					

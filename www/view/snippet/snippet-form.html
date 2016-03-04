@@ -13,70 +13,70 @@
 
 <script type="text/javascript">
 function initUploadField(prefix, allow, onlyone){
-    var progressbar = $('#' +  prefix + '-progressbar'),
-        bar         = progressbar.find('.uk-progress-bar'),
-        uploadfiles = [],
-        settings    = {
-	        action: '/api/file?t=snippet', // upload url
+	var progressbar = $('#' +  prefix + '-progressbar'),
+		bar         = progressbar.find('.uk-progress-bar'),
+		uploadfiles = [],
+		settings    = {
+			action: '/api/file?t=snippet', // upload url
 
-	        before: function(settings, files){
-	        	var i, names = [];
-	        	for( i = 0; i<files.length; i++ ){
-	        		names.push( files[i].name );
-	        	}
+			before: function(settings, files){
+				var i, names = [];
+				for( i = 0; i<files.length; i++ ){
+					names.push( files[i].name );
+				}
 
-	        	uploadfiles = [];
-	        	$('#' + prefix +' tr').each(function(i){
+				uploadfiles = [];
+				$('#' + prefix +' tr').each(function(i){
 					uploadfiles.push($(this).attr("name"));
 				});
 
-	        	for(var i = 0; i < uploadfiles.length; i++ ){
-	        		if( names.indexOf(uploadfiles[i])!==-1){
-	        			info('请不要上传相同的文件');
-	        			return false;
-	        		}
-	        	}
-	        	if(onlyone && names.length + uploadfiles.length > 1){
-	        		info('只能上传1个文件');
-	        		return false;
-	        	}
-	        	return true;
-	        },
+				for(var i = 0; i < uploadfiles.length; i++ ){
+					if( names.indexOf(uploadfiles[i])!==-1){
+						info('请不要上传相同的文件');
+						return false;
+					}
+				}
+				if(onlyone && names.length + uploadfiles.length > 1){
+					info('只能上传1个文件');
+					return false;
+				}
+				return true;
+			},
 
-	        allow : allow || '*.*', // allow only images
-	        notallowed:function(file, settings){
-	        	var exts = settings.allow.substring(settings.allow.indexOf('.')+2);
-	        	exts = exts.slice(0,-1);
-	        	exts = exts.split('|').join(', ');
-	        	info('仅允许后缀名为'+ exts + '的文件');
-	        },
-	        loadstart: function() {
-	            bar.css("width", "0%").text("0%");
-	            progressbar.removeClass("uk-hidden");
-	        },
+			allow : allow || '*.*', // allow only images
+			notallowed:function(file, settings){
+				var exts = settings.allow.substring(settings.allow.indexOf('.')+2);
+				exts = exts.slice(0,-1);
+				exts = exts.split('|').join(', ');
+				info('仅允许后缀名为'+ exts + '的文件');
+			},
+			loadstart: function() {
+				bar.css("width", "0%").text("0%");
+				progressbar.removeClass("uk-hidden");
+			},
 
-	        progress: function(percent) {
-	            percent = Math.ceil(percent);
-	            bar.css("width", percent+"%").text(percent+"%");
-	        },
-	        complete:function(response){
-	            var allfiles = JSON.parse(response).files,
-	            	f = allfiles[0];
+			progress: function(percent) {
+				percent = Math.ceil(percent);
+				bar.css("width", percent+"%").text(percent+"%");
+			},
+			complete:function(response){
+				var allfiles = JSON.parse(response).files,
+					f = allfiles[0];
 
-	            uploadfiles.push( f.name );
-	            $('#' + prefix).append( 
-	            '<tr id="' + f.attid +'" name="' + f.name +'"><td>' + f.name + '</td><td style="text-align:right"><a onclick="removeFile(\'' + f.attid + '\')" class="uk-close"></a></td></tr>' );
-	        },
-	        allcomplete: function(response) {
-	            bar.css("width", "100%").text("100%");
-	            setTimeout(function(){
-	                progressbar.addClass("uk-hidden");
-	            }, 250);
-	        }
-	    };
+				uploadfiles.push( f.name );
+				$('#' + prefix).append( 
+				'<tr id="' + f.attid +'" name="' + f.name +'"><td>' + f.name + '</td><td style="text-align:right"><a onclick="removeFile(\'' + f.attid + '\')" class="uk-close"></a></td></tr>' );
+			},
+			allcomplete: function(response) {
+				bar.css("width", "100%").text("100%");
+				setTimeout(function(){
+					progressbar.addClass("uk-hidden");
+				}, 250);
+			}
+		};
 
-    var select = UIkit.uploadSelect($("#" + prefix + "-upload-select"), settings),
-        drop   = UIkit.uploadDrop($("#" + prefix + "-upload-drop"), settings);
+	var select = UIkit.uploadSelect($("#" + prefix + "-upload-select"), settings),
+		drop   = UIkit.uploadDrop($("#" + prefix + "-upload-drop"), settings);
 }
 
 function getUploadAttachList(){
@@ -154,12 +154,12 @@ function initVM( data ){
 	});
 	
 	var htmleditor = UIkit.htmleditor($('#help').get(0), {
-    markdown: true,
-    maxsplitsize: 600
-    });
+	markdown: true,
+	maxsplitsize: 600
+	});
 
 	if( data.code && data.code.length > 0 ){
-	    var html = codeToHtml(data.code);
+		var html = codeToHtml(data.code);
 		$('#codeAnddoc').html(html);
 	}
 }
@@ -232,89 +232,89 @@ snippet修改成功
 		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
 			<fieldset>
 				<div class="uk-alert uk-alert-danger uk-hidden"></div>
-			    <div class="uk-form-row uk-grid" style="margin-top:10px">
-			    	<div class="uk-width-1-4">
-				        <label class="uk-form-label">{{ _('Name') }}</label>
-				        <div class="uk-form-controls">
-				        	<input v-model="name" name="name"  type="text" class="uk-width-1-1">
-				        </div>
-			        </div>
-			        <div style="margin-left:0px;margin-right:0px;">
-				        <div class="uk-form-label" style="padding-top:30px">--</div>
-			        </div>
-			        <div class="uk-width-1-2">
-				        <label class="uk-form-label">{{ _('description') }}</label>
-				        <div class="uk-form-controls">
-				        	<input v-model="brief" name="brief"  type="text" class="uk-width-1-1">
-				        </div>
-			        </div>
-			        <div>
-			        	<p class="help-text">函数名或模块名，3-50字符，必须是小写字母、数字、-连字线或_下划线字符。</p>
-			    	</div>
-			    </div>
-			    <div class="uk-form-row uk-grid" style="margin-top:20px">
-			    	<div class="uk-width-1-4">
-				        <label class="uk-form-label">{{ _('Program language') }}</label>
-				        <div class="uk-form-controls">
-				        	<select id="language" v-model="language" name="language" class="uk-width-1-1">
-				        		{% for n,lang in __languages %}
-				        			{% if loop.first %}
-				        			<option>{{ lang }}</option>
-				        			{% else %}
-				        			<option>{{ lang }}</option>
-				        			{% endif %}
-				        		{% endfor %}
-				        	</select>
-				        </div>
-			        </div>
-			        <div style="margin-left:0px;margin-right:0px;">
-				        <div class="uk-form-label" style="padding-top:30px">--</div>
-			        </div>
-			        <div class="uk-width-1-2">
-				        <label class="uk-form-label">{{ _('develop environment') }}</label>
-				        <div class="uk-form-controls">
-				        	<select v-model="environment" name="environment" class="uk-width-1-1">
-				        		{% for n, x in __environments %}
-				        			{% if loop.first %}
-				        			<option>{{ x }}</option>
-				        			{% else %}
-				        			<option>{{ x }}</option>
-				        			{% endif %}
-				        		{% endfor %}
-				        	</select>
-				        </div>
-			        </div>
-			        <div>
-			        	<p class="help-text"></p>
-			    	</div>
-			    </div>
-			    <div class="uk-form-row" style="margin-top:20px">
-			        <label class="uk-form-label">{{ _('Keywords') }}</label>
-			        <div class="uk-form-controls">
-			        	<input v-model="keywords" name="keywords" type="text" class="uk-width-1-1">
-			        </div>
-			        <p class="help-text">3-100字符，最多10个关键词，需要把模块名称中的词语设置为关键字</p>
-			    </div>
-			    <!--div class="uk-form-row" style="margin-top:20px">
-			    	<label class="uk-form-label">{{ _('代码类型') }}</label>
-			    	<div class="uk-form-controls">
-			        	<input type="radio" name="codetype" value="code" checked>单个代码段</input>
-			        	<input type="radio" name="codetype" value="file" style="margin-left:30px;">代码文件(1个或多个)</input>
-			        	<input type="radio" name="codetype" value="pkg" style="margin-left:30px;">包(1个zip压缩包，可包含文件夹)</input>
-			        </div>
-			    </div-->
-			    <div id="block-code" class="uk-form-row" style="margin-top:20px">
-			    	<label class="uk-form-label">{{ _('Code snippet') }}</label>
-			    	<div class="uk-form-controls">
-			        	<textarea v-model="code" v-on:change="gendoc" cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:300px" ></textarea>
-			        </div>
-			        <p class="help-text"></p>
-			        <div id="codeAnddoc">
-			        </div>
-			    </div>
-			    <!--div id="block-file" class="uk-form-row" style="margin-top:20px;display:none">
-			    	<label class="uk-form-label">{{ _('代码文件') }}</label>
-			    	<div>
+				<div class="uk-form-row uk-grid" style="margin-top:10px">
+					<div class="uk-width-1-4">
+						<label class="uk-form-label">{{ _('Name') }}</label>
+						<div class="uk-form-controls">
+							<input v-model="name" name="name"  type="text" class="uk-width-1-1">
+						</div>
+					</div>
+					<div style="margin-left:0px;margin-right:0px;">
+						<div class="uk-form-label" style="padding-top:30px">--</div>
+					</div>
+					<div class="uk-width-1-2">
+						<label class="uk-form-label">{{ _('description') }}</label>
+						<div class="uk-form-controls">
+							<input v-model="brief" name="brief"  type="text" class="uk-width-1-1">
+						</div>
+					</div>
+					<div>
+						<p class="help-text">函数名或模块名，3-50字符，必须是小写字母、数字、-连字线或_下划线字符。</p>
+					</div>
+				</div>
+				<div class="uk-form-row uk-grid" style="margin-top:20px">
+					<div class="uk-width-1-4">
+						<label class="uk-form-label">{{ _('Program language') }}</label>
+						<div class="uk-form-controls">
+							<select id="language" v-model="language" name="language" class="uk-width-1-1">
+								{% for n,lang in __languages %}
+									{% if loop.first %}
+									<option>{{ lang }}</option>
+									{% else %}
+									<option>{{ lang }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div style="margin-left:0px;margin-right:0px;">
+						<div class="uk-form-label" style="padding-top:30px">--</div>
+					</div>
+					<div class="uk-width-1-2">
+						<label class="uk-form-label">{{ _('develop environment') }}</label>
+						<div class="uk-form-controls">
+							<select v-model="environment" name="environment" class="uk-width-1-1">
+								{% for n, x in __environments %}
+									{% if loop.first %}
+									<option>{{ x }}</option>
+									{% else %}
+									<option>{{ x }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div>
+						<p class="help-text"></p>
+					</div>
+				</div>
+				<div class="uk-form-row" style="margin-top:20px">
+					<label class="uk-form-label">{{ _('Keywords') }}</label>
+					<div class="uk-form-controls">
+						<input v-model="keywords" name="keywords" type="text" class="uk-width-1-1">
+					</div>
+					<p class="help-text">3-100字符，最多10个关键词，需要把模块名称中的词语设置为关键字</p>
+				</div>
+				<!--div class="uk-form-row" style="margin-top:20px">
+					<label class="uk-form-label">{{ _('代码类型') }}</label>
+					<div class="uk-form-controls">
+						<input type="radio" name="codetype" value="code" checked>单个代码段</input>
+						<input type="radio" name="codetype" value="file" style="margin-left:30px;">代码文件(1个或多个)</input>
+						<input type="radio" name="codetype" value="pkg" style="margin-left:30px;">包(1个zip压缩包，可包含文件夹)</input>
+					</div>
+				</div-->
+				<div id="block-code" class="uk-form-row" style="margin-top:20px">
+					<label class="uk-form-label">{{ _('Code snippet') }}</label>
+					<div class="uk-form-controls">
+						<textarea v-model="code" v-on:change="gendoc" cols="" rows="" placeholder="粘贴代码块" class="uk-width-1-1" style="height:300px" ></textarea>
+					</div>
+					<p class="help-text"></p>
+					<div id="codeAnddoc">
+					</div>
+				</div>
+				<!--div id="block-file" class="uk-form-row" style="margin-top:20px;display:none">
+					<label class="uk-form-label">{{ _('代码文件') }}</label>
+					<div>
 						<table id="codefiles" class="uk-table uk-table-striped">
 							<tr v-for="att in attachments" v-bind:id="att.id" v-bind:name="att.name">
 								<td v-text="att.name"></td>
@@ -322,16 +322,16 @@ snippet修改成功
 							</tr>
 						</table>
 					</div>
-			    	<div id="codefiles-upload-drop" class="uk-placeholder">
-					    <i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="codefiles-upload-select" type="file"></a>.
+					<div id="codefiles-upload-drop" class="uk-placeholder">
+						<i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="codefiles-upload-select" type="file"></a>.
 					</div>
 					<div id="codefiles-progressbar" class="uk-progress uk-hidden">
-					    <div class="uk-progress-bar" style="width: 0%;">...</div>
+						<div class="uk-progress-bar" style="width: 0%;">...</div>
 					</div>
-			    </div>
-			    <div id="block-pkg" class="uk-form-row" style="margin-top:20px;display:none">
-			    	<label class="uk-form-label">{{ _('代码包文件') }}</label>
-			    	<div>
+				</div>
+				<div id="block-pkg" class="uk-form-row" style="margin-top:20px;display:none">
+					<label class="uk-form-label">{{ _('代码包文件') }}</label>
+					<div>
 						<table id="pkgfile" class="uk-table uk-table-striped">
 							<tr v-for="att in attachments" v-bind:id="att.id" v-bind:name="att.name">
 								<td v-text="att.name"></td>
@@ -339,23 +339,23 @@ snippet修改成功
 							</tr>
 						</table>
 					</div>
-			    	<div id="pkgfile-upload-drop" class="uk-placeholder">
-					    <i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="pkgfile-upload-select" type="file"></a>.
+					<div id="pkgfile-upload-drop" class="uk-placeholder">
+						<i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="pkgfile-upload-select" type="file"></a>.
 					</div>
 					<div id="pkgfile-progressbar" class="uk-progress uk-hidden">
-					    <div class="uk-progress-bar" style="width: 0%;">...</div>
+						<div class="uk-progress-bar" style="width: 0%;">...</div>
 					</div>
-			    </div-->
-			    <div class="uk-form-row" style="margin-top:20px">
-			        <label class="uk-form-label">{{ _('Help') }}</label>
-			        <div class="uk-form-controls">
-			        	<textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" ></textarea>
-			        </div>
-			        <p class="help-text">markdown格式，填写帮助信息，如需要包含何种头文件 、使用示例等</p>
-			    </div>
-			    <div class="uk-form-row" style="margin-top:20px">
-			    	<label class="uk-form-label">{{ _('Attachment') }}</label>
-			    	<div>
+				</div-->
+				<div class="uk-form-row" style="margin-top:20px">
+					<label class="uk-form-label">{{ _('Help') }}</label>
+					<div class="uk-form-controls">
+						<textarea id="help" v-model="help" cols="" rows="" placeholder="" class="uk-width-1-1" style="height:100px" ></textarea>
+					</div>
+					<p class="help-text">markdown格式，填写帮助信息，如需要包含何种头文件 、使用示例等</p>
+				</div>
+				<div class="uk-form-row" style="margin-top:20px">
+					<label class="uk-form-label">{{ _('Attachment') }}</label>
+					<div>
 						<table id="attachments" class="uk-table uk-table-striped">
 							<tr v-for="att in attachments" v-bind:id="att.id">
 								<td v-text="att.name"></td>
@@ -363,19 +363,19 @@ snippet修改成功
 							</tr>
 						</table>
 					</div>
-			    	<div id="attachments-upload-drop" class="uk-placeholder">
-					    <i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="attachments-upload-select" type="file"></a>.
+					<div id="attachments-upload-drop" class="uk-placeholder">
+						<i class="uk-icon-cloud-upload uk-icon-medium"></i>{{_('Attach files by dropping them here or')}}<a class="uk-form-file">{{_('Select a file')}}<input id="attachments-upload-select" type="file"></a>.
 					</div>
 					<div id="attachments-progressbar" class="uk-progress uk-hidden">
-					    <div class="uk-progress-bar" style="width: 0%;">...</div>
+						<div class="uk-progress-bar" style="width: 0%;">...</div>
 					</div>
-			    </div>
-			    <div class="uk-form-row uk-clearfix">
-			        <button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
-			        	<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.name) }}
-			        </button>
-			    </div>
-	    </fieldset>
+				</div>
+				<div class="uk-form-row uk-clearfix">
+					<button  type="submit" class="uk-button-primary uk-button-large uk-width-medium uk-align-center" style="width:480px;" >
+						<i class="uk-icon-check uk-icon-medium"></i> {{ _(__form.name) }}
+					</button>
+				</div>
+		</fieldset>
 		</form>
 	</div>
 </div>

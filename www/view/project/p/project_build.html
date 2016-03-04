@@ -7,61 +7,435 @@
 <script src="/static/js/browser.min.js"></script>
 
 <script type="text/babel">
+var Tasks = {};
 
-var UkTab = React.createClass({
-	getInitialState: function() {
-	    return {view: 'view_task'};
-	},
-	handleClick: function(ev){
-		var id = ev.target.id;
-		if( id && id.indexOf('view_')===0){
-			this.setState({ view: ev.target.id });
+function saveTasks(ts){
+	Tasks['root'] = { id:'root', name:'root', parent: 'none' };
+	ts.forEach(function(t){
+		Tasks[t.id] = t;
+	});
+}
+
+/*key-value: parent - task object*/
+function makeTaskMap(ts){
+	var map = {root:[]};
+	ts.forEach(function(t){
+		if( map.hasOwnProperty(t.parent)){
+			map[t.parent].push(t);
+		}else{
+			map[t.parent] = [t];
 		}
+	});
+	return map;
+}
+
+function sortTasks( ts ){
+	ts.sort(function(a,b){
+		return a.number - b.number;
+	});
+	return ts;
+}
+
+
+function initTree(){
+	$('.tree').treegrid({
+		treeColumn: 1,
+		expanderExpandedClass: 'uk-icon-folder-open-o',
+		expanderCollapsedClass: 'uk-icon-folder-o',
+		nodeClasses: {
+			user:'uk-icon-user',
+			manager: 'uk-icon-manage',
+			manager_duputy: 'uk-icon-manage-deputy'
+		},
+		draggable: true, 
+		//onMove: moveDepartment,
+		selectable: true,
+		selectedClass: 'uk-active'
+		//onSelected:onSelected
+	});
+}
+
+function init(data){
+
+}
+
+/*$(function(){
+
+	loadingElement('vm');
+	getJSON( '/api/project/p/{{__id}}', function(err, data ){
+		readyElement('vm');
+		if(err){
+			fatal(err);
+		}else{
+			initTree( data );
+		}
+	});
+});*/
+
+
+
+function showBlock(id){
+	$('#block-'+id).toggleClass('uk-hidden');
+}
+
+function selectRow(rid){
+	$('#'+rid).toggleClass('uk-active');
+}
+
+var TASKS = [
+	{ key:'id_prepare', id:'id_prepare', parent:'root', number:0, name:'准备', manager_name: '李四', executor_name: '张三', duration: '2', automode:false, plan_start_time:1456156800000, plan_end_time: 1458230400000, start_time:1456156800000, end_time: 1458230400000, difficulty:1, details:'details'},
+	{ key:'id_hardware',id:'id_hardware', parent:'root', number:1,name:'硬件', manager_name: '李四', executor_name: '张三', duration: '2', automode:false, plan_start_time:1456156800000, plan_end_time: 1458230400000, start_time:1456156800000, end_time: 1458230400000, difficulty:1, details:'details'},
+	{ key:'id_software',id:'id_software', parent:'root', number:4,name:'软件', manager_name: '李四', executor_name: '张三', duration: '2', automode:false, plan_start_time:1456156800000, plan_end_time: 1458230400000, start_time:1456156800000, end_time: 1458230400000, difficulty:1, details:'details'},
+	{ key:'id_pcb',id:'id_pcb', parent:'id_hardware',number:2, name:'PCB', manager_name: '李四', executor_name: '张三', duration: '2', automode:false, plan_start_time:1456156800000, plan_end_time: 1458230400000, start_time:1456156800000, end_time: 1458230400000, difficulty:1, details:'details'},
+	{ key:'id_origi',id:'id_origi', parent:'id_hardware', number:3,name:'原理', manager_name: '李四', executor_name: '张三', duration: '2', automode:false, plan_start_time:1456156800000, plan_end_time: 1458230400000, start_time:1456156800000, end_time: 1458230400000, difficulty:1, details:'details'},
+	{ key:'id_system',id:'id_system', parent:'id_software', number:5,name:'系统软件', manager_name: '李四', executor_name: '张三', duration: '2', automode:false, plan_start_time:1456156800000, plan_end_time: 1458230400000, start_time:1456156800000, end_time: 1458230400000, difficulty:1, details:'details'},
+	{ key:'id_app',id:'id_app', parent:'id_software', number:6,name:'应用软件', manager_name: '李四', executor_name: '张三', duration: '2', automode:false, plan_start_time:1456156800000, plan_end_time: 1458230400000, start_time:1456156800000, end_time: 1458230400000, difficulty:1, details:'details'}
+];
+
+
+var styles = {
+	smallwidth: {
+		width: "5%"
 	},
+	nopadding: {
+		padding: "0"
+	},
+	gap: {
+		marginRight: "10px"
+	},
+	block: {
+		padding: "20px"
+	},
+	multilines: {
+		height:"120px"
+	}
+};
+
+var tabs = [
+	{ type:'view', title: '概况' },
+	{ type:'edit', title: '编辑' },
+	{ type:'log', title: '进展' }
+];
+
+var difficulties = [ '简单', '普通', '困难'];
+
+var TaskTabView = React.createClass({	
 	render: function(){
-		return (
-			<div>			
-				<ul className="uk-tab" data-uk-tab>
-					{
-						React.Children.map(this.props.children, function (child) {
-						  var cls = child.props.id == this.state.view ? 'uk-active' : '';
-		                  return (<li onClick={this.handleClick} className={cls} >{child}</li>);
-		                }, this)
-					}
-				</ul>
-				<ResourceView display={this.state.view == "view_res"?'':'uk-hidden'}/>
-				<TaskView display={this.state.view == "view_task"?'':'uk-hidden'}/>
+		var task = this.props.task;
+		return ( 
+			<div>
+				<table className="uk-table dv-border">
+					<tbody>
+						<tr>
+							<td className="uk-width-2-10 uk-block-muted">任务名称：</td>
+							<td className="uk-width-3-10">{task.name}</td>
+							<td className="uk-width-2-10 uk-block-muted">工期(天)：</td>
+							<td className="uk-width-3-10">{task.duration}</td>
+						</tr>
+						<tr>
+							<td className="uk-width-2-10 uk-block-muted">执行人：</td>
+							<td className="uk-width-3-10">{task.executor_name}</td>
+							<td className="uk-width-2-10 uk-block-muted">工作审核人：</td>
+							<td className="uk-width-3-10">{task.manager_name}</td>
+						</tr>
+						<tr>
+							<td className="uk-width-2-10 uk-block-muted">计划模式：</td>
+							<td className="uk-width-3-10">{task.automode ? '自动' : '手动'}</td>
+							<td className="uk-width-2-10 uk-block-muted">任务难度：</td>
+							<td className="uk-width-3-10">{ difficulties[task.difficulty]}</td>
+						</tr>
+						<tr>
+							<td className="uk-width-2-10 uk-block-muted">开始时间：</td>
+							<td className="uk-width-3-10">{ formatDate(task.start_time)} </td>
+							<td className="uk-width-2-10 uk-block-muted">计划开始时间：</td>
+							<td className="uk-width-3-10">{ formatDate(task.plan_start_time)}</td>	
+						</tr>
+						<tr>
+							<td className="uk-width-2-10 uk-block-muted">结束时间：</td>
+							<td className="uk-width-3-10">{ formatDate(task.end_time)}</td>
+							<td className="uk-width-2-10 uk-block-muted">计划结束时间：</td>
+							<td className="uk-width-3-10">{ formatDate(task.plan_end_time)}</td>
+						</tr>
+						<tr>
+							<td className="uk-block-muted">任务说明:</td>
+							<td colSpan="3" >{ task.details }</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
-		);
+			)
 	}
 });
 
-{% include './project_res.js' %}
-{% include './project_task.js' %}
+var TaskTabEdit = React.createClass({
+	render: function(){
+		return ( 
+			<div></div>
+			)
+	}
+});
+
+
+var TaskTabLog = React.createClass({
+	render: function(){
+		return ( 
+			<div></div>
+			)
+	}
+});
+
+
+var TaskDialog = React.createClass({
+	getInitialState: function() {
+		return {task: this.props.task, tab: 'view'};
+	},
+	onSwitch: function(type){
+		this.setState({tab:type});
+	},
+	render: function(){
+		var task = this.state.task;
+		return (
+			<div id={'modal_' + task.id} className="uk-modal">
+				<div className="uk-modal-dialog uk-modal-dialog-large">
+					<a href="#" className="uk-modal-close uk-close uk-close-alt"></a>
+					<div className="uk-modal-header"><h2>任务：{task.name}</h2></div>
+					
+					<div>
+						<div className="uk-grid">
+							<div className="uk-width-medium-1-10">
+								<ul className="uk-tab uk-tab-left" data-uk-tab={"{connect:'#tab-" + task.id +"'}"}>
+									{ 
+										this.props.tabs.map(function(t){
+											return ( 
+												<li key={'tab_view_'+t.type} id={'tab_view_'+task.id} className={ this.state.tab == t.type ? "uk-active": '' } onClick={this.onSwitch.bind(this,t.type)}>
+													<a href="#" >{t.title}</a>
+												</li>)
+										}.bind(this))
+									}
+								</ul>
+							</div>
+							<div className="uk-width-medium-9-10">
+								<ul id={"tab-" + task.id} className="uk-switcher">
+									<li className={ this.state.tab == 'view' ? "uk-active": '' }>
+										<TaskTabView task={this.state.task}/>
+									</li>
+									<li className={ this.state.tab == 'edit' ? "uk-active": '' }>
+										<TaskTabEdit task={this.state.task}/>
+									</li>
+									<li className={ this.state.tab == 'log' ? "uk-active": '' }>
+										<TaskTabLog task={this.state.task}/>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			);
+	}
+});
+
+
+var Task = React.createClass({
+	getInitialState: function() {
+		return {task: this.props.task, detail_shown: false };
+	},
+	onToggle: function(e){
+		e.preventDefault();
+		this.setState({detail_shown: !this.state.detail_shown})
+	},
+	render: function(){
+		var task = this.state.task,
+			parentCls = task.parent !=='root' ? 'treegrid-parent-' + task.parent : '',
+			plan_mode = task.automode ? '自动' : '手动';
+		
+		return (
+			<tr id={task.id} key={task.id} className={ 'treegrid-' + task.id + ' ' + parentCls}>
+				<td className="uk-block-muted"><button  className="uk-button-link dv-link">{task.number}</button></td>
+				<td><a className="dv-link-black"  href={'#modal_'+task.id} data-uk-modal="{center:true}">{task.name}</a>
+					<TaskDialog task={task} tabs={tabs}/>
+				</td>
+				<td>{task.executor_name}</td>
+				<td>{task.duration}</td>
+				<td>{plan_mode}</td>
+				<td>{formatDate(task.start_time)}</td>
+				<td>{formatDate(task.end_time)}
+					
+				</td>
+			</tr>
+			);
+	}
+});
+
+
+
+var TaskTable = React.createClass({
+	getInitialState: function() {
+		return {tasks: [] };
+	},
+	componentWillMount:function(){
+		this.setState({ tasks: sortTasks(TASKS) });
+	},
+	componentDidMount: function(){
+		initTree();
+	},
+	render: function(){
+		var createTaskItem = function(task){
+			
+		};
+		return (
+			<table id="treeTask" className="tree uk-table uk-width-1-1 uk-table-condensed">
+				<thead>
+					<tr>
+						<th style={styles.smallwidth}>标识</th>
+						<th className="uk-width-3-10">任务名称</th>
+						<th className="uk-width-2-10">负责人</th>
+						<th className="uk-width-1-10">工期(天)</th>
+						<th className="uk-width-1-10">计划模式</th>
+						<th className="uk-width-1-10">开始时间</th>
+						<th className="uk-width-1-10">结束时间</th>		
+					</tr>
+				</thead>
+				<tbody>
+					{ this.state.tasks.map(function(t){
+							return <Task key={t.id} task={t} />
+						})
+					}
+				</tbody>
+			</table>
+			);
+	}
+});
+var PROJECT = {
+	name: 'i90',
+	master_name: '张三',
+	start_time: '2016-2-23',
+	end_time: '2016-3-31'
+};
+
+var NewTaskDlg = React.createClass({	
+	render: function(){
+		return (
+			<div id="modal_new_task" className="uk-modal uk-text-left">
+				<div className="uk-modal-dialog">
+					<a href="" className="uk-modal-close uk-close uk-close-alt"></a>
+					<div className="uk-modal-header "><h2>创建新任务</h2></div>
+					<div>
+						<form className="uk-form uk-form-stacked">
+							<fieldset>
+								<div className="uk-alert uk-alert-danger uk-hidden"></div>
+								<div className="uk-form-row uk-width-2-3">
+									<label className="uk-form-label">名称</label>
+									<div className="uk-form-controls">
+										<input name="name"  type="text" className="uk-width-1-1" autofucus placeholder="3-50字符"/>
+									</div>
+								</div>
+								<div className="uk-form-row uk-width-1-1" >
+									<label className="uk-form-label">负责人</label>
+									<div className="uk-form-controls">
+										<select name="executor" className="uk-width-1-3">
+											{ this.props.users.map(function(u){
+												return <option key={u.id} value={u.id}>{u.name}</option>
+												})
+											}
+										</select>
+									</div>
+								</div>
+								<div className="uk-form-row">
+									<label className="uk-form-label">工期（小时）</label>
+									<div className="uk-form-controls">
+										<input type="text" name="duration" placeholder="填入整数"/>
+									</div>
+								</div>
+								<div className="uk-form-row uk-width-1-3">
+									<label className="uk-form-label">计划模式</label>
+									<div className="uk-form-controls">
+										<select name="mode" className="uk-width-1-1">
+											<option value="0">自动</option>
+											<option value="1">手动</option>
+										</select>
+									</div>
+								</div>
+								<div className="uk-form-row">
+									<label className="uk-form-label">开始时间</label>
+									<div className="uk-form-controls uk-form-icon">
+										<i className="uk-icon-calendar"></i>
+										<input type="text" name="start_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"/>
+									</div>
+								</div>
+								<div className="uk-form-row">
+									<label className="uk-form-label">结束时间</label>
+									<div className="uk-form-controls uk-form-icon">
+										<i className="uk-icon-calendar"></i>
+										<input type="text" name="end_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"/>
+									</div>
+								</div>
+								<div className="uk-form-row uk-width-1-1">
+									<label className="uk-form-label">前置任务</label>
+									<div className="uk-form-controls">
+										<input type="text" name="replayTo" placeholder="填写标识，用逗号分隔"/>
+									</div>
+								</div>
+							</fieldset>
+						</form>
+					</div>
+					<div className="uk-modal-footer uk-text-right">
+						<button type="button" className="uk-button uk-button-primary">保存</button>
+					</div>
+				</div>
+			</div>
+			)
+	}
+});
+
+var USERS = [ 
+{ id: '1112233', name:'张三'},
+{ id: '111223344', name:'李四'}
+];
+
+var ToolBar = React.createClass({
+	render: function(){
+		return (
+			<div className="uk-text-right">
+				添加任务：
+				<a className="dv-link" href={'#modal_new_task'} data-uk-modal="{center:true}">同级层</a>、
+				<a className="dv-link" >下属</a>
+				<NewTaskDlg users={USERS}/>
+			</div>
+			)
+	}
+});
+
+var Project = React.createClass({
+	getInitialState: function() {
+		return {project: PROJECT };
+	},
+	render: function(){
+		return (
+			<div className="uk-width-1-1">				
+				<h2 className="x-title">项目: {this.state.project.name}</h2>
+				<ToolBar />				
+				<hr className="dv-hr"/>
+				<TaskTable />
+			</div>
+			);
+	}
+});
 
 ReactDOM.render(
-	<UkTab>
-		<a id="view_task" >任务</a>
-		<a id="view_res" >资源</a>
-	</UkTab>, 
-	document.getElementById('tab_views'));
-</script>
-<script type="text/javascript">
-var Tasks = {
-	root:{ id:'root', name:'{{project.name}}', parent: 'none' }
-};
+	<Project url=""/>,
+	document.getElementById('vm')
+	);
+
 </script>
 
 {% endblock %}
 
 
 {% block content %}
-<div id="content-block" class="dv-container x-content" style="max-width:1480px">
-	<div id="vm" class="dv-container uk-width-1-1"  style="max-width:1480px">
-		<h2 class="x-title">项目: {{project.name}}</h2>
-		<!--hr style="margin-top:2px"-->
-		<div id="tab_views" class="uk-width-1-1">
-		</div>
+<div id="content-block" class="dv-container x-content" style="max-width:1080px">
+	<div id="vm" class="dv-container uk-width-1-1"  style="max-width:1080px">
+		
 	</div>
 </div>
 {% endblock %}

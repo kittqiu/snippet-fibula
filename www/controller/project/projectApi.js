@@ -79,15 +79,14 @@ module.exports = {
 	'GET /project/p/:id/build': function* (id){
 		var project = yield base.project.$get(id) || {},
 			model = {
+				__id: id,
 				project: project
 			};
 		yield $_render( this, model, 'p/project_build.html');
 	},
 	'GET /project/p/:id/edit': function* (id){
-		var project = yield base.project.$get(id) || {},
-			model = {
+		var model = {
 				__id: id,
-				project: project,
 				statusOptions: base.project.statusOptions(),
 				roleOptions: base.project.roleOptions(),
 				users: yield base.user.$list(),
@@ -101,10 +100,8 @@ module.exports = {
 	},
 
 	'GET /project/p/:id': function* (id){
-		var project = yield base.project.$get(id) || {},
-			model = {
+		var model = {
 				__id: id,
-				project: project,
 				statusOptions: base.project.statusOptions(),
 				roleOptions: base.project.roleOptions()
 			};
