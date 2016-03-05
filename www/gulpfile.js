@@ -6,7 +6,8 @@ var
     uglify = require('gulp-uglify'),
     concat = require('gulp-concat'),
     minifyCSS = require('gulp-minify-css'),
-    gulp = require('gulp');
+    gulp = require('gulp'),
+    babel = require('gulp-babel');
 
 var theme = 'default';
 
@@ -67,5 +68,13 @@ gulp.task('less', function () {
         .pipe(less())
         .pipe(gulp.dest('./static/css/theme'));
 });
+
+gulp.task('babel', () =>
+    gulp.src('./view/project/p/component/*.jsx')
+        .pipe(babel({
+            presets: ['es2015']
+        }))
+        .pipe(gulp.dest('./view/project/p/component/build'))
+);
 
 gulp.task('default', ['less']);
