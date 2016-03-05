@@ -10922,6 +10922,9 @@ a.uk-datepicker-table-muted {
   text-decoration: none;
   font-weight: bold;
 }
+.dv-row-selected {
+  background: #f0f0f0;
+}
 .x-title {
   font-size: 36px;
   line-height: 42px;

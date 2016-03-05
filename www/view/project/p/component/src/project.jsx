@@ -1,28 +1,32 @@
 var Task = React.createClass({
 	getInitialState: function() {
-		return {task: this.props.task, detail_shown: false };
+		return { };
 	},
-	onToggle: function(e){
+	onDoubleClick: function(e){
 		e.preventDefault();
-		this.setState({detail_shown: !this.state.detail_shown})
+		var tabs = [
+						{ type:'view', title: '概况' },
+						{ type:'edit', title: '编辑' },
+						{ type:'log', title: '进展' }
+					];
+		ReactDOM.render(
+			<TaskDialog task={this.props.task} tabs={tabs}/>,
+				document.getElementById('modal_task_'+this.props.task.id)
+			);
 	},
 	render: function(){
-		var task = this.state.task,
+		var task = this.props.task,
 			parentCls = task.parent !=='root' ? 'treegrid-parent-' + task.parent : '',
 			plan_mode = task.automode ? '自动' : '手动',
 			start_time = task.status=='created'?formatDate(task.plan_start_time): formatDate(task.start_time),
-			end_time = task.status=='created'?formatDate(task.plan_end_time): formatDate(task.end_time),
-			tabs = [
-							{ type:'view', title: '概况' },
-							{ type:'edit', title: '编辑' },
-							{ type:'log', title: '进展' }
-						];
+			end_time = task.status=='created'?formatDate(task.plan_end_time): formatDate(task.end_time);
 
 		return (
-			<tr id={task.id} key={task.id} className={ 'treegrid-' + task.id + ' ' + parentCls}>
+			<tr id={task.id} key={task.id} onDoubleClick={this.onDoubleClick} className={ 'treegrid-' + task.id + ' ' + parentCls}>
 				<td className="uk-block-muted"><button  className="uk-button-link dv-link">{this.props.index}</button></td>
 				<td><a className="dv-link-black"  href={'#modal_'+task.id} data-uk-modal="{center:true}">{task.name}</a>
-					<TaskDialog task={task} tabs={tabs}/>
+					<div id={"modal_task_"+task.id} className="uk-modal">
+					</div>
 				</td>
 				<td>{task.executor_name}</td>
 				<td>{task.duration}</td>
@@ -36,7 +40,7 @@ var Task = React.createClass({
 
 var TaskTable = React.createClass({
 	getInitialState: function() {
-		return {taskLen: 0 };
+		return {taskLen: 0, selected_task_id: 'root' };
 	},
 	initTree: function (options){
 		options = options || {};
@@ -45,21 +49,25 @@ var TaskTable = React.createClass({
 			expanderExpandedClass: 'uk-icon-folder-open-o',
 			expanderCollapsedClass: 'uk-icon-folder-o',
 			nodeClasses: {
-				user:'uk-icon-user',
-				manager: 'uk-icon-manage',
-				manager_duputy: 'uk-icon-manage-deputy'
+				task:'uk-icon-tasks'
 			},
 			draggable: true, 
 			//onMove: moveDepartment,
 			selectable: true,
-			selectedClass: 'uk-active',
-			onSelected:options.onSelected
+			selectedClass: 'dv-row-selected',
+			onSelected:options.onSelected,
+			leafClass:'uk-icon-leaf'
 		});
 	},
 	resetTree: function(){
 		this.initTree({
 			onSelected: this.props.onTaskSelected
 		});
+	},
+	onViewDetail: function(id){
+		this.setState({selected_task_id: id});
+		console.log("onViewDetail" + id)
+		console.log(this)	
 	},
 	componentDidUpdate:function(){
 		if( this.props.tasks.length !== this.state.taskLen ){
@@ -69,26 +77,30 @@ var TaskTable = React.createClass({
 	},
 	render: function(){
 		var smallwidth = { width: "5%" };
+		
 		return (
-			<table id="treeTask" className="tree uk-table uk-width-1-1 uk-table-condensed">
-				<thead>
-					<tr>
-						<th style={smallwidth}>标识</th>
-						<th className="uk-width-3-10">任务名称</th>
-						<th className="uk-width-2-10">负责人</th>
-						<th className="uk-width-1-10">工期(天)</th>
-						<th className="uk-width-1-10">计划模式</th>
-						<th className="uk-width-1-10">开始时间</th>
-						<th className="uk-width-1-10">结束时间</th>		
-					</tr>
-				</thead>
-				<tbody>
-					{ this.props.tasks.map(function(t, index){
-							return <Task key={t.id} task={t} index={index} />
-						})
-					}
-				</tbody>
-			</table>
+			<div>
+				<table id="treeTask" className="tree uk-table uk-width-1-1 uk-table-condensed">
+					<thead>
+						<tr>
+							<th style={smallwidth}>标识</th>
+							<th className="uk-width-3-10">任务名称</th>
+							<th className="uk-width-2-10">负责人</th>
+							<th className="uk-width-1-10">工期(天)</th>
+							<th className="uk-width-1-10">计划模式</th>
+							<th className="uk-width-1-10">开始时间</th>
+							<th className="uk-width-1-10">结束时间</th>		
+						</tr>
+					</thead>
+					<tbody>
+						{ this.props.tasks.map(function(t, index){
+								return <Task key={t.id} task={t} index={index} onViewDetail={this.onViewDetail} />
+							}.bind(this))
+						}
+					</tbody>
+				</table>
+				
+			</div>
 			);
 	}
 });
@@ -100,7 +112,7 @@ var ToolBar = React.createClass({
 	handleNewTask: function(parent){
 		this.setState({new_task_parent:parent});
 	},
-	render: function(){
+	render: function(){		
 		return (
 			<div className="uk-grid">
 				<div className="uk-width-1-3">
@@ -148,6 +160,9 @@ var Project = React.createClass({
 		ts.forEach(function(t){
 			TaskMap[t.id] = t;
 		});
+	},
+	getTaskById: function( id){
+		return this.state.TaskMap[id];
 	},
 	evaluateTaskParent: function (id){
 		var TaskMap = this.state.TaskMap;
@@ -230,7 +245,7 @@ var Project = React.createClass({
 				<h2 className="x-title">项目: {this.state.project.name}</h2>
 				<ToolBar users={this.state.users} onNewTask={this.onNewTask} selected_task={this.state.selected_task} evaluateTaskParent={this.evaluateTaskParent} TaskMap={this.state.TaskMap}/>				
 				<hr className="dv-hr"/>
-				<TaskTable tasks={this.state.tasks} onTaskSelected={this.onTaskSelected}/>
+				<TaskTable tasks={this.state.tasks} onTaskSelected={this.onTaskSelected} getTaskById={this.getTaskById}/>
 			</div>
 			);
 	}

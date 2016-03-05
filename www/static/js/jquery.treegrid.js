@@ -429,7 +429,7 @@
             if( type !== undefined ){
                 $this.find('.treegrid-expander').addClass($this.treegrid('getSetting', 'nodeClasses')[type]);
             }else{
-                $this.find('.treegrid-expander').addClass($this.treegrid('getSetting', 'expanderCollapsedClass'));
+                $this.find('.treegrid-expander').addClass($this.treegrid('getSetting', 'leafClass'));
             }
             //expander = $this.find('.treegrid-expander');
             //$this.treegrid('getSetting', 'expanderTemplate');
@@ -915,6 +915,7 @@
         indentTemplate: '<span class="treegrid-indent"></span>',
         expanderExpandedClass: 'treegrid-expander-expanded',
         expanderCollapsedClass: 'treegrid-expander-collapsed',
+        leafClass: 'treegrid-expander-collapsed',
         treeColumn: 0,
         draggable: false,
         selectable: false,

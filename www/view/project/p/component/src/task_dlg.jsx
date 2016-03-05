@@ -68,15 +68,33 @@ var TaskTabLog = React.createClass({
 
 var TaskDialog = React.createClass({
 	getInitialState: function() {
-		return {task: this.props.task, tab: 'view'};
+		return {task_id:'root', tab: 'view'};
 	},
 	onSwitch: function(type){
 		this.setState({tab:type});
+	},	
+	showModal: function(){
+		if( this.props.task ){
+			var id = "modal_task_"+this.props.task.id;
+			var modal = new UIkit.modal('#'+id);
+			modal.show();
+			// modal.on({
+			// 	'hide.uk.modal': function(e){
+			// 		ReactDOM.unmountComponentAtNode(document.getElementById(id));
+			// 	}.bind(this)
+			// });
+		}
+		
+	},
+	componentDidMount: function(){
+		this.showModal();
+	},
+	componentDidUpdate:function(){
+		this.showModal();
 	},
 	render: function(){
-		var task = this.state.task;
+		var task = this.props.task;
 		return (
-			<div id={'modal_' + task.id} className="uk-modal">
 				<div className="uk-modal-dialog uk-modal-dialog-large">
 					<a href="#" className="uk-modal-close uk-close uk-close-alt"></a>
 					<div className="uk-modal-header"><h2>任务：{task.name}</h2></div>
@@ -98,20 +116,19 @@ var TaskDialog = React.createClass({
 							<div className="uk-width-medium-9-10">
 								<ul id={"tab-" + task.id} className="uk-switcher">
 									<li className={ this.state.tab == 'view' ? "uk-active": '' }>
-										<TaskTabView task={this.state.task}/>
+										<TaskTabView task={task}/>
 									</li>
 									<li className={ this.state.tab == 'edit' ? "uk-active": '' }>
-										<TaskTabEdit task={this.state.task}/>
+										<TaskTabEdit task={task}/>
 									</li>
 									<li className={ this.state.tab == 'log' ? "uk-active": '' }>
-										<TaskTabLog task={this.state.task}/>
+										<TaskTabLog task={task}/>
 									</li>
 								</ul>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 			);
 	}
 });
