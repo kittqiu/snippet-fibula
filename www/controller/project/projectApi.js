@@ -39,6 +39,7 @@ POST METHOD:
 /api/project/p/:id/group
 /api/project/p/:id/task
 /api/project/group/:id
+/api/project/task/:id
 
 ********/
 
@@ -216,7 +217,7 @@ module.exports = {
 			project_id: id,
 			parent: pid,
 			name: data.name,
-			automode: data.automode==0?true:false,
+			automode: data.automode===0?true:false,
 			number: 0,
 			order: order,
 			rely_to: data.rely_to,
@@ -227,7 +228,7 @@ module.exports = {
 			closed: 0,
 			details: data.details,
 			executor_id: data.executor,
-			manager_id: '',
+			manager_id: this.request.user.id,
 			start_time:data.start_time,
 			end_time:data.end_time,
 			status: 'created'
@@ -247,6 +248,25 @@ module.exports = {
 		}
 
 		yield db.op.$update_record( r, data, ['name', 'start_time', 'end_time', 'details', 'master_id'])
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+
+	'POST /api/project/task/:id': function* (id){
+		var r, cols = [],
+			data = this.request.body;
+		json_schema.validate('editTask', data);
+
+		r = yield base.modelTask.$find( id );
+		if( r === null ){
+			throw api.notFound('task', this.translate('Record not found'));
+		}
+
+		yield db.op.$update_record( r, data, 
+			['name', 'executor_id', 'manager_id', 'duration', 'plan_start_time', 'plan_end_time', 
+				'automode', 'difficulty', 'details'])
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)

@@ -108,7 +108,7 @@ var NewTaskDlg = React.createClass({
 									<div className="uk-form-controls uk-width-1-3">
 										<select name="executor" ref="executor" className="uk-width-1-1">
 											{ this.props.users.map(function(u){
-												return <option key={u.id} value={u.id}>{u.name}</option>
+												return <option key={u.user_id} value={u.user_id}>{u.name}</option>
 												})
 											}
 										</select>
@@ -130,7 +130,7 @@ var NewTaskDlg = React.createClass({
 									</div>
 								</div>
 								<div className="uk-form-row">
-									<label className="uk-form-label">开始时间</label>
+									<label className="uk-form-label">计划开始时间</label>
 									<div className="uk-form-controls uk-width-1-3">
 										<div className="uk-form-icon">
 											<i className="uk-icon-calendar"></i>
@@ -139,7 +139,7 @@ var NewTaskDlg = React.createClass({
 									</div>
 								</div>
 								<div className="uk-form-row">
-									<label className="uk-form-label">结束时间</label>
+									<label className="uk-form-label">计划结束时间</label>
 									<div className="uk-form-controls uk-width-1-3">
 										<div className="uk-form-icon">
 											<i className="uk-icon-calendar"></i>

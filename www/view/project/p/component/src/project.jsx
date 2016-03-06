@@ -10,21 +10,20 @@ var Task = React.createClass({
 						{ type:'log', title: '进展' }
 					];
 		ReactDOM.render(
-			<TaskDialog task={this.props.task} tabs={tabs}/>,
+			<TaskDialog task={this.props.task} tabs={tabs} project={this.props.project} onTaskChanged={this.props.onTaskChanged}/>,
 				document.getElementById('modal_task_'+this.props.task.id)
 			);
 	},
-	render: function(){
+	render: function(){		
 		var task = this.props.task,
 			parentCls = task.parent !=='root' ? 'treegrid-parent-' + task.parent : '',
-			plan_mode = task.automode ? '自动' : '手动',
+			plan_mode = task.automode === 0 ? '自动' : '手动',
 			start_time = task.status=='created'?formatDate(task.plan_start_time): formatDate(task.start_time),
 			end_time = task.status=='created'?formatDate(task.plan_end_time): formatDate(task.end_time);
-
 		return (
 			<tr id={task.id} key={task.id} onDoubleClick={this.onDoubleClick} className={ 'treegrid-' + task.id + ' ' + parentCls}>
 				<td className="uk-block-muted"><button  className="uk-button-link dv-link">{this.props.index}</button></td>
-				<td><a className="dv-link-black"  href={'#modal_'+task.id} data-uk-modal="{center:true}">{task.name}</a>
+				<td>{task.name}
 					<div id={"modal_task_"+task.id} className="uk-modal">
 					</div>
 				</td>
@@ -40,7 +39,7 @@ var Task = React.createClass({
 
 var TaskTable = React.createClass({
 	getInitialState: function() {
-		return {taskLen: 0, selected_task_id: 'root' };
+		return {taskLen: 0, changed_cnt:0 };
 	},
 	initTree: function (options){
 		options = options || {};
@@ -64,10 +63,8 @@ var TaskTable = React.createClass({
 			onSelected: this.props.onTaskSelected
 		});
 	},
-	onViewDetail: function(id){
-		this.setState({selected_task_id: id});
-		console.log("onViewDetail" + id)
-		console.log(this)	
+	onTaskChanged: function(){
+		this.setState({changed_cnt:this.state.changed_cnt++});
 	},
 	componentDidUpdate:function(){
 		if( this.props.tasks.length !== this.state.taskLen ){
@@ -94,7 +91,7 @@ var TaskTable = React.createClass({
 					</thead>
 					<tbody>
 						{ this.props.tasks.map(function(t, index){
-								return <Task key={t.id} task={t} index={index} onViewDetail={this.onViewDetail} />
+								return <Task key={t.id} task={t} index={index} project={this.props.project} onTaskChanged={this.onTaskChanged}/>
 							}.bind(this))
 						}
 					</tbody>
@@ -151,7 +148,7 @@ var Project = React.createClass({
 	/*key-value: user id - user object*/
 	makeUserMap: function (us){
 		us.forEach(function(u){
-			this.state.UserMap[u.id] = u;
+			this.state.UserMap[u.user_id] = u;
 		}.bind(this));
 	},
 	makeTaskMap: function (ts){
@@ -218,6 +215,7 @@ var Project = React.createClass({
 				}else{
 					data.forEach( function(t, index) {
 						t.executor_name = this.state.UserMap[t.executor_id].name;
+						t.manager_name = this.state.UserMap[t.manager_id].name;
 					}.bind(this));
 					this.makeTaskMap(data);		
 					this.setState({tasks:this.sortTasks(data)});
@@ -232,6 +230,7 @@ var Project = React.createClass({
 					fatal(err);
 				}else{
 					this.makeUserMap(data.members);
+					data.UserMap = this.state.UserMap;
 					this.setState({project:data, users: data.members});
 					this.loadTasks();					
 				}
@@ -245,7 +244,7 @@ var Project = React.createClass({
 				<h2 className="x-title">项目: {this.state.project.name}</h2>
 				<ToolBar users={this.state.users} onNewTask={this.onNewTask} selected_task={this.state.selected_task} evaluateTaskParent={this.evaluateTaskParent} TaskMap={this.state.TaskMap}/>				
 				<hr className="dv-hr"/>
-				<TaskTable tasks={this.state.tasks} onTaskSelected={this.onTaskSelected} getTaskById={this.getTaskById}/>
+				<TaskTable project={this.state.project} tasks={this.state.tasks} onTaskSelected={this.onTaskSelected} getTaskById={this.getTaskById}/>
 			</div>
 			);
 	}

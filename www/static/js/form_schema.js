@@ -215,7 +215,20 @@ var SCHEMAS = {
 			end_time:SCHEMA_PROPERTY.TIMESTAMP,
 			automode:SCHEMA_PROPERTY.MINIINTEGER
 		},
-		required:['name', 'executor', 'duration', 'start_time', 'automode']
+		required:['name', 'executor', 'duration', 'start_time']
+	},
+	editTask: {
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME,
+			executor_id: SCHEMA_PROPERTY.ID,
+			manager_id: SCHEMA_PROPERTY.ID,
+			duration:SCHEMA_PROPERTY.MINIINTEGER,
+			plan_start_time:SCHEMA_PROPERTY.TIMESTAMP,
+			plan_end_time:SCHEMA_PROPERTY.TIMESTAMP,
+			automode:SCHEMA_PROPERTY.MINIINTEGER
+		},
+		required:['name', 'executor_id', 'manager_id', 'duration', 'plan_start_time']
 	}
 };
 
