@@ -8,10 +8,11 @@ module.exports = function(warp){
 		base.column_id('parent', {defaultValue:'root'}),
 		base.column_varchar_100('name'),
 		base.column_bigint('automode', {defaultValue:1}), 
-		base.column_bigint('number', {defaultValue:0}),//no in project
+		//base.column_bigint('number', {defaultValue:0}),//no in project
 		base.column_bigint('order', {defaultValue:0}),//order in the same 
-		base.column_varchar_100('rely_to', {defaultValue:''}),//number list, e. 1, 5
-		base.column_bigint('duration', {defaultValue:1}),//hour
+		//base.column_varchar_100('rely_to', {defaultValue:''}),//number list, e. 1, 5
+		base.column_bigint('plan_duration', {defaultValue:0}),//hour
+		base.column_bigint('duration', {defaultValue:0}),//hour
 		base.column_bigint('plan_start_time', {defaultValue:0}),//validate on automode is false
 		base.column_bigint('plan_end_time', {defaultValue:0}),//validate on automode is false
 		base.column_bigint('difficulty', {defaultValue:0}),//0:simple, 1:general, 2: difficulte

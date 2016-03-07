@@ -22,6 +22,7 @@ var
 	modelMember = db.project_member,
 	modelGroup = db.project_member_group,
 	modelTask = db.project_task,
+	modelTaskRely = db.project_task_rely,
 	warp = models.warp;
 
 
@@ -157,11 +158,53 @@ function* $project_listTasks(id){
 	});
 }
 
+function* $project_listTaskRelies(id){
+	return yield modelTaskRely.$findAll({
+		select: '*',
+		where: '`project_id`=?',
+		params: [id]
+	})
+}
+
 function* $task_maxOrder(pid){
 	var sql = 'select MAX(`order`) AS maxorder from project_task where parent=?',
     	rs = yield warp.$query( sql, [pid] ),
     	maxorder = rs[0].maxorder;
     return maxorder === null ? -1 : maxorder;
+}
+
+function* $task_setRelies(tid, pid, relies){
+	var rs = yield modelTaskRely.$findAll({
+			select: '*',
+			where: '`task_id`=?',
+			params: [tid]
+			}),
+		rids = [], i;
+
+	rs.forEach(function(r, i){
+		rids.push(r.rely_task_id);
+	});
+
+	//create
+	for( i = 0; i < relies.length; i++ ){
+		var r = relies[i];
+		if( rids.indexOf(r) === -1 ){
+			var record = {
+				project_id:pid,
+				task_id: tid, 
+				rely_task_id: r
+			};
+			yield modelTaskRely.$create(record);
+		}
+	}
+	
+	//delete
+	for( i = 0; i < rs.length; i++ ){
+		var r = rs[i];
+		if( relies.indexOf(r.rely_task_id) === -1){
+			yield r.$destroy();
+		}
+	}
 }
 
 
@@ -194,6 +237,7 @@ module.exports = {
 	modelGroup: modelGroup,
 	modelMember: modelMember,
 	modelTask: modelTask,
+	modelTaskRely: modelTaskRely,
 
 	$render: $_render,
 	setHistoryUrl: setHistoryUrl,
@@ -212,7 +256,8 @@ module.exports = {
 		statusOptions: project_optionStatus,
 		roleOptions: project_optionRole,
 		$listOptionalUsers: $project_listOptionalUsers,
-		$listTasks : $project_listTasks
+		$listTasks : $project_listTasks,
+		$listTaskRelies: $project_listTaskRelies
 	},
 
 	group: {
@@ -221,7 +266,8 @@ module.exports = {
 	},
 
 	task: {
-		$maxOrder: $task_maxOrder
+		$maxOrder: $task_maxOrder,
+		$setRelies: $task_setRelies
 	},
 
 	user: {

@@ -25,6 +25,7 @@ GET METHOD:
 
 
 /api/project/p/:id/tasklist
+/api/project/p/:id/taskrelylist
 /api/project/p/:id
 
 /api/project/group/:id
@@ -40,6 +41,7 @@ POST METHOD:
 /api/project/p/:id/task
 /api/project/group/:id
 /api/project/task/:id
+/api/project/tasklist/updateplan
 
 ********/
 
@@ -120,6 +122,10 @@ module.exports = {
 
 	'GET /api/project/p/:id/tasklist': function* (id){
 		this.body = yield base.project.$listTasks(id);
+	},
+
+	'GET /api/project/p/:id/taskrelylist': function* (id){
+		this.body = yield base.project.$listTaskRelies(id);
 	},
 
 	'GET /api/project/p/:id': function* (id){
@@ -218,9 +224,8 @@ module.exports = {
 			parent: pid,
 			name: data.name,
 			automode: data.automode===0?true:false,
-			number: 0,
 			order: order,
-			rely_to: data.rely_to,
+			//rely_to: data.rely_to,
 			duration: data.duration,
 			plan_start_time: data.start_time,
 			plan_end_time: data.end_time,
@@ -256,7 +261,8 @@ module.exports = {
 
 	'POST /api/project/task/:id': function* (id){
 		var r, cols = [],
-			data = this.request.body;
+			data = this.request.body,
+			relies = data.relyTo;
 		json_schema.validate('editTask', data);
 
 		r = yield base.modelTask.$find( id );
@@ -265,11 +271,31 @@ module.exports = {
 		}
 
 		yield db.op.$update_record( r, data, 
-			['name', 'executor_id', 'manager_id', 'duration', 'plan_start_time', 'plan_end_time', 
+			['name', 'executor_id', 'manager_id', 'plan_duration', 'plan_start_time', 'plan_end_time', 
 				'automode', 'difficulty', 'details'])
+		yield base.task.$setRelies(id, r.project_id,relies);		
+
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)
+		}
+	},
+
+	'POST /api/project/tasklist/updateplan':function* (){
+		var data = this.request.body;
+		if( data instanceof(Array)){
+			for( var i = 0; i < data.length; i++ ){
+				var item = data[i];
+				var t = yield base.modelTask.$find(item.id);
+				if( t ){
+					t.plan_start_time = item.plan_start_time;
+					t.plan_end_time = item.plan_end_time;
+					yield t.$update(['plan_start_time', 'plan_end_time'])
+				}
+			}
+		}
+		this.body = {
+			result: 'ok'
 		}
 	}
 };

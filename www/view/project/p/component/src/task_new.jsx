@@ -37,9 +37,9 @@ var NewTaskDlg = React.createClass({
 			parent: this.props.parent,
 			executor: executor,
 			duration: duration,
-			start_time: toDateTime(start_time),
+			start_time: wd_formatStart(toDateTime(start_time)),
 			automode: automode,
-			end_time: toDateTime(end_time),
+			end_time: wd_formatEnd(toDateTime(end_time)),
 			rely_to: rely_to,
 			difficulty: difficulty,
 			details: details

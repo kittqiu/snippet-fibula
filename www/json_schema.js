@@ -341,15 +341,16 @@ var schemas = {
 			name: PROPERTY.NAME,
 			executor_id: PROPERTY.ID,
 			manager_id: PROPERTY.ID,
-			duration:PROPERTY.MINI_INTEGER,
+			plan_duration:PROPERTY.MINI_INTEGER,
 			plan_start_time:PROPERTY.TIMESTAMP,
 			plan_end_time:PROPERTY.TIMESTAMP,
 			automode:PROPERTY.MINI_INTEGER,
 			//rely_to: PROPERTY.EMPTYSTRING,
 			difficulty: PROPERTY.MINI_INTEGER,
-			details: PROPERTY.TEXT_EMPTY
+			details: PROPERTY.TEXT_EMPTY,
+			relyTo: PROPERTY.ID_EMPTY_LIST
 		},
-		required:['name', 'executor_id', 'manager_id', 'duration', 'plan_start_time', 'plan_end_time', 'automode', 'difficulty', 'details']
+		required:['name', 'executor_id', 'manager_id', 'plan_duration', 'plan_start_time', 'plan_end_time', 'automode', 'difficulty', 'details', 'relyTo']
 	},
 	product:{
 		type: 'object',

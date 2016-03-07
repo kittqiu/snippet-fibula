@@ -19,7 +19,12 @@ var Task = React.createClass({
 			parentCls = task.parent !=='root' ? 'treegrid-parent-' + task.parent : '',
 			plan_mode = task.automode === 0 ? '自动' : '手动',
 			start_time = task.status=='created'?formatDate(task.plan_start_time): formatDate(task.start_time),
-			end_time = task.status=='created'?formatDate(task.plan_end_time): formatDate(task.end_time);
+			end_time = task.status=='created'?formatDate(task.plan_end_time): formatDate(task.end_time),
+			relies = [];
+			task.rely.forEach(function(r, n){
+				relies.push( this.props.project.TaskMap[r].index );
+			}.bind(this));
+
 		return (
 			<tr id={task.id} key={task.id} onDoubleClick={this.onDoubleClick} className={ 'treegrid-' + task.id + ' ' + parentCls}>
 				<td className="uk-block-muted"><button  className="uk-button-link dv-link">{this.props.index}</button></td>
@@ -28,7 +33,8 @@ var Task = React.createClass({
 					</div>
 				</td>
 				<td>{task.executor_name}</td>
-				<td>{task.duration}</td>
+				<td>{relies.toString()||'无'}</td>
+				<td>{task.isCompleted?task.duration:task.plan_duration}</td>
 				<td>{plan_mode}</td>
 				<td>{start_time}</td>
 				<td>{end_time}</td>
@@ -82,8 +88,9 @@ var TaskTable = React.createClass({
 						<tr>
 							<th style={smallwidth}>标识</th>
 							<th className="uk-width-3-10">任务名称</th>
-							<th className="uk-width-2-10">负责人</th>
-							<th className="uk-width-1-10">工期(天)</th>
+							<th className="uk-width-1-10">负责人</th>
+							<th className="uk-width-1-10">前置任务</th>
+							<th className="uk-width-1-10">工期(小时)</th>
 							<th className="uk-width-1-10">计划模式</th>
 							<th className="uk-width-1-10">开始时间</th>
 							<th className="uk-width-1-10">结束时间</th>		
@@ -126,7 +133,7 @@ var ToolBar = React.createClass({
 
 var Project = React.createClass({
 	getInitialState: function() {
-		return {project: {}, users:[], tasks:[], selected_task:'root', UserMap:{}, TaskMap:{}};
+		return { project: {}, users:[], tasks:[], selected_task:'root', UserMap:{}, TaskMap:{}};
 	},
 	onNewTask: function(id){
 		getJSON( '/api/project/task/'+id, function(err, data ){
@@ -134,6 +141,9 @@ var Project = React.createClass({
 					var t = data,
 						ts = this.state.tasks;
 					t.executor_name = this.state.UserMap[t.executor_id].name;
+					t.manager_name = this.state.UserMap[t.manager_id].name;
+					t.isCompleted = t.status=='completed';
+					t.rely = [];
 					this.state.TaskMap[t.id] = t;
 					ts.push(t);
 					this.sortTasks(ts);
@@ -205,34 +215,59 @@ var Project = React.createClass({
 				return 0;
 			}
 		});
+
+		ts.forEach( function(t, index) {
+			t.index = index;
+		});
 		return ts;
 	},
-	loadTasks: function(){
-		getJSON( '/api/project/p/{{__id}}/tasklist', function(err, data ){
+	loadTaskRelies: function(tasks){
+		getJSON( '/api/project/p/'+ this.props.id +'/taskrelylist', function(err, data ){
 				readyElement('vm');
 				if(err){
 					fatal(err);
 				}else{
-					data.forEach( function(t, index) {
-						t.executor_name = this.state.UserMap[t.executor_id].name;
-						t.manager_name = this.state.UserMap[t.manager_id].name;
+					data.forEach( function(r, index) {
+						var task = this.state.TaskMap[r.task_id];
+						if( task ){
+							task.rely.push(r.rely_task_id);
+						}
 					}.bind(this));
-					this.makeTaskMap(data);		
-					this.setState({tasks:this.sortTasks(data)});
+					this.setState({tasks:tasks});
 				}
 			}.bind(this)
 		);
 	},
-	componentDidMount: function(){
+	loadTasks: function(){
+		getJSON( '/api/project/p/'+ this.props.id+'/tasklist', function(err, data ){
+				if(err){
+					fatal(err);
+				}else{					
+					this.makeTaskMap(data);
+					var tasks = this.sortTasks(data);
+					data.forEach( function(t, index) {
+						t.executor_name = this.state.UserMap[t.executor_id].name;
+						t.manager_name = this.state.UserMap[t.manager_id].name;
+						t.isCompleted = t.status=='completed';
+						t.rely = [];
+					}.bind(this));					
+					this.loadTaskRelies(tasks);
+					this.state.project.tasks = tasks;
+				}
+			}.bind(this)
+		);
+	},
+	componentWillMount: function(){
 		loadingElement('vm');
-		getJSON( '/api/project/p/{{__id}}', function(err, data ){				
+		getJSON( '/api/project/p/' + this.props.id, function(err, data ){				
 				if(err){
 					fatal(err);
 				}else{
 					this.makeUserMap(data.members);
 					data.UserMap = this.state.UserMap;
+					data.TaskMap = this.state.TaskMap;
 					this.setState({project:data, users: data.members});
-					this.loadTasks();					
+					this.loadTasks();				
 				}
 			}.bind(this)
 		);
@@ -250,7 +285,3 @@ var Project = React.createClass({
 	}
 });
 
-ReactDOM.render(
-	<Project url=""/>,
-	document.getElementById('vm')
-	);
