@@ -27,6 +27,7 @@ GET METHOD:
 /api/project/p/:id/tasklist
 /api/project/p/:id/taskrelylist
 /api/project/p/:id
+/api/project/task/:id/relylist
 
 /api/project/group/:id
 /api/project/task/:id
@@ -129,11 +130,18 @@ module.exports = {
 	},
 
 	'GET /api/project/p/:id': function* (id){
-		this.body = yield base.project.$get(id) || {};
+		this.body = yield base.project.$get(id) || [];
+	},
+
+	'GET /api/project/task/:id/relylist': function*(id){
+		this.body = yield base.task.$listRelies(id) || [];
 	},
 
 	'GET /api/project/task/:id': function* (id){
-		this.body = yield base.modelTask.$find(id);
+		var t = yield base.modelTask.$find(id),
+			relies = yield base.task.$listRelies(id) || [];
+		t.rely = relies;
+		this.body = t;
 	},
 
 	'POST /api/project/group/:id': function* (id){
@@ -223,10 +231,9 @@ module.exports = {
 			project_id: id,
 			parent: pid,
 			name: data.name,
-			automode: data.automode===0?true:false,
+			automode: data.automode,
 			order: order,
-			//rely_to: data.rely_to,
-			duration: data.duration,
+			plan_duration: data.duration,
 			plan_start_time: data.start_time,
 			plan_end_time: data.end_time,
 			difficulty: data.difficulty,
@@ -238,7 +245,8 @@ module.exports = {
 			end_time:data.end_time,
 			status: 'created'
 		};
-		yield base.modelTask.$create(t);		
+		yield base.modelTask.$create(t);
+		yield base.task.$setRelies(t.id, t.project_id, data.relyTo);				
 		this.body = { result: 'ok', id: t.id };
 	},
 

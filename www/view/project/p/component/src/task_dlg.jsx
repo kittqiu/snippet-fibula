@@ -150,12 +150,9 @@ var TaskTabEdit = React.createClass({
 			if(data.start_time > data.end_time){
 				throw  { error:'invalid parameter', data:'end_time', message:"结束时间应该大于开始时间"}; 
 			}
-			// if( data.automode == 0 && !data.rely_to){
-			// 	throw { error:'invalid parameter', data:'rely_to', message:"计划模式为自动时，需要设置依赖任务"}
-			// }
-			// if( !/^[0-9\,]{0,50}$/.test(data.rely_to)){
-			// 	throw { error:'invalid parameter', data:'rely_to', message:"依赖的任务只可输入整数与英文逗号"}
-			// }
+			if( data.automode == 0 && rs.length === 0){
+				throw { error:'invalid parameter', data:'rely_to', message:"计划模式为自动时，需要设置依赖任务"}
+			}
 			return data;
 		}
 	},
@@ -232,7 +229,6 @@ var TaskTabEdit = React.createClass({
 		}
 	},
 	getInitialState: function() {
-		console.log(this.props.task);
 		return { automode: this.props.task.automode, relies:'', plan_start_time: this.props.task.plan_start_time,
 			plan_end_time: this.props.task.plan_end_time, plan_duration: this.props.task.plan_duration };
 	},
@@ -283,7 +279,7 @@ var TaskTabEdit = React.createClass({
 	},
 	onAutoModeChanged: function(event){
 		var value = event.target.value;
-		this.setState({automode:value});
+		this.setState({automode:parseInt(value)});
 		var isDisabled = value == 0 ? true:false;
 		this.refs.plan_start_time.disabled = isDisabled;
 		this.refs.plan_end_time.disabled = isDisabled;
@@ -291,11 +287,9 @@ var TaskTabEdit = React.createClass({
 	},
 	onPlanStartTimeChanged: function(event){
 		this.setState({plan_start_time:toDateTime(event.target.value)});
-		console.log(toDateTime(event.target.value));
 	},
 	onPlanEndTimeChanged: function(event){
 		this.setState({plan_end_time:toDateTime(event.target.value)});
-		console.log('test')
 	},
 	onRelyChanged: function(event){
 		var value = event.target.value,
@@ -402,7 +396,8 @@ var TaskTabEdit = React.createClass({
 							<tr>
 								<td className="uk-width-2-10 uk-block-muted">前置任务：</td>
 								<td colSpan="3">
-									<input type="text" name="rely_to" className="uk-width-1-1" ref="rely_to" value={this.state.relies} onChange={this.onRelyChanged}/>
+									<input type="text" name="rely_to" className="uk-width-1-1" ref="rely_to" 
+										value={this.state.relies} onChange={this.onRelyChanged}/>
 								</td>
 							</tr>	
 							<tr>

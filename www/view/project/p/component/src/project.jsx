@@ -124,7 +124,7 @@ var ToolBar = React.createClass({
 					<a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,'root')} data-uk-modal="{center:true}">顶级</a>、
 					<a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,this.props.evaluateTaskParent(this.props.selected_task))} data-uk-modal="{center:true}">同级</a>、
 					<a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,this.props.selected_task)} data-uk-modal="{center:true}">下属</a>
-					<NewTaskDlg users={this.props.users} parent={this.state.new_task_parent} onNewTask={this.props.onNewTask} TaskMap={this.props.TaskMap}/>
+					<NewTaskDlg users={this.props.users} project={this.props.project} parent={this.state.new_task_parent} onNewTask={this.props.onNewTask} TaskMap={this.props.TaskMap}/>
 				</div>
 			</div>
 			)
@@ -143,7 +143,6 @@ var Project = React.createClass({
 					t.executor_name = this.state.UserMap[t.executor_id].name;
 					t.manager_name = this.state.UserMap[t.manager_id].name;
 					t.isCompleted = t.status=='completed';
-					t.rely = [];
 					this.state.TaskMap[t.id] = t;
 					ts.push(t);
 					this.sortTasks(ts);
@@ -277,7 +276,7 @@ var Project = React.createClass({
 		return (
 			<div className="uk-width-1-1">				
 				<h2 className="x-title">项目: {this.state.project.name}</h2>
-				<ToolBar users={this.state.users} onNewTask={this.onNewTask} selected_task={this.state.selected_task} evaluateTaskParent={this.evaluateTaskParent} TaskMap={this.state.TaskMap}/>				
+				<ToolBar users={this.state.users} onNewTask={this.onNewTask} project={this.state.project} selected_task={this.state.selected_task} evaluateTaskParent={this.evaluateTaskParent} TaskMap={this.state.TaskMap}/>				
 				<hr className="dv-hr"/>
 				<TaskTable project={this.state.project} tasks={this.state.tasks} onTaskSelected={this.onTaskSelected} getTaskById={this.getTaskById}/>
 			</div>

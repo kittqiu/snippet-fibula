@@ -207,6 +207,19 @@ function* $task_setRelies(tid, pid, relies){
 	}
 }
 
+function* $task_listRelies(id){
+	var rs = yield modelTaskRely.$findAll({
+		select: '*',
+		where: '`task_id`=?',
+		params: [id]
+	}), 
+	relies = [];
+	rs.forEach( function(r, index) {
+		relies.push(r.rely_task_id);
+	});
+	return relies;
+}
+
 
 function* $group_getMembers(id){
 	var sql = 'select m.*, u.`name` from project_member as m, users as u where m.user_id = u.id and m.group_id=?';
@@ -267,7 +280,8 @@ module.exports = {
 
 	task: {
 		$maxOrder: $task_maxOrder,
-		$setRelies: $task_setRelies
+		$setRelies: $task_setRelies,
+		$listRelies: $task_listRelies
 	},
 
 	user: {

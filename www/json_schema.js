@@ -396,11 +396,11 @@ var schemas = {
 			start_time:PROPERTY.TIMESTAMP,
 			end_time:PROPERTY.TIMESTAMP,
 			automode:PROPERTY.MINI_INTEGER,
-			rely_to: PROPERTY.EMPTYSTRING,
+			relyTo: PROPERTY.ID_EMPTY_LIST,
 			difficulty: PROPERTY.MINI_INTEGER,
 			details: PROPERTY.TEXT_EMPTY
 		},
-		required:['name', 'parent', 'executor', 'duration', 'start_time', 'end_time', 'automode', 'rely_to', 'difficulty', 'details']
+		required:['name', 'parent', 'executor', 'duration', 'start_time', 'end_time', 'automode', 'relyTo', 'difficulty', 'details']
 	},
 	tplModule:{
 		type: 'object',
