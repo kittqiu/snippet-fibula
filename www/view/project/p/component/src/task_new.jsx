@@ -191,7 +191,7 @@ var NewTaskDlg = React.createClass({
 								<div className="uk-form-row uk-width-2-3">
 									<label className="uk-form-label">父任务</label>
 									<div className="uk-form-controls">
-										<span>{this.props.parent=='root'?'无':this.props.TaskMap[this.props.parent].name}</span>
+										<span>{this.props.parent=='root'?'无':this.props.project.TaskMap[this.props.parent].name}</span>
 									</div>
 								</div>
 								<div className="uk-form-row" >

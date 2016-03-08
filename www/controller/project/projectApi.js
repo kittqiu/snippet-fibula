@@ -42,6 +42,7 @@ POST METHOD:
 /api/project/p/:id/task
 /api/project/group/:id
 /api/project/task/:id
+/api/project/task/:id/move?action=xx
 /api/project/tasklist/updateplan
 
 ********/
@@ -224,7 +225,7 @@ module.exports = {
 			pid = data.parent || 'root';
 		json_schema.validate('simpleTask', data);
 		
-		order = yield base.task.$maxOrder(pid);
+		order = yield base.task.$maxOrder(id, pid);
 		order++;
 		t = {
 			id: db.next_id(),
@@ -267,6 +268,23 @@ module.exports = {
 		}
 	},
 
+	'POST /api/project/task/:id/move': function*(id){
+		var data = this.request.body,
+			action = data.action || 'up',
+			t = yield base.modelTask.$find(id);
+		if( t === null ){
+			throw api.notFound('task', this.translate('Record not found'));
+		}
+		if( action === 'up'){
+			yield base.task.$moveUp(id);
+		}else if (action === 'down') {
+			yield base.task.$moveDown(id);
+		}else if( action === 'update_parent'){
+			yield base.task.$changeParent(id, data.parent||'root');
+		}
+		this.body = { result: 'ok'}
+	},
+
 	'POST /api/project/task/:id': function* (id){
 		var r, cols = [],
 			data = this.request.body,
@@ -302,8 +320,6 @@ module.exports = {
 				}
 			}
 		}
-		this.body = {
-			result: 'ok'
-		}
+		this.body = { result: 'ok'}
 	}
 };

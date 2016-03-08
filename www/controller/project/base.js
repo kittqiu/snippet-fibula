@@ -166,9 +166,9 @@ function* $project_listTaskRelies(id){
 	})
 }
 
-function* $task_maxOrder(pid){
-	var sql = 'select MAX(`order`) AS maxorder from project_task where parent=?',
-    	rs = yield warp.$query( sql, [pid] ),
+function* $task_maxOrder(project_id, parent_id){
+	var sql = 'select MAX(`order`) AS maxorder from project_task where project_id=? and parent=?',
+    	rs = yield warp.$query( sql, [project_id, parent_id] ),
     	maxorder = rs[0].maxorder;
     return maxorder === null ? -1 : maxorder;
 }
@@ -218,6 +218,43 @@ function* $task_listRelies(id){
 		relies.push(r.rely_task_id);
 	});
 	return relies;
+}
+
+function* $task_moveUp(id){
+	var r = yield modelTask.$find(id);
+	if( r.order !== 0 ){
+		yield warp.$query( 'update project_task set `order`=`order`+1 where `project_id`=? and `parent`=? and `order`=?', 
+				[r.project_id, r.parent, r.order-1]);
+		r.order--;
+		yield r.$update(['order']);
+	}
+}
+
+function* $task_moveDown(id){
+	var r = yield modelTask.$find(id),
+		maxOrder = yield $task_maxOrder(r.project_id, r.parent);
+	if( r.order !== maxOrder ){
+		yield warp.$query( 'update project_task set `order`=`order`-1 where `project_id`=? and `parent`=? and `order`=?', 
+				[r.project_id, r.parent, r.order+1]);
+		r.order++;
+		yield r.$update(['order']);
+	}
+}
+
+function* $task_changeParent(task_id, parent_id){
+	var r = yield modelTask.$find(task_id);
+	if( parent_id !== 'root'){
+		var parent = yield modelTask.$find(parent_id);
+		if( parent === null )
+			return false;
+	}
+		
+	yield warp.$query( 'update project_task set `order`=`order`-1 where `project_id`=? and `parent`=? and `order`>?', 
+				[r.project_id, r.parent, r.order]);
+	var maxOrder = yield $task_maxOrder(r.project_id, parent_id);
+	r.parent = parent_id;
+	r.order = maxOrder + 1;
+	yield r.$update(['parent', 'order']);
 }
 
 
@@ -281,7 +318,10 @@ module.exports = {
 	task: {
 		$maxOrder: $task_maxOrder,
 		$setRelies: $task_setRelies,
-		$listRelies: $task_listRelies
+		$listRelies: $task_listRelies,
+		$moveUp: $task_moveUp,
+		$moveDown: $task_moveDown,
+		$changeParent: $task_changeParent
 	},
 
 	user: {

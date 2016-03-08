@@ -30,6 +30,17 @@ ReactDOM.render(
 </script>
 {% endif %}
 
+{% block css %}
+<style>
+    .uk-nav-menu {
+        position: fixed;
+        top: 300px;
+        left: 40px;
+        border-right: 2px solid #ccc;
+        padding-right: 10px
+    }
+</style>
+{% endblock %}
 
 
 {% endblock %}

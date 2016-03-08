@@ -45,7 +45,7 @@ var Task = React.createClass({
 
 var TaskTable = React.createClass({
 	getInitialState: function() {
-		return {taskLen: 0, changed_cnt:0 };
+		return {taskLen: 0, changed_cnt:0, update_cnt:0 };
 	},
 	initTree: function (options){
 		options = options || {};
@@ -57,12 +57,18 @@ var TaskTable = React.createClass({
 				task:'uk-icon-tasks'
 			},
 			draggable: true, 
-			//onMove: moveDepartment,
+			renderOnDrag: false,
+			onMove: this.dragTask,
 			selectable: true,
 			selectedClass: 'dv-row-selected',
 			onSelected:options.onSelected,
 			leafClass:'uk-icon-leaf'
 		});
+	},
+	dragTask: function(task_id, toParentId, fromParentId ){
+		var TaskMap = this.props.project.TaskMap;
+		this.props.handleMoveTo(toParentId, task_id);
+		console.log( 'Move task ' + TaskMap[task_id].name +' from ' + (fromParentId==='root'||fromParentId===null ?'root':TaskMap[fromParentId].name) + ' to ' + TaskMap[toParentId].name );
 	},
 	resetTree: function(){
 		this.initTree({
@@ -73,10 +79,14 @@ var TaskTable = React.createClass({
 		this.setState({changed_cnt:this.state.changed_cnt++});
 	},
 	componentDidUpdate:function(){
-		if( this.props.tasks.length !== this.state.taskLen ){
+		if( this.props.tasks.length !== this.state.taskLen){
 			this.resetTree();
 			this.setState({taskLen:this.props.tasks.length})
 		}
+		if( this.props.project.update_cnt !== this.state.update_cnt){
+			this.resetTree();
+			this.setState({update_cnt:this.props.project.update_cnt})
+		} 
 	},
 	render: function(){
 		var smallwidth = { width: "5%" };
@@ -111,10 +121,65 @@ var TaskTable = React.createClass({
 
 var ToolBar = React.createClass({
 	getInitialState: function() {
-		return {new_task_parent:'root'};
+		return {new_task_parent:'root', selected_task:'root', disabledDown:true, disabledUp:true, disabledRoot:true};
 	},
 	handleNewTask: function(parent){
 		this.setState({new_task_parent:parent});
+	},
+	handleMove: function(action){
+		var selected_task = this.state.selected_task,
+			task = this.props.project.TaskMap[selected_task],
+			tasks = this.props.project.tasks,
+			i;
+		
+		postJSON( '/api/project/task/'+task.id+'/move', {action:action}, function(err, result){
+			if(err)
+				fatal(err);
+		});
+		if( action === 'up'){
+			task.order--;
+			for( i = task.index-1; i >= 0; i--){
+				if( tasks[i].parent === task.parent){
+					tasks[i].order++;
+					break;
+				}
+			}
+		}else if( action === 'down' ){
+			task.order++;
+			for( i = task.index+1; i < tasks.length; i++){
+				if( tasks[i].parent === task.parent){
+					tasks[i].order--;
+					break;
+				}
+			}
+		}
+		
+		this.props.onTaskOrderChanged();
+		this.resetMoveStatus(selected_task);
+	},
+	handleMoveToRoot: function(){
+		this.props.handleMoveTo('root');
+		this.resetMoveStatus(this.state.selected_task);
+	},
+	resetMoveStatus: function(selected_task){
+		var task = this.props.project.TaskMap[selected_task],
+			tasks = this.props.project.tasks,
+			maxOrder = task.order;
+		for( var i = task.index + 1; i < tasks.length; i++ ){
+			var t = tasks[i];
+			if( t.parent === task.parent ){
+				maxOrder = t.order;
+				break;
+			}
+		}
+		this.setState({disabledDown: task.order===maxOrder, disabledUp: task.order===0, disabledRoot: task.parent==='root'});	
+	},
+	componentWillReceiveProps: function(nextProps){
+		if( nextProps.selected_task !== this.state.selected_task){
+			var selected_task = nextProps.selected_task;
+			this.resetMoveStatus(selected_task);
+			this.setState({selected_task:selected_task})
+		}
 	},
 	render: function(){		
 		return (
@@ -124,12 +189,29 @@ var ToolBar = React.createClass({
 					<a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,'root')} data-uk-modal="{center:true}">顶级</a>、
 					<a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,this.props.evaluateTaskParent(this.props.selected_task))} data-uk-modal="{center:true}">同级</a>、
 					<a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,this.props.selected_task)} data-uk-modal="{center:true}">下属</a>
-					<NewTaskDlg users={this.props.users} project={this.props.project} parent={this.state.new_task_parent} onNewTask={this.props.onNewTask} TaskMap={this.props.TaskMap}/>
+					<NewTaskDlg users={this.props.users} project={this.props.project} parent={this.state.new_task_parent} onNewTask={this.props.onNewTask} />
 				</div>
+				<div className="uk-width-1-3">
+					移动：
+					<button className="uk-button-link dv-link" onClick={this.handleMove.bind(this,'up')} disabled={this.state.disabledUp}>上移</button>、
+					<button className="uk-button-link dv-link" onClick={this.handleMove.bind(this,'down')} disabled={this.state.disabledDown}>下移</button>、
+					<button className="uk-button-link dv-link" onClick={this.handleMoveToRoot} disabled={this.state.disabledRoot}>置为顶级</button>
+				</div>
+				<ul className="uk-nav uk-nav-menu" data-uk-scrollspy-nav="{closest:'li', smoothscroll:false}">
+					<li>添加任务</li>
+					<li><a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,'root')} data-uk-modal="{center:true}">顶级</a></li>
+					<li><a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,this.props.evaluateTaskParent(this.props.selected_task))} data-uk-modal="{center:true}">同级</a></li>
+					<li><a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,this.props.selected_task)} data-uk-modal="{center:true}">下属</a></li>
+					<li>移动任务</li>
+					<li><button className="uk-button-link dv-link" onClick={this.handleMove.bind(this,'up')} disabled={this.state.disabledUp}>上移</button></li>
+					<li><button className="uk-button-link dv-link" onClick={this.handleMove.bind(this,'down')} disabled={this.state.disabledDown}>下移</button></li>
+					<li><button className="uk-button-link dv-link" onClick={this.handleMoveToRoot} disabled={this.state.disabledRoot}>置为顶级</button></li>
+				</ul>
 			</div>
 			)
 	}
 });
+
 
 var Project = React.createClass({
 	getInitialState: function() {
@@ -153,6 +235,42 @@ var Project = React.createClass({
 	},
 	onTaskSelected: function(id){
 		this.setState({selected_task:id});
+	},
+	onTaskOrderChanged: function(){
+		var ts = this.state.tasks;
+		this.sortTasks(ts);
+		this.setState({tasks:ts});
+	},
+	handleMoveTo: function(parent, task_id){
+		var selected_task = task_id || this.state.selected_task,
+			task = this.state.TaskMap[selected_task],
+			tasks = this.state.tasks,
+			params = {action:'update_parent', parent:parent },
+			i;
+		
+		for(i = task.index + 1; i < tasks.length; i++ ){
+			var t = tasks[i];
+			if( t.parent === task.parent ){
+				t.order--;
+			}				
+		}
+		var maxOrder = -1;
+		for( i = 0; i < tasks.length; i++ ){
+			var t = tasks[i];
+			if( t.parent === parent){
+				maxOrder = Math.max(maxOrder, t.order);
+			}
+		}
+		task.parent = parent;
+		task.order = maxOrder + 1;
+
+		postJSON( '/api/project/task/'+task.id+'/move', params, function(err, result){
+			if(err)
+				fatal(err);
+		});
+		this.sortTasks(tasks);
+		this.state.project.update_cnt++;
+		this.setState({tasks:tasks});
 	},
 	/*key-value: user id - user object*/
 	makeUserMap: function (us){
@@ -265,20 +383,24 @@ var Project = React.createClass({
 					this.makeUserMap(data.members);
 					data.UserMap = this.state.UserMap;
 					data.TaskMap = this.state.TaskMap;
+					data.update_cnt = 0;
 					this.setState({project:data, users: data.members});
 					this.loadTasks();				
 				}
 			}.bind(this)
 		);
 		
-	},	
+	},
 	render: function(){
 		return (
-			<div className="uk-width-1-1">				
+			<div className="uk-width-1-1">		
 				<h2 className="x-title">项目: {this.state.project.name}</h2>
-				<ToolBar users={this.state.users} onNewTask={this.onNewTask} project={this.state.project} selected_task={this.state.selected_task} evaluateTaskParent={this.evaluateTaskParent} TaskMap={this.state.TaskMap}/>				
-				<hr className="dv-hr"/>
-				<TaskTable project={this.state.project} tasks={this.state.tasks} onTaskSelected={this.onTaskSelected} getTaskById={this.getTaskById}/>
+				<ToolBar users={this.state.users} onNewTask={this.onNewTask} project={this.state.project} onTaskOrderChanged={this.onTaskOrderChanged}
+					selected_task={this.state.selected_task} evaluateTaskParent={this.evaluateTaskParent} 
+					handleMoveTo={this.handleMoveTo}/>				
+				<hr className="dv-hr"/>				
+				<TaskTable project={this.state.project} tasks={this.state.tasks} onTaskSelected={this.onTaskSelected} 
+					getTaskById={this.getTaskById} handleMoveTo={this.handleMoveTo}/>
 			</div>
 			);
 	}
