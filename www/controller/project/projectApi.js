@@ -139,9 +139,10 @@ module.exports = {
 	},
 
 	'GET /api/project/task/:id': function* (id){
-		var t = yield base.modelTask.$find(id),
+		/*var t = yield base.modelTask.$find(id),
 			relies = yield base.task.$listRelies(id) || [];
-		t.rely = relies;
+		t.rely = relies;*/
+		var t = yield base.task.$get(id);
 		this.body = t;
 	},
 

@@ -25,7 +25,7 @@ module.exports = function(warp){
 		base.column_bigint('end_time', {defaultValue:0}),
 		base.column_bigint('percent', {defaultValue:0}),//0-100
 		base.column_bigint('qulity', {defaultValue:0}),//0:bad, 1:not bad, 2: good, 3: very good
-		base.column_varchar_20('status', {defaultValue:'created'})//options: created,accept, pending, cancel, commit, completed
+		base.column_varchar_20('status', {defaultValue:'created'})//options: created,doing, pending, cancel, commit, completed
 		], {
 			table: 'project_task'
 		});

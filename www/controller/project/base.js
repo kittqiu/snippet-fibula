@@ -23,6 +23,7 @@ var
 	modelGroup = db.project_member_group,
 	modelTask = db.project_task,
 	modelTaskRely = db.project_task_rely,
+	modelTaskFlow = db.project_task_flow_record,
 	warp = models.warp;
 
 
@@ -257,6 +258,88 @@ function* $task_changeParent(task_id, parent_id){
 	yield r.$update(['parent', 'order']);
 }
 
+function* $task_listExecutingOfUser(uid){
+	/*var rs = yield modelTask.$findAll({
+			select: '*',
+			where: '`executor_id`=? and `status`=?',
+			params: [uid, 'doing']
+		});*/
+	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
+		+ 'left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id  LEFT JOIN project as p on t.project_id=p.id '
+		+ 'where t.executor_id =? and t.status=? order by t.plan_end_time asc';
+	var rs = yield warp.$query(sql, [uid, 'doing']);
+	return rs;
+}
+
+function* $task_listQueueOfUser(uid){
+	/*var rs = yield modelTask.$findAll({
+			select: '*',
+			where: '`executor_id`=? and `status`=?',
+			params: [uid, 'doing']
+		});*/
+	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
+		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
+		+ ' where t.executor_id =? and t.status=? order by t.plan_end_time asc';
+	var rs = yield warp.$query(sql, [uid, 'created']);
+	return rs;
+}
+
+function* $task_listFlow(task_id){
+	return yield modelTaskFlow.$findAll({
+		select: '*',
+		where: '`task_id`=?',
+		params: [task_id]
+	});
+}
+
+//created,doing, pending, cancel, commit, completed
+var statusFlow = {
+	created: {
+		accept: 'doing',
+		cancel: 'cancel'
+	},
+	doing: {
+		commit: 'commit',
+		pause: 'pending',
+		cancel: 'cancel'
+	},
+	commit: {
+		complete: 'completed',
+		reopen: 'doing'
+	},
+	pending: {
+		resume: 'doing',
+		cancel: 'cancel'
+	}
+};
+
+function* $task_nextFlow(task, action){
+	if( statusFlow.hasOwnProperty(task.status)){
+		var as = statusFlow[task.status];
+		if( as.hasOwnProperty(action)){
+			var cols = ['status'];
+			task.status = as[action];
+			if( task.status === 'completed' || task.status === 'cancel'){
+				task.closed = true;
+				cols.push('closed');
+			}
+			yield task.$update(cols);
+		}
+	}
+}
+
+function* $task_get(tid){
+	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
+		+ 'left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id  LEFT JOIN project as p on t.project_id=p.id '
+		+ 'where t.id =? ';
+	var rs = yield warp.$query(sql, [tid]);
+	var task = rs[0];
+	if( task !== null ){
+		var relies = yield $task_listRelies(tid) || [];
+		task.rely = relies;
+	}
+	return task || {};
+}
 
 function* $group_getMembers(id){
 	var sql = 'select m.*, u.`name` from project_member as m, users as u where m.user_id = u.id and m.group_id=?';
@@ -288,6 +371,7 @@ module.exports = {
 	modelMember: modelMember,
 	modelTask: modelTask,
 	modelTaskRely: modelTaskRely,
+	modelTaskFlow: modelTaskFlow,
 
 	$render: $_render,
 	setHistoryUrl: setHistoryUrl,
@@ -321,7 +405,12 @@ module.exports = {
 		$listRelies: $task_listRelies,
 		$moveUp: $task_moveUp,
 		$moveDown: $task_moveDown,
-		$changeParent: $task_changeParent
+		$changeParent: $task_changeParent,
+		$listExecutingOfUser: $task_listExecutingOfUser,
+		$listQueueOfUser: $task_listQueueOfUser,
+		$listFlow: $task_listFlow,
+		$nextFlow: $task_nextFlow,
+		$get: $task_get
 	},
 
 	user: {

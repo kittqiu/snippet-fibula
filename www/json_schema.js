@@ -117,6 +117,10 @@ var PROPERTY = {
 		minimum: 0,
 		maximum: 32506358400000
 	},
+	NOTEMPTY_STRING: {
+		type: 'string',
+		minLength: 1
+	},
 	POSITIVE_INTEGER: {
 		type: 'integer',
 		minimum: 1,
@@ -401,6 +405,14 @@ var schemas = {
 			details: PROPERTY.TEXT_EMPTY
 		},
 		required:['name', 'parent', 'executor', 'duration', 'start_time', 'end_time', 'automode', 'relyTo', 'difficulty', 'details']
+	},
+	taskFlow: {
+		type: 'object',
+		properties: {
+			action: PROPERTY.NOTEMPTY_STRING,
+			reply: PROPERTY.TEXT_EMPTY
+		},
+		required:['action', 'reply']
 	},
 	tplModule:{
 		type: 'object',
