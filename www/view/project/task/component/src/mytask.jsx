@@ -5,6 +5,7 @@ function noticeTaskChanged(newtask){
 	}
 }
 
+
 var ExecutingTaskList = React.createClass({	
 	handleView: function(task, e){
 		e.preventDefault();
@@ -54,7 +55,7 @@ var ExecutingTaskList = React.createClass({
 	render: function(){
 		return (
 			<div className="uk-width-1-1">		
-				<h2><b>我正在执行的任务</b></h2>		
+				<h2><b>今日任务</b></h2>		
 				<hr className="dv-hr"/>
 				<table className="uk-table">
 					<thead>
@@ -84,7 +85,7 @@ var ExecutingTaskList = React.createClass({
 										<td>{t.manager_name}</td>
 										<td>{t.plan_duration}小时</td>
 										<td>{t.duration}小时</td>
-										<td><a href={'/project/p/'+t.project_id+'/build'}>{t.project_name}</a></td>
+										<td><a className="dv-link" href={'/project/p/'+t.project_id+'/build'}>{t.project_name}</a></td>
 									</tr>
 									)
 							}.bind(this))
@@ -139,7 +140,7 @@ var QueueTaskList = React.createClass({
 	render: function(){
 		return (
 			<div className="uk-width-1-1">		
-				<h2><b>我等待执行的任务</b></h2>		
+				<h2><b>待执行的任务</b></h2>		
 				<hr className="dv-hr"/>
 				<table className="uk-table">
 					<thead>

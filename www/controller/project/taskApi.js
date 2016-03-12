@@ -28,25 +28,38 @@ var ACTIONMAP = {
 
 /******
 GET METHOD:
+/project/daily
 /project/task
 
+/api/project/daily?date=xx
 /api/project/t/listExecuting?uid=xx
 /api/project/t/listQueue?uid=xx
 /api/project/t/:id/listFlow
 
 
 
-
 POST METHOD:
 /api/project/t/:id/flow
+/api/project/daily/creation
+/api/project/daily/:id
 
 ********/
 
 
 module.exports = {
+	'GET /project/daily': function* (){
+		yield $_render( this, {}, 'mydaily.html');
+		base.setHistoryUrl(this);
+	},
 	'GET /project/task': function* (){
 		yield $_render( this, {}, 'task_index.html');
 		base.setHistoryUrl(this);
+	},
+
+	'GET /api/project/daily': function* (){
+		var uid = this.request.user.id || '',
+			date = parseInt(this.request.query.date||'0') || Date.now();
+		this.body = yield base.daily.$listUser(uid, date);
 	},
 
 	'GET /api/project/t/listExecuting': function* (){
@@ -61,6 +74,40 @@ module.exports = {
 
 	'GET /api/project/t/:id/listFlow': function* (id){
 		this.body = yield base.task.$listFlow(id);
+	},
+
+	'POST /api/project/daily/creation': function* (){
+		var data = this.request.body,
+			task, daily;
+
+		json_schema.validate('workDaily', data);
+		task = yield base.modelTask.$find( data.task_id );
+		if( task === null ){
+			throw api.notFound('task', this.translate('Record not found'));
+		}
+		daily = {
+			id: db.next_id(),
+			task_id: data.task_id,
+			user_id: this.request.user.id,
+			report: data.report,
+			duration: data.duration,
+			plan: data.plan,
+			time: data.time
+		}
+		yield base.modelDaily.$create(daily);
+		this.body = { id: daily.id, result: 'ok'};
+	},
+
+	'POST /api/project/daily/:id':function* (id){
+		var data = this.request.body,
+			r = yield base.modelDaily.$find(id);
+
+		json_schema.validate('workDaily', data);
+		if( r === null ){
+			throw api.notFound('daily', this.translate('Record not found'));
+		}
+		yield db.op.$update_record( r, data, ['report', 'plan', 'duration']);
+		this.body = { result: 'ok'};
 	},
 
 	'POST /api/project/t/:id/flow': function* (id){
@@ -80,10 +127,17 @@ module.exports = {
 			reply: data.reply
 		}
 
+		if( task.status === 'created' && data.action === 'accept'){
+			task.start_time = Date.now();
+			yield task.$update(['start_time']);
+		}else if( action === 'cancel' || data.action === 'complete'){
+			task.end_time = Date.now();
+			yield task.$update(['end_time']);
+		}
 		yield base.modelTaskFlow.$create(flow);
 		yield base.task.$nextFlow(task, data.action);
-
-
 		this.body = { result: 'ok'};		
-	}
+	},
+
+
 };

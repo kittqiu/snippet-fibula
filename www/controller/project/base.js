@@ -9,7 +9,8 @@ var
     api = require('../../api'), 
     cache = require('../../cache'),
     json_schema = require('../../json_schema'),
-    team_base = require( __base + 'controller/team/base');
+    team_base = require( __base + 'controller/team/base'),
+    helper = require( __base + 'helper');
 
 var models = {
     next_id: db.next_id,
@@ -24,6 +25,7 @@ var
 	modelTask = db.project_task,
 	modelTaskRely = db.project_task_rely,
 	modelTaskFlow = db.project_task_flow_record,
+	modelDaily = db.project_daily,
 	warp = models.warp;
 
 
@@ -298,6 +300,14 @@ var statusFlow = {
 		accept: 'doing',
 		cancel: 'cancel'
 	},
+	/*confirm: {
+		understand: 'understood',
+		cancel: 'cancel'
+	},
+	understood: {
+		accept: 'doing',
+		cancel: 'cancel'
+	},*/
 	doing: {
 		commit: 'commit',
 		pause: 'pending',
@@ -358,10 +368,35 @@ function* $group_get(id){
 	return g || {};
 }
 
+function* $daily_listUser(user_id, dateTime){
+	var begin_time = helper.getDateTimeAt0(dateTime),
+		end_time = helper.getNextDateTime(dateTime),
+		sql = 'select t.* from project_task as t where t.executor_id=? and t.start_time<>0 and t.start_time<? and (t.end_time>=? or t.end_time=0)',
+		ts, ds, i, j;
+
+	ts = yield warp.$query(sql, [user_id, end_time, begin_time]);
+	ds = yield modelDaily.$findAll({
+		select: '*',
+		where: '`user_id`=? and `time` >=? and `time`<?',
+		params: [user_id, begin_time, end_time]
+	});
+
+	for( i = 0; i < ts.length; i++ ){
+		var task = ts[i];
+		task.daily = {};
+		for( j = 0; j < ds.length; j++ ){
+			if( ds[j].task_id === task.id ){
+				task.daily = ds[j];
+				break;
+			}
+		}
+	}
+	return ts;
+}
+
 
 
 /**********cache*********/
-
 
 
 module.exports = {
@@ -372,6 +407,7 @@ module.exports = {
 	modelTask: modelTask,
 	modelTaskRely: modelTaskRely,
 	modelTaskFlow: modelTaskFlow,
+	modelDaily: modelDaily,
 
 	$render: $_render,
 	setHistoryUrl: setHistoryUrl,
@@ -411,6 +447,10 @@ module.exports = {
 		$listFlow: $task_listFlow,
 		$nextFlow: $task_nextFlow,
 		$get: $task_get
+	},
+
+	daily: {
+		$listUser: $daily_listUser
 	},
 
 	user: {

@@ -331,6 +331,17 @@ var schemas = {
 		},
 		required:['name', 'brief', 'language', 'environment', 'keywords', 'code', 'help', 'attachments']
 	},
+	workDaily: {
+		type: 'object',
+		properties: {
+			task_id: PROPERTY.ID,
+			duration: PROPERTY.MINI_INTEGER,
+			report:PROPERTY.TEXT_EMPTY,
+			plan:PROPERTY.TEXT_EMPTY,
+			time:PROPERTY.TIMESTAMP
+		},
+		required:['task_id', 'duration', 'report', 'plan', 'time']
+	},
 	editwiki:{
 		type: 'object',
 		properties: {

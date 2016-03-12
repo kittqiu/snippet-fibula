@@ -44,13 +44,13 @@ var TaskInfo = React.createClass({
 							<td className="uk-width-2-10 uk-block-muted">计划开始时间：</td>
 							<td className="uk-width-3-10">{ formatDate(task.plan_start_time)}</td>
 							<td className="uk-width-2-10 uk-block-muted">实际开始时间：</td>
-							<td className="uk-width-3-10">{ formatDate(task.start_time) } </td>
+							<td className="uk-width-3-10">{ task.start_time===0?'无':formatDate(task.start_time) } </td>
 						</tr>
 						<tr>
 							<td className="uk-width-2-10 uk-block-muted">计划结束时间：</td>
 							<td className="uk-width-3-10">{ formatDate(task.plan_end_time)}</td>
 							<td className="uk-width-2-10 uk-block-muted">实际结束时间：</td>
-							<td className="uk-width-3-10">{ formatDate(task.end_time)}</td>
+							<td className="uk-width-3-10">{ task.end_time===0?'无':formatDate(task.end_time)}</td>
 						</tr>
 						<tr>
 							<td className="uk-block-muted">任务说明:</td>
@@ -66,8 +66,16 @@ var TaskInfo = React.createClass({
 var ActionOnStatus = {
 	created: {
 		executor: ['accept', 'reply'],
+		manager: ['confirm', 'reply', 'cancel']
+	},
+	/*confirm: {
+		executor: ['understand', 'reply'],
 		manager: ['reply', 'cancel']
 	},
+	understood: {
+		executor: ['accept', 'reply'],
+		manager: ['reply', 'cancel']
+	},*/
 	doing: {
 		executor: ['commit', 'reply'],
 		manager: ['reply', 'pause', 'cancel']
@@ -90,7 +98,9 @@ var ActionOnStatus = {
 	}
 };
 var ACTIONMAP = {
-	accept: '确认接收',
+	confirm: '确认要求',
+	understand: '已理解要求',
+	accept: '接收任务',
 	reply: '回复',
 	commit: '提交',
 	pause: '暂停执行',
@@ -150,6 +160,45 @@ var TaskFlow = React.createClass({
 			}
 		}.bind(this));
 	},
+	haveFlow: function(type){
+		var flows = this.state.flows;
+		for(var i = 0; i < flows.length; i++ ){
+			if( flows[i].action === type ){
+				return true;
+			}
+		}
+		return false;
+	},
+	getFlowProgressClass: function(){
+		var progresses = ['accept', 'do', 'commit', 'complete', 'cancel'],
+			cls = {}, task = this.props.task;
+		for(var i = 0;i <progresses.length; i++){
+			cls[progresses[i]] = 'dv-badge-muted';
+		}
+		cls['cancel'] = 'uk-hidden';
+		if( this.haveFlow('accept') ){
+			cls['accept'] = 'uk-badge-success';
+		}else if(task.status === 'created'){
+			cls['accept'] = 'uk-badge-warning';
+		}
+		if( task.status === 'doing'){
+			cls['do'] = 'uk-badge-warning';
+		}else if( this.haveFlow('commit') ){
+			cls['do'] = 'uk-badge-success';
+		}
+		if(task.status === 'commit'){
+			cls['commit'] = 'uk-badge-warning';
+		}else if( this.haveFlow('commit') && task.status !== 'doing' ){
+			cls['commit'] = 'uk-badge-success';
+		}
+		if(task.status === 'completed'){
+			cls['complete'] = 'uk-badge-success';
+		}
+		if(task.status === 'cancel'){
+			cls['cancel'] = 'uk-badge uk-badge-danger';
+		}
+		return cls;
+	},
 	getInitialState: function() {
 		return {flows:[], actionType:'reply'}
 	},
@@ -160,7 +209,9 @@ var TaskFlow = React.createClass({
 		var task = this.props.task,
 			actions = [], i, radios = [],
 			marginRadio = { marginLeft: '15px'},
-			textarea_height = { height: "60px"};;
+			marginSpan = { marginLeft: '5px'},
+			textarea_height = { height: "60px"},
+			cls = this.getFlowProgressClass();
 		if( task.executor_id === ENV.user_id ){
 			actions = actions.concat( ActionOnStatus[task.status].executor );
 		}
@@ -180,6 +231,14 @@ var TaskFlow = React.createClass({
 		return (
 			<div>
 				<h2>工作流</h2>
+				<div>
+					<span className="uk-badge uk-badge-success" style={marginSpan}>创建</span>
+					<span className={ 'uk-badge ' + cls['accept'] } style={marginSpan}>接收</span>
+					<span className={ 'uk-badge ' + cls['do'] } style={marginSpan}>执行</span>
+					<span className={ 'uk-badge ' + cls['commit'] } style={marginSpan}>提交</span>
+					<span className={ 'uk-badge ' + cls['complete'] } style={marginSpan}>完成</span>
+					<span className={ cls['cancel'] } style={marginSpan}>取消</span>
+				</div>
 				<table className={"uk-table" + (this.state.flows.length === 0?' uk-hidden':'')}>
 					<thead>
 						<tr>

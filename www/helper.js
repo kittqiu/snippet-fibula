@@ -34,10 +34,20 @@ function string2Integer(s) {
     return null;
 }
 
-function getDateTimeAt0(){
-    var n = Date.now();
-    return n - (n%86400000);
+function getDateTimeAt0(millisecond){    
+    var n = millisecond || Date.now();
+    var day = new Date(millisecond);
+    day.setHours(0,0,0,0);
+    //return n - (n%86400000);
+    return day.getTime();
 }
+
+function getNextDateTime(millisecond){
+    var n = millisecond || Date.now();
+    //return n - (n%86400000) + 86400000;
+    return getDateTimeAt0(millisecond) + 86400000;
+}
+
 
 function getWeek(){
     var now = new Date(),
@@ -83,6 +93,7 @@ module.exports = {
     }, 
 
     getDateTimeAt0: getDateTimeAt0,
+    getNextDateTime: getNextDateTime,
     getWeek: getWeek, 
     getFirstDayOfMonth: getFirstDayOfMonth,
     getId: getId

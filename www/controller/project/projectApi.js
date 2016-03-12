@@ -220,6 +220,7 @@ module.exports = {
 		yield base.modelGroup.$create(r);
 		this.body = { result: 'ok', data: r };
 	},
+	/*create a task*/
 	'POST /api/project/p/:id/task': function* (id){
 		var t, order,
 			data = this.request.body || {},
@@ -243,8 +244,8 @@ module.exports = {
 			details: data.details,
 			executor_id: data.executor,
 			manager_id: this.request.user.id,
-			start_time:data.start_time,
-			end_time:data.end_time,
+			start_time:0,
+			end_time:0,
 			status: 'created'
 		};
 		yield base.modelTask.$create(t);
@@ -285,7 +286,7 @@ module.exports = {
 		}
 		this.body = { result: 'ok'}
 	},
-
+	/*edit a task*/
 	'POST /api/project/task/:id': function* (id){
 		var r, cols = [],
 			data = this.request.body,
