@@ -9,14 +9,14 @@ var styles = {
 var ReportDialog = React.createClass({
 	showModal: function(){
 		if( this.props.task ){
-			var id = "modal_task_"+this.props.task.id;
+			var id = "modal_task_daily_"+this.props.task.id;
 			var modal = new UIkit.modal('#'+id);
 			modal.show();
 		}		
 	},
 	hideModel: function(){
 		if( this.props.task ){
-			var id = "modal_task_"+this.props.task.id;
+			var id = "modal_task_daily_"+this.props.task.id;
 			var modal = new UIkit.modal('#'+id);
 			modal.hide();
 		}
@@ -109,8 +109,19 @@ var TaskDaily = React.createClass({
 		var task = this.props.task;
 		ReactDOM.render(
 			<ReportDialog task={task} dayTime={this.props.dayTime} onUpdate={this.onUpdate}/>,
+				document.getElementById('modal_task_daily_'+task.id)
+			);
+	},
+	handleViewTask: function(e){
+		e.preventDefault();
+		var task = this.props.task;
+		ReactDOM.render(
+			<TaskDialog task={task} onTaskChanged={this.onTaskChanged}/>,
 				document.getElementById('modal_task_'+task.id)
 			);
+	},
+	onTaskChanged: function(){
+
 	},
 	onUpdate: function(){
 		this.setState({updateCnt:this.state.updateCnt+1})
@@ -126,7 +137,7 @@ var TaskDaily = React.createClass({
 			report = daily.report || '未填写';
 		return (
 			<div >
-				<h3 className="uk-accordion-title" style={styles.smallBottomMargin}>任务：{t.name}</h3>
+				<h3 onClick={this.handleViewTask} className="uk-accordion-title" style={styles.smallBottomMargin}>任务：{t.name}</h3>
 				<div className="uk-accordion-content">
 					<table className="uk-width-1-1 dv-border" style={styles.tableBorder} >
 						<thead>
@@ -150,8 +161,8 @@ var TaskDaily = React.createClass({
 							</tr>
 						</tbody>
 					</table>
-					<div id={"modal_task_"+t.id} className="uk-modal">
-					</div>
+					<div id={"modal_task_daily_"+t.id} className="uk-modal"></div>
+					<div id={"modal_task_"+t.id} className="uk-modal"></div>
 				</div>
 			</div>
 			)
@@ -224,6 +235,7 @@ var MyDaily = React.createClass({
 							)
 					}.bind(this))
 				}
+					<div className={this.state.tasks.length>0?'uk-hidden':''}>无执行任务</div>
 				</div>
 			</div>
 			)

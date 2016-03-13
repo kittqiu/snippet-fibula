@@ -344,6 +344,12 @@ function formatNow(){
 function toDateTime(strdate){
 	return new Date(strdate).getTime();
 }
+function getDateTimeAt0(millisecond){    
+    var n = millisecond || Date.now();
+    var day = new Date(millisecond);
+    day.setHours(0,0,0,0);
+    return day.getTime();
+}
 
 /*work duration althorithm*/
 var ONEDAY = 3600*24*1000,

@@ -15,7 +15,7 @@ var TaskTabView = React.createClass({
 							<td className="uk-width-2-10 uk-block-muted">任务名称：</td>
 							<td className="uk-width-3-10">{task.name}</td>
 							<td className="uk-width-2-10 uk-block-muted">状态：</td>
-							<td className="uk-width-3-10">{task.status}</td>
+							<td className="uk-width-3-10">{taskStatusMap[task.status]}</td>
 						</tr>
 						<tr>
 							<td className="uk-width-2-10 uk-block-muted">执行人：</td>
@@ -427,9 +427,21 @@ var TaskTabEdit = React.createClass({
 
 
 var TaskTabLog = React.createClass({
+	onTaskChanged: function(newtask){
+
+	},
+	reset: function(newtask){
+
+	},
 	render: function(){
+		var marginTop = {marginTop:'50px'};
+		var task = this.props.task;
 		return ( 
-			<div></div>
+			<div>
+				<TaskFlow task={task} onTaskChanged={this.onTaskChanged} resetDialog={this.reset}/>
+				<div style={marginTop}/>
+				<TaskDailyList task={task}/>
+			</div>
 			)
 	}
 });

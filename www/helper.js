@@ -35,17 +35,27 @@ function string2Integer(s) {
 }
 
 function getDateTimeAt0(millisecond){    
-    var n = millisecond || Date.now();
-    var day = new Date(millisecond);
+    var n = millisecond || Date.now(),
+        offset = 0,
+        day = new Date(millisecond);
     day.setHours(0,0,0,0);
     //return n - (n%86400000);
-    return day.getTime();
+    if( process.env.TZ === 'Asia/Shanghai' && day.getTimezoneOffset() !== -480){
+        offset = (-480 - day.getTimezoneOffset())*60000;
+    }
+    return day.getTime() + offset;
 }
 
 function getNextDateTime(millisecond){
     var n = millisecond || Date.now();
     //return n - (n%86400000) + 86400000;
     return getDateTimeAt0(millisecond) + 86400000;
+}
+
+function getPreviousDateTime(millisecond){
+    var n = millisecond || Date.now();
+    //return n - (n%86400000) + 86400000;
+    return getDateTimeAt0(n-86400000);
 }
 
 
@@ -94,6 +104,7 @@ module.exports = {
 
     getDateTimeAt0: getDateTimeAt0,
     getNextDateTime: getNextDateTime,
+    getPreviousDateTime: getPreviousDateTime,
     getWeek: getWeek, 
     getFirstDayOfMonth: getFirstDayOfMonth,
     getId: getId

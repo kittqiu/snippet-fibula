@@ -18,6 +18,9 @@ var Task = React.createClass({
 		var task = this.props.task,
 			parentCls = task.parent !=='root' ? 'treegrid-parent-' + task.parent : '',
 			plan_mode = task.automode === 0 ? '自动' : '手动',
+			noMargin = {marginRight:'0px'},
+			statusCls = { created: 'uk-text-primary', doing: 'uk-text-warning', commit: 'uk-text-warning',
+				completed: 'uk-text-success', cancel: 'uk-text-danger', pending: 'uk-text-warning' },
 			start_time = task.status=='created'?formatDate(task.plan_start_time): formatDate(task.start_time),
 			end_time = task.status=='created'?formatDate(task.plan_end_time): formatDate(task.end_time),
 			relies = [];
@@ -27,17 +30,18 @@ var Task = React.createClass({
 
 		return (
 			<tr id={task.id} key={task.id} onDoubleClick={this.onDoubleClick} className={ 'treegrid-' + task.id + ' ' + parentCls}>
-				<td className="uk-block-muted"><button  className="uk-button-link dv-link">{this.props.index}</button></td>
+				<td className="uk-block-muted"><button className="uk-button-link dv-link" style={noMargin}>{this.props.index}</button></td>
 				<td>{task.name}
 					<div id={"modal_task_"+task.id} className="uk-modal">
 					</div>
 				</td>
-				<td>{task.executor_name}</td>
-				<td>{relies.toString()||'无'}</td>
+				<td className="uk-text-center"><i className={ 'uk-icon-circle ' + statusCls[task.status] }></i></td>
+				<td>{task.executor_name}</td>				
 				<td>{task.isCompleted?task.duration:task.plan_duration}</td>
 				<td>{plan_mode}</td>
 				<td>{start_time}</td>
 				<td>{end_time}</td>
+				<td>{relies.toString()||'无'}</td>
 			</tr>
 			);
 	}
@@ -98,12 +102,13 @@ var TaskTable = React.createClass({
 						<tr>
 							<th style={smallwidth}>标识</th>
 							<th className="uk-width-3-10">任务名称</th>
-							<th className="uk-width-1-10">负责人</th>
-							<th className="uk-width-1-10">前置任务</th>
+							<th style={smallwidth}>状态</th>							
+							<th className="uk-width-1-10">负责人</th>							
 							<th className="uk-width-1-10">工期(小时)</th>
 							<th className="uk-width-1-10">计划模式</th>
 							<th className="uk-width-1-10">开始时间</th>
-							<th className="uk-width-1-10">结束时间</th>		
+							<th className="uk-width-1-10">结束时间</th>
+							<th className="uk-width-1-10">前置任务</th>	
 						</tr>
 					</thead>
 					<tbody>

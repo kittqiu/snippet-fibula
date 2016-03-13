@@ -268,8 +268,8 @@ function* $task_listExecutingOfUser(uid){
 		});*/
 	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
 		+ 'left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id  LEFT JOIN project as p on t.project_id=p.id '
-		+ 'where t.executor_id =? and t.status=? order by t.plan_end_time asc';
-	var rs = yield warp.$query(sql, [uid, 'doing']);
+		+ 'where t.executor_id =? and ( t.status=? or t.status=? ) order by t.plan_end_time asc';
+	var rs = yield warp.$query(sql, [uid, 'doing', 'commit']);
 	return rs;
 }
 
@@ -283,6 +283,14 @@ function* $task_listQueueOfUser(uid){
 		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
 		+ ' where t.executor_id =? and t.status=? order by t.plan_end_time asc';
 	var rs = yield warp.$query(sql, [uid, 'created']);
+	return rs;
+}
+
+function* $task_listManageOfUser(uid){
+	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
+		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
+		+ ' where t.manager_id =? and t.closed=? order by t.plan_end_time asc';
+	var rs = yield warp.$query(sql, [uid, false]);
 	return rs;
 }
 
@@ -351,6 +359,12 @@ function* $task_get(tid){
 	return task || {};
 }
 
+function* $task_listDaily(tid){
+	var sql = 'select d.*, u.`name` as user_name from project_daily as d left JOIN users as u on u.id=d.user_id '
+		+ 'where d.task_id =? ';
+	return yield warp.$query(sql, [tid]);
+}
+
 function* $group_getMembers(id){
 	var sql = 'select m.*, u.`name` from project_member as m, users as u where m.user_id = u.id and m.group_id=?';
 	return yield warp.$query(sql, [id]);
@@ -371,14 +385,21 @@ function* $group_get(id){
 function* $daily_listUser(user_id, dateTime){
 	var begin_time = helper.getDateTimeAt0(dateTime),
 		end_time = helper.getNextDateTime(dateTime),
-		sql = 'select t.* from project_task as t where t.executor_id=? and t.start_time<>0 and t.start_time<? and (t.end_time>=? or t.end_time=0)',
-		ts, ds, i, j;
+		yes_time = helper.getPreviousDateTime(dateTime),
+		sql = 'select t.*, u.`name` as manager_name, e.name as executor_name from project_task as t '
+			+ 'left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id where t.executor_id=? and t.start_time<>0 and t.start_time<? and (t.end_time>=? or t.end_time=0)',
+		ts, ds, os, i, j;
 
 	ts = yield warp.$query(sql, [user_id, end_time, begin_time]);
 	ds = yield modelDaily.$findAll({
 		select: '*',
 		where: '`user_id`=? and `time` >=? and `time`<?',
 		params: [user_id, begin_time, end_time]
+	});
+	os = yield modelDaily.$findAll({
+		select: '*',
+		where: '`user_id`=? and `time` >=? and `time`<?',
+		params: [user_id, yes_time, begin_time]
 	});
 
 	for( i = 0; i < ts.length; i++ ){
@@ -387,6 +408,12 @@ function* $daily_listUser(user_id, dateTime){
 		for( j = 0; j < ds.length; j++ ){
 			if( ds[j].task_id === task.id ){
 				task.daily = ds[j];
+				break;
+			}
+		}
+		for( j = 0; j < os.length; j++ ){
+			if( os[j].task_id === task.id ){
+				task.daily.org_plan = os[j].plan;
 				break;
 			}
 		}
@@ -443,9 +470,11 @@ module.exports = {
 		$moveDown: $task_moveDown,
 		$changeParent: $task_changeParent,
 		$listExecutingOfUser: $task_listExecutingOfUser,
+		$listManageOfUser: $task_listManageOfUser,
 		$listQueueOfUser: $task_listQueueOfUser,
 		$listFlow: $task_listFlow,
 		$nextFlow: $task_nextFlow,
+		$listDaily: $task_listDaily,
 		$get: $task_get
 	},
 

@@ -150,15 +150,19 @@ var TaskFlow = React.createClass({
 		}
 		form.postJSON( '/api/project/t/' + tid + '/flow', data, function(err, result){
 			if( !err ){
+				this.resetFields();
 				this.loadFlow();
 				getJSON( '/api/project/task/'+ tid, function(err, data ){
-					this.setState({actionType:'reply'})
+					this.setState({actionType:'reply'})					
 					if( !err && this.props.task.status !== data.status ){
 						this.props.resetDialog(data);
 					}
 				}.bind(this));
 			}
 		}.bind(this));
+	},
+	resetFields: function(){
+		this.refs.reply.value = '';
 	},
 	haveFlow: function(type){
 		var flows = this.state.flows;
@@ -222,6 +226,9 @@ var TaskFlow = React.createClass({
 					actions.push(list[i]);
 				}
 			}
+		}
+		if(actions.length === 0){
+			actions.push( 'reply' );
 		}
 		for( i = 0; i < actions.length; i++){
 			var a = actions[i];				
@@ -294,6 +301,59 @@ var TaskFlow = React.createClass({
 	}
 });
 
+var TaskDailyList = React.createClass({
+	loadFlow: function(){
+		getJSON( '/api/project/t/'+ this.props.task.id+'/daily', function(err, data ){
+				if(err){
+					fatal(err);
+				}else{					
+					this.setState({daily:data});
+				}
+			}.bind(this)
+		);
+	},
+	componentWillMount: function(){
+		this.loadFlow();
+	},
+	getInitialState: function(){
+		return {daily:[]}
+	},
+	render: function(){
+		return (
+			<div>
+				<h2>进展日志</h2>
+				<table className="uk-width-1-1 uk-table">
+					<thead>
+						<tr>
+							<th className="uk-width-2-10">时间</th>
+							<th className="uk-width-1-10">执行人</th>
+							<th className="uk-width-1-10">用时</th>
+							<th className="uk-width-3-10">当日工作</th>
+							<th className="uk-width-2-10">明日计划</th>					
+						</tr>
+					</thead>
+					<tbody>
+						{ 
+							this.state.daily.map(function(d, index){
+							return (
+								<tr key={index}>
+									<td>{formatDate(d.time,true)}</td>
+									<td>{d.user_name}</td>
+									<td>{d.duration}小时</td>
+									<td>{d.report}</td>
+									<td>{d.plan}</td>
+								</tr>
+								)
+							}.bind(this))
+						}
+						<tr className={this.state.daily.length>0?'uk-hidden':''}><td colSpan="5">无记录</td></tr>				
+					</tbody>
+				</table>
+			</div>
+			)
+	}
+});
+
 var TaskDialog = React.createClass({
 	showModal: function(){
 		if( this.props.task ){
@@ -340,6 +400,8 @@ var TaskDialog = React.createClass({
 						<TaskInfo task={task}/>
 						<div style={marginTop}/>
 						<TaskFlow task={task} onTaskChanged={this.props.onTaskChanged} resetDialog={this.reset}/>
+						<div style={marginTop}/>
+						<TaskDailyList task={task}/>
 					</div>
 				</div>
 			)

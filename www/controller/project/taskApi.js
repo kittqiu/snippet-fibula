@@ -33,8 +33,10 @@ GET METHOD:
 
 /api/project/daily?date=xx
 /api/project/t/listExecuting?uid=xx
+/api/project/t/listManage?uid=xx
 /api/project/t/listQueue?uid=xx
 /api/project/t/:id/listFlow
+/api/project/t/:id/daily
 
 
 
@@ -67,6 +69,11 @@ module.exports = {
 		this.body = yield base.task.$listExecutingOfUser(uid);
 	},
 
+	'GET /api/project/t/listManage': function* (){
+		var uid = this.request.query.uid || this.request.user.id;
+		this.body = yield base.task.$listManageOfUser(uid);
+	},
+
 	'GET /api/project/t/listQueue': function* (){
 		var uid = this.request.query.uid || '';
 		this.body = yield base.task.$listQueueOfUser(uid);
@@ -74,6 +81,10 @@ module.exports = {
 
 	'GET /api/project/t/:id/listFlow': function* (id){
 		this.body = yield base.task.$listFlow(id);
+	},
+
+	'GET /api/project/t/:id/daily': function* (id){
+		this.body = yield base.task.$listDaily(id);
 	},
 
 	'POST /api/project/daily/creation': function* (){
@@ -94,18 +105,28 @@ module.exports = {
 			plan: data.plan,
 			time: data.time
 		}
+		task.duration += data.duration;
+		yield task.$update(['duration']);
 		yield base.modelDaily.$create(daily);
+
 		this.body = { id: daily.id, result: 'ok'};
 	},
 
 	'POST /api/project/daily/:id':function* (id){
 		var data = this.request.body,
-			r = yield base.modelDaily.$find(id);
+			r = yield base.modelDaily.$find(id),
+			task;
 
 		json_schema.validate('workDaily', data);
 		if( r === null ){
 			throw api.notFound('daily', this.translate('Record not found'));
 		}
+		task = yield base.modelTask.$find( r.task_id );
+		if( task === null ){
+			throw api.notFound('task', this.translate('Record not found'));
+		}
+		task.duration = task.duration - r.duration + data.duration;
+		yield task.$update(['duration']);
 		yield db.op.$update_record( r, data, ['report', 'plan', 'duration']);
 		this.body = { result: 'ok'};
 	},
@@ -130,7 +151,7 @@ module.exports = {
 		if( task.status === 'created' && data.action === 'accept'){
 			task.start_time = Date.now();
 			yield task.$update(['start_time']);
-		}else if( action === 'cancel' || data.action === 'complete'){
+		}else if( data.action === 'cancel' || data.action === 'complete'){
 			task.end_time = Date.now();
 			yield task.$update(['end_time']);
 		}

@@ -13,6 +13,7 @@ ENV.user_id = "{{__request__.user.id}}";
 
 {% if __production__ %}
 <script type="text/javascript">
+{% include './component/build/task.js' %}
 {% include './component/build/mydaily.js' %}
 </script>
 <script type="text/babel">
@@ -23,6 +24,7 @@ ReactDOM.render(
 </script>
 {% else %}
 <script type="text/babel">
+{% include './component/src/task.jsx' %}
 {% include './component/src/mydaily.jsx' %}
 ReactDOM.render(
 	<MyDaily  />,
