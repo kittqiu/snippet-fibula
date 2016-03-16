@@ -3,6 +3,7 @@
 {% block pagehead %}
 <script src="/static/js/sha1.min.js"></script>
 <script type="text/javascript">
+"{{ __theme__ }}";
 $(function () {
 	Vue.config.debug = true;
 	var vm = new Vue({
@@ -29,7 +30,8 @@ $(function () {
 					}
 					//salt password
 					delete(data['verifypassword']);
-					data.password = CryptoJS.SHA1( this.password + '{{ __salt__ }}' ).toString();
+					data.password = CryptoJS.SHA1( this.password + "{{model.__salt__}} {{__request__.__user__.id}}1" ).toString();
+
 					return data;
 				}				
 			},

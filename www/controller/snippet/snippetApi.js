@@ -817,5 +817,5 @@ module.exports = {
         };
     },
 
-    'LoginRequired': [ '/snippet/s/creation', '/api/snippet/s', '/snippet/pending']
+    'LoginRequired': [ /^\/snippet[\s\S]*/, /^\/api\/snippet[\s\S]*/]
 };

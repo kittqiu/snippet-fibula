@@ -10,7 +10,9 @@ var
     cache = require('../../cache'),
     json_schema = require('../../json_schema'),
     team_base = require( __base + 'controller/team/base'),
-    helper = require( __base + 'helper');
+    helper = require( __base + 'helper'),
+    co = require('co'), 
+    perm = require( __base + 'controller/system/permission');
 
 var models = {
     next_id: db.next_id,
@@ -32,6 +34,18 @@ var
 var 
 	DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires,
     PARENT_ROOT = 'root';
+
+function* init_database(){
+	//perm.perm.$register('')
+}
+
+function MODULE_init(){
+	co( init_database ).then( function (val) {
+		 }, function (err) {
+		  console.error(err.stack);
+		});
+}
+MODULE_init();
 
 
 function* $_render( context, model, view ){

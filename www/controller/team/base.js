@@ -2,7 +2,9 @@
 
 var 
 	db = require( __base + 'db'),
-	config = require( __base + 'config');
+	config = require( __base + 'config'),
+	co = require('co'), 
+    perm = require( __base + 'controller/system/permission');
 
 
 var 
@@ -12,6 +14,21 @@ var
 	modelMember = db.team_member,
 	DEP_ROOT = 'root',
 	DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires;
+
+function* co_module_init(){
+	var pid = yield perm.perm.$register('team.structure.edit', '有权修改部门架构树');
+	var rid = yield perm.role.$register('团队规划师', '规划团队结构');
+	yield perm.role.$registerPerm(rid, pid);
+}
+
+function MODULE_init(){
+	co( co_module_init ).then( function (val) {
+		 }, function (err) {
+		  console.error(err.stack);
+		});
+}
+MODULE_init();
+
 
 function* $_getDepartment(id){
 	if( id === DEP_ROOT ){
@@ -151,7 +168,8 @@ module.exports = {
 	member: {
 		$getUsers: $_member_getUsers,
 		$getFree: $member_getFree,
-		$getUser: $member_getUser
+		$getUser: $member_getUser,
+		$listRoles: perm.user.$listRoles
 	},
 
 	setHistoryUrl: setHistoryUrl,

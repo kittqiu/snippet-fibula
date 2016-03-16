@@ -33,5 +33,6 @@ module.exports = {
 			tree: yield cache.$getVersionTree()
 		};
 		yield $render(this, model, 'req_index.html' )
-	}
+	},
+	'LoginRequired': [ /^\/req[\s\S]*/, /^\/api\/req[\s\S]*/]
 };

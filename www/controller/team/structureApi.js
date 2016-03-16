@@ -17,6 +17,7 @@ function* $_render( context, model, view ){
 
 /**************
 GET METHOD:
+/team/structure/
 /team/structure/build
 /team/structure/department/creation?parent=xx
 /team/structure/department/:id/edit
@@ -37,8 +38,12 @@ POST METHOD:
 *************/
 
 module.exports = {
+	'GET /team/structure': function* (){
+		yield $_render( this, {__mode__:'ro'}, 'build.html');
+		base.setHistoryUrl(this);
+	},
 	'GET /team/structure/build': function* (){
-		yield $_render( this, {}, 'build.html');
+		yield $_render( this, {__mode__:'rw'}, 'build.html');
 		base.setHistoryUrl(this);
 	},
 

@@ -112,7 +112,7 @@ var DepartmentTable = React.createClass({
 			nodeClasses: {
 				user:'uk-icon-user'
 			},
-			draggable: true, 
+			draggable: this.props.mode==="rw", 
 			onMove: this.dragDepartment,
 			selectable: true,
 			selectedClass: 'dv-row-selected',
@@ -568,10 +568,12 @@ var Structure = React.createClass({
 		return (
 			<div className="uk-width-1-1">		
 				<h2 className="x-title">部门架构</h2>
+				{ this.props.mode === 'rw' ?
 				<ToolBar selectedItem={this.state.selectedItem} deps={this.state.data} updatedCnt={this.state.updatedCnt}
 					onDataChanged={this.onDataChanged} handleDepChangeParent={this.handleDepChangeParent} addUsers={this.addUsers}/>				
+				:null}
 				<hr className="dv-hr"/>				
-				<DepartmentTable deps={this.state.data} onItemSelected={this.onItemSelected} updatedCnt={this.state.updatedCnt}
+				<DepartmentTable mode={this.props.mode} deps={this.state.data} onItemSelected={this.onItemSelected} updatedCnt={this.state.updatedCnt}
 					onDragDrop={this.onDragDrop}/>
 			</div>
 			)

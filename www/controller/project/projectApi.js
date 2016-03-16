@@ -323,5 +323,7 @@ module.exports = {
 			}
 		}
 		this.body = { result: 'ok'}
-	}
+	},
+
+	'LoginRequired': [ /^\/project[\s\S]*/, /^\/api\/project[\s\S]*/]
 };
