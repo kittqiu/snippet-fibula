@@ -46,7 +46,6 @@ var NewTaskDlg = React.createClass({
 			start_time = this.state.start_time;
 			end_time = this.state.end_time;
 		}
-		console.log(new Date(end_time))
 
 		this.state.relies.split(',').forEach( function(r, index) {
 			if(r){

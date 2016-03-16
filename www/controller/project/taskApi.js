@@ -106,7 +106,8 @@ module.exports = {
 			time: data.time
 		}
 		task.duration += data.duration;
-		yield task.$update(['duration']);
+		task.percent = data.percent;
+		yield task.$update(['duration', 'percent']);
 		yield base.modelDaily.$create(daily);
 
 		this.body = { id: daily.id, result: 'ok'};
@@ -126,7 +127,8 @@ module.exports = {
 			throw api.notFound('task', this.translate('Record not found'));
 		}
 		task.duration = task.duration - r.duration + data.duration;
-		yield task.$update(['duration']);
+		task.percent = data.percent;
+		yield task.$update(['duration', 'percent']);
 		yield db.op.$update_record( r, data, ['report', 'plan', 'duration']);
 		this.body = { result: 'ok'};
 	},

@@ -29,7 +29,7 @@ function* $_getDepartment(id){
 	}
 }
 
-function* $_dep_isLeaf(id){
+function* $department_isLeaf(id){
 	var cnt = yield modelDep.$findNumber({
 		select: 'count(*)',
 		where: '`parent`=?',
@@ -38,11 +38,11 @@ function* $_dep_isLeaf(id){
 	return cnt === 0;
 }
 
-function* $_changeDepartmentOrder(id, offset){
+function* $department_changeOrder(id, offset){
 	var dep = yield modelDep.$find(id),
 		orgorder =  dep.order,
 		order = orgorder + offset,
-		maxorder = yield $__getDepMaxOrder(dep.parent);
+		maxorder = yield $department_getMaxOrder(dep.parent);
 	if( order < 0 ){
 		order = 0;
 	}
@@ -61,37 +61,29 @@ function* $_changeDepartmentOrder(id, offset){
 	}	
 }
 
-function* $_deleteParentDepartOrder(pid, order){
+function* $department_deleteOrder(pid, order){
 	yield warp.$query( 'update team_department set `order`=`order`-1 where `parent`=? and `order`>? ', [pid, order]);
 }
 
-function* $__getDepMaxOrder(id){
-	var sql = 'select MAX(`order`) AS nextorder from team_department where parent=?',
-    	rs = yield warp.$query( sql, [id] ),
-    	nextorder = rs[0].nextorder;
-    return nextorder === null ? 0 : nextorder;
+function* $department_getMaxOrder(id){
+	var sql = 'select MAX(`order`) AS maxorder from team_department where parent=?',
+    	rs = yield warp.$query( sql, [id] );
+    return rs.length > 0? rs[0].maxorder: -1;
 }
 
-function* $_getDepNextOrder(id){
-	var sql = 'select MAX(`order`) AS nextorder from team_department where parent=?',
-    	rs = yield warp.$query( sql, [id] ),
-    	nextorder = rs[0].nextorder;
-    return nextorder === null ? 0 : nextorder + 1;
-}
-
-function* $_getAllDepartment(){
+function* $department_list(){
 	return yield modelDep.$findAll({
 		select: ['id', 'name', 'parent', 'order']
 	});
 }
 
 /***** member*******/
-function* $_member_getFree(){
+function* $member_getFree(){
 	var sql = "select u.id,u.name from users as u LEFT JOIN team_member as m on u.id=m.user_id where u.actived=1 and u.verified=1 and m.department is null or m.department =''";
 	return yield warp.$query(sql);
 }
 
-function* $_member_getUser(uid){
+function* $member_getUser(uid){
 	var r = yield modelMember.$find({
 		select: '*',
 		where: '`user_id`=?',
@@ -100,7 +92,7 @@ function* $_member_getUser(uid){
 	return r;
 }
 
-function* $_member_getDepUsers(){
+function* $department_listUsers(){
 	var sql = "select u.id, u.name, m.department from users as u,team_member as m where u.id=m.user_id and m.department <>''";
 	return yield warp.$query(sql);
 }
@@ -145,19 +137,21 @@ function getHistoryUrl( context ){
 
 module.exports = {
 	$getDepartment: $_getDepartment,
-	$changeDepartmentOrder: $_changeDepartmentOrder,
-	$deleteParentDepartOrder: $_deleteParentDepartOrder,
-	$getDepNextOrder: $_getDepNextOrder,
-	$getAllDepartment: $_getAllDepartment,
-	$dep_isLeaf: $_dep_isLeaf,
-
-	$member_getFree: $_member_getFree,
-	$member_getUser: $_member_getUser,
 	$member_create: $_member_create,
-	$member_getDepUsers: $_member_getDepUsers,
+
+	department: {
+		$list: $department_list,
+		$listUsers: $department_listUsers,
+		$changeOrder: $department_changeOrder,
+		$getMaxOrder: $department_getMaxOrder,
+		$deleteOrder: $department_deleteOrder,
+		$isLeaf: $department_isLeaf
+	},
 
 	member: {
-		$getUsers: $_member_getUsers
+		$getUsers: $_member_getUsers,
+		$getFree: $member_getFree,
+		$getUser: $member_getUser
 	},
 
 	setHistoryUrl: setHistoryUrl,

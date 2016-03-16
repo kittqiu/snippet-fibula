@@ -28,12 +28,14 @@ var ReportDialog = React.createClass({
 			daily = task.daily,
 			formid = 'form-daily-'+ tid,
 			form = $('#'+formid).find('form'),
+			percent = parseInt(this.refs.percent.value),
 			data = {
 				task_id: tid,
 				duration: parseInt(this.refs.duration.value),
 				report: this.refs.report.value,
 				plan: this.refs.plan.value,
-				time: this.props.dayTime
+				time: this.props.dayTime,
+				percent: (percent > 100? 100:(percent<0?0:percent))
 			},
 			url = '/api/project/daily/' + (daily.id? daily.id: 'creation');
 		//console.log(data);
@@ -83,6 +85,12 @@ var ReportDialog = React.createClass({
 								<label className="uk-form-label">今日用时：</label>
 								<div className="uk-form-controls uk-form-controls-text">
 									<input type="number" name="duration" ref="duration" defaultValue={duration} className="uk-width-1-3" min="0"/>小时
+								</div>
+							</div>
+							<div className="uk-form-row">
+								<label className="uk-form-label">总计进度：</label>
+								<div className="uk-form-controls uk-form-controls-text">
+									<input type="number" name="percent" ref="percent" defaultValue={task.percent} className="uk-width-1-3" min="0" max="100"/>%
 								</div>
 							</div>
 							<div className="uk-form-row uk-width-1-1">

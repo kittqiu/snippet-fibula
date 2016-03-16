@@ -29,8 +29,10 @@ GET METHOD:
 POST METHOD:
 /api/team/department?parent=xx&before=xx
 /api/team/department/:id
+/api/team/department/:id/delete
 /api/team/department/:id/order?action=xx
 /api/team/member/u/:uid?department=xx
+/api/team/member/updateusers
 
 *************/
 
@@ -73,15 +75,15 @@ module.exports = {
 	},
 
 	'GET /api/team/department/freeusers': function* (){
-		this.body = yield base.$member_getFree();
+		this.body = yield base.member.$getFree();
 	},
 
 	'GET /api/team/department/list': function* (){
-		this.body = yield base.$getAllDepartment();
+		this.body = yield base.department.$list();
 	},
 
 	'GET /api/team/department/users': function* (){
-		this.body = yield base.$member_getDepUsers();
+		this.body = yield base.department.$listUsers();
 	},
 
 	'GET /api/team/department/:id': function* (id){
@@ -97,7 +99,7 @@ module.exports = {
 			name: data.name,
 			type: 'department',
 			parent: data.pid,
-			order: yield base.$getDepNextOrder(data.pid),
+			order: (yield base.department.$getMaxOrder(data.pid)) + 1,
 			duty: ''
 		};
 		yield modelDep.$create( r );
@@ -125,7 +127,7 @@ module.exports = {
 			orgOrder = r.order;
 			columns.push('parent');
 			r.parent = data.pid;
-			r.order = yield base.$getDepNextOrder(data.pid);
+			r.order = (yield base.department.$getMaxOrder(data.pid)) + 1;
 			columns.push('order');
 		}
 		//if( r.order != data)
@@ -134,7 +136,7 @@ module.exports = {
 		}
 
 		if( orgParentId ){
-			yield base.$deleteParentDepartOrder( orgParentId, orgOrder );
+			yield base.department.$deleteOrder( orgParentId, orgOrder );
 		}
 
 		this.body = {
@@ -146,10 +148,11 @@ module.exports = {
 		if( r === null ){
 			throw api.notFound('department');
 		}
-		var isLeaf = yield base.$dep_isLeaf(id);
+		var isLeaf = yield base.department.$isLeaf(id);
 		if( !isLeaf ){
 			throw api.notAllowed('department is not empty');
 		}
+		yield base.department.$deleteOrder(r.parent, r.order);
 		yield r.$destroy();
 		this.body = {
 			result:'ok'
@@ -162,9 +165,9 @@ module.exports = {
 			throw api.notFound('department');
 		}
 		if( action === 'up' ){
-			yield base.$changeDepartmentOrder(id, -1 );
+			yield base.department.$changeOrder(id, -1 );
 		}else if( action === 'down' ){
-			yield base.$changeDepartmentOrder(id, 1 );
+			yield base.department.$changeOrder(id, 1 );
 		}
 		this.body = {
 			result:'ok'
@@ -172,27 +175,43 @@ module.exports = {
 	},
 	'POST /api/team/member/u/:uid': function* (uid){
 		var u = yield modelUser.$find(uid),
-			m = yield base.$member_getUser(uid),
-			q = this.request.query,
+			m = yield base.member.$getUser(uid),
+			data = this.request.body,
 			cols = [];
 		if( u === null ){
 			throw api.notFound('user');
 		}
 		if( m === null ){
-			yield base.$member_create(uid,q.department);
+			yield base.$member_create(uid,data.department);
 		}else{
-			if( q.hasOwnProperty('department')){
-				m.department = q.department;
+			if( data.hasOwnProperty('department')){
+				m.department = data.department;
 				cols.push('department');
 			}
 			if( cols.length > 0 ){
 				yield m.$update(cols);
 			}			
 		}
-		this.body = {
-			result: 'ok'
-		}
+		this.body = { result: 'ok' }
+	},
 
+	'POST /api/team/member/updateusers': function*(){
+		var data = this.request.body || [];
+		if( data instanceof(Array)){
+			for( var i = 0; i < data.length; i++ ){
+				var item = data[i];
+				var m = yield base.member.$getUser(item.id);
+				if( m !== null ){
+					if( item.hasOwnProperty('department')){
+						if( m.department !== item.department ){
+							m.department = item.department;
+							yield m.$update(['department'])
+						}
+					}
+				}
+			}
+		}
+		this.body = { result: 'ok'};
 	}
 
 };

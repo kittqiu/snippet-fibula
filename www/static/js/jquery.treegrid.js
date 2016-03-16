@@ -136,7 +136,9 @@
 					if( $this.treegrid('getSetting', 'renderOnDrag')){
 						$(this).treegrid('appendChild', id );
 					}
+					console.log('drop')
 					$this.treegrid('getSetting', 'onMove').apply($this, [id,$this.treegrid('getNodeId'),orgParentId]);
+					return false;
 				});
 			}
 			if( $this.treegrid('getSetting', 'selectable' )){
@@ -920,7 +922,7 @@
 		leafClass: 'treegrid-expander-collapsed',
 		treeColumn: 0,
 		draggable: false,
-		renderOnDrag: true,
+		renderOnDrag: false,
 		selectable: false,
 		selectedClass: 'treegrid-selected',
 		getExpander: function() {

@@ -71,8 +71,10 @@ var TaskTable = React.createClass({
 	},
 	dragTask: function(task_id, toParentId, fromParentId ){
 		var TaskMap = this.props.project.TaskMap;
-		this.props.handleMoveTo(toParentId, task_id);
-		console.log( 'Move task ' + TaskMap[task_id].name +' from ' + (fromParentId==='root'||fromParentId===null ?'root':TaskMap[fromParentId].name) + ' to ' + TaskMap[toParentId].name );
+		if( TaskMap[task_id].parent !== toParentId ){
+			this.props.handleMoveTo(toParentId, task_id);
+			console.log( 'Move task ' + TaskMap[task_id].name +' from ' + (fromParentId==='root'||fromParentId===null ?'root':TaskMap[fromParentId].name) + ' to ' + TaskMap[toParentId].name );
+		}
 	},
 	resetTree: function(){
 		this.initTree({
@@ -238,6 +240,15 @@ var Project = React.createClass({
 			}.bind(this)
 		); 
 	},
+	hasBloodRelation:function(ida, idb){
+		var pas = this.evaluateTaskAncestor(ida),
+			pbs = this.evaluateTaskAncestor(idb);
+		if( pas.indexOf(idb)!== -1 || pbs.indexOf(ida)!== -1){
+			console.log('hasBloodRelation')
+			return true;
+		}
+		return false;
+	},
 	onTaskSelected: function(id){
 		this.setState({selected_task:id});
 	},
@@ -252,6 +263,10 @@ var Project = React.createClass({
 			tasks = this.state.tasks,
 			params = {action:'update_parent', parent:parent },
 			i;
+
+		if( task.parent === parent ){
+			return;
+		}
 		
 		for(i = task.index + 1; i < tasks.length; i++ ){
 			var t = tasks[i];
@@ -293,6 +308,16 @@ var Project = React.createClass({
 	getTaskById: function( id){
 		return this.state.TaskMap[id];
 	},
+	taskIsLeaf: function(tid){
+		var tasks = this.state.tasks;
+		for( var i = this.state.TaskMap[tid].index + 1; i < tasks.length; i++ ){
+			if( tasks[i].parent === tid ){
+				return false;
+			}
+		}
+		return true;
+	},
+	
 	evaluateTaskParent: function (id){
 		var TaskMap = this.state.TaskMap;
 		if( !TaskMap.hasOwnProperty(id) || id === 'root'){
@@ -300,28 +325,63 @@ var Project = React.createClass({
 		}
 		return TaskMap[id].parent;
 	},
-	sortTasks: function( ts ){
+	evaluateTaskAncestor: function(id){
 		var TaskMap = this.state.TaskMap;
+		var as = [];
+		if( TaskMap.hasOwnProperty(id) && id !== 'root' ){
+			var tid = id;
+			do{
+				var a = TaskMap[tid];
+				as.unshift(a.parent);
+				tid = a.parent;
+			}while(tid!=='root');
+		}
+		return as;
+	},
+	sortTasks: function( ts ){
+		var TaskMap = this.state.TaskMap, 
+			i;		
 
-		function evaluateTaskAncestor(id){
-			var as = [];
-			if( TaskMap.hasOwnProperty(id) && id !== 'root' ){
-				var tid = id;
-				do{
-					var a = TaskMap[tid];
-					as.unshift(a.parent);
-					tid = a.parent;
-				}while(tid!=='root');
+		function calcTaskLevel(tasks){
+			for( var i = 0; i < tasks.length; i++ ){
+				var t = tasks[i];
+				if( t.parent === 'root'){
+					t.level = 1;
+				}else{
+					t.level = TaskMap[t.parent].level + 1;
+				}
 			}
-			return as;
+		}
+
+		function calcTotalDuration(tasks){
+			var i, j, t;
+
+			//reset
+			for( i = 0; i < tasks.length; i++){
+				t = tasks[i];
+				t.total_duration = t.duration;
+			}
+
+			for( i = 0; i < tasks.length; i++){
+				t = tasks[i];
+				var children = 0;
+				for( j = i + 1; j < tasks.length; j++ ){
+					var tk = tasks[j];
+					if( tk.level <= t.level ){
+						break;
+					}
+					children += tk.duration;
+				}
+				t.total_duration += children;
+			}
 		}
 
 		ts.sort(function(a,b){
 			if(a.parent === b.parent){
 				return a.order - b.order;
 			}else{
-				var aas = evaluateTaskAncestor(a.id),
-					abs = evaluateTaskAncestor(b.id),
+				var aas = this.evaluateTaskAncestor(a.id),
+					abs = this.evaluateTaskAncestor(b.id),
 					maxlen = Math.max(aas.length, abs.length);
 				for(var i = 0; i < maxlen; i++ ){
 					if(i>=aas.length){
@@ -336,11 +396,15 @@ var Project = React.createClass({
 				}
 				return 0;
 			}
-		});
+		}.bind(this));
 
-		ts.forEach( function(t, index) {
-			t.index = index;
-		});
+		for( i = 0; i < ts.length; i++ ){
+			var t = ts[i];
+			t.index = i;
+			t.isLeaf = this.taskIsLeaf.bind(this, t.id);
+		}
+		calcTaskLevel(ts);
+		calcTotalDuration(ts);
 		return ts;
 	},
 	loadTaskRelies: function(tasks){

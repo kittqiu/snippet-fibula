@@ -105,12 +105,12 @@ function resetJob(){
 }
 
 function MODULE_init(){
-	search = createEngine();
-	co( indexSnippet ).then( function (val) {
-		  setTimeout(resetJob, 1800000 );
-		}, function (err) {
-		  console.error(err.stack);
-		});
+	// search = createEngine();
+	// co( indexSnippet ).then( function (val) {
+	// 	  setTimeout(resetJob, 1800000 );
+	// 	}, function (err) {
+	// 	  console.error(err.stack);
+	// 	});
 }
 
 MODULE_init();

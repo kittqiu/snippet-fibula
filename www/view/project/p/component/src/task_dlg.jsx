@@ -39,18 +39,23 @@ var TaskTabView = React.createClass({
 							<td className="uk-width-2-10 uk-block-muted">计划开始时间：</td>
 							<td className="uk-width-3-10">{ formatDate(task.plan_start_time)}</td>
 							<td className="uk-width-2-10 uk-block-muted">实际开始时间：</td>
-							<td className="uk-width-3-10">{ formatDate(task.start_time) } </td>
+							<td className="uk-width-3-10">{ task.start_time!==0?formatDate(task.start_time):'无' } </td>
 						</tr>
 						<tr>
 							<td className="uk-width-2-10 uk-block-muted">计划结束时间：</td>
 							<td className="uk-width-3-10">{ formatDate(task.plan_end_time)}</td>
 							<td className="uk-width-2-10 uk-block-muted">实际结束时间：</td>
-							<td className="uk-width-3-10">{ formatDate(task.end_time)}</td>
+							<td className="uk-width-3-10">{ task.end_time!==0?formatDate(task.end_time):'无'}</td>
 						</tr>
 						<tr>
 							<td className="uk-block-muted">前置任务:</td>
-							<td colSpan="3" >{ relies.toString()||'无' }
-							</td>
+							<td>{ relies.toString()||'无' }</td>
+							<td className="uk-block-muted">进度:</td>
+							<td>{ task.percent }%</td>
+						</tr>
+						<tr className={task.isLeaf()?'uk-hidden':''}>
+							<td className="uk-block-muted">下属总工期:</td>
+							<td colSpan="3" >{ task.total_duration }小时</td>
 						</tr>
 						<tr>
 							<td className="uk-block-muted">任务说明:</td>

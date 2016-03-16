@@ -1,0 +1,396 @@
+{% extends '../team_base.html' %}
+
+{% block req_right_toolbar %}
+<a href="/team/structure/department/creation" class="dv-link" style="margin-right:10px" >{{ _('Create department on level 1')}}</a>
+{% endblock %}
+
+{% block css %}
+<style type="text/css">
+.uk-table tbody tr.user-active {
+  background: #f0f0f0;
+}
+</style>
+{% endblock %}
+
+{% block head %}
+
+
+
+<script type="text/javascript">
+var Departments = {},
+	Users = {};
+
+function saveDeps(deps){
+	Departments['root'] = { id:'root', name:'root', parent: 'none' };
+   for( var i = 0; i < deps.length; i++ ){
+		var dep = deps[i];
+		Departments[dep.id] = dep;
+	} 
+}
+
+function saveUsers(users){
+   for( var i = 0; i < users.length; i++ ){
+		var u = users[i];
+		Users[u.id] = u;
+	} 
+}
+
+function makeMap(deps){
+	var map = {root:[]};
+	for( var i = 0; i < deps.length; i++ ){
+		var dep = deps[i];
+		if( map.hasOwnProperty(dep.parent)){
+			map[dep.parent].push(dep);
+		}else{
+			map[dep.parent] = [dep];
+		}
+	}
+	return map;
+}
+
+function buildTree( tree, map){
+	var nodeId = tree.id,
+		children = map[nodeId] || [];
+	for( var i = 0; i < children.length; i++ ){
+		var dep = children[i],
+			child = {id:dep.id, name:dep.name, parent: dep.parent, order: dep.order, children:[]};
+		tree.children.push( child );
+		buildTree( child, map );
+	}
+}
+
+function sortTree( tree ){
+	var i, 
+		children = tree.children;
+	children.sort(function(a,b){
+		return a.order - b.order;
+	});
+	for( i = 0; i < children.length; i++ ){
+		sortTree(children[i]);
+	}
+}
+
+function renderTree(tree, $parent){
+	var children = tree.children;
+	for(var i = 0; i < children.length; i++ ){
+		var child = children[i];
+		var txt = '<tr id="' + child.id+'" class="treegrid-'+child.id;
+		if( child.parent !== 'root'){
+			txt += ' treegrid-parent-' + child.parent;
+		}
+		txt += '">'
+				+ '<td><b>' + child.name + '</b></td>'
+				+ '<td style="text-align:left">'
+				+ '<button onclick="editDepartment(\'' + child.id + '\')" class="uk-button-link uk-icon-edit dv-link uk-icon-small" title="{{ _('Edit')}}" ></button>'
+				+ '<button onclick="removeDepartment(\'' + child.id + '\')" class="uk-button-link uk-icon-remove dv-link uk-icon-small" title="{{ _('Delete')}}" ></button>'
+				+ '<button onclick="rollDepartment(\'' + child.id + '\', \'upgrade\')" class="uk-button-link uk-icon-arrow-circle-left dv-link uk-icon-small" title="{{ _('upgrade')}}" ></button>'
+				+ '<button onclick="rollDepartment(\'' + child.id + '\', \'up\')" class="uk-button-link uk-icon-arrow-circle-up dv-link uk-icon-small" title="{{ _('Move up')}}"></button>'
+				+ '<button onclick="rollDepartment(\'' + child.id + '\', \'down\')" class="uk-button-link uk-icon-arrow-circle-down dv-link uk-icon-small" title="{{ _('Move down')}}"></button>'
+				+ '<button onclick="location.assign(\'/team/structure/department/creation?parent=' + child.id + '\')" class="uk-button-link uk-icon-plus dv-link uk-icon-small" title="{{ _('Create sub-department')}}"></button>'
+				+ '</td>'
+				+'</tr>';
+		$parent.append( txt );
+		renderTree( child, $parent );
+	}  
+}
+
+function initNode(id){
+	var $this = $('#'+id);
+	$this.find('.uk-icon-remove').prop('disabled', false);
+	$this.find('.uk-icon-arrow-circle-up').prop('disabled', false);
+	$this.find('.uk-icon-arrow-circle-down').prop('disabled', false);
+	$this.find('.uk-icon-arrow-circle-left').prop('disabled', false);
+
+	if( !$this.treegrid('isLeaf') ){
+		$this.find('.uk-icon-remove').prop('disabled', true);
+	}
+	if( $this.treegrid('isFirst')){
+		$this.find('.uk-icon-arrow-circle-up').prop('disabled', true);
+	}
+	if( $this.treegrid('isLast')){
+		$this.find('.uk-icon-arrow-circle-down').prop('disabled', true);
+	}
+	if( $this.treegrid('getParentNode')===null){
+		$this.find('.uk-icon-arrow-circle-left').prop('disabled', true);
+	}
+}
+
+function editDepartment(id){
+	location.assign('/team/structure/department/' + id +'/edit');
+}
+
+function removeDepartment(id){
+	postJSON( '/api/team/department/'+id+'/delete', function(err,result){
+		if( err !== null )console.log(err);
+		else{
+			$('#'+id).remove();
+		}
+	});
+}
+
+function moveDepartment(depId, toParentId, fromParentId){
+	console.log('from "' + depId + '" to "' + toParentId + '"');
+	var parent = Departments[toParentId],
+		dep = Departments[depId],
+		url = '/api/team/department/' + dep.id,
+		data = { name: dep.name, pid: toParentId } ;
+
+	postJSON( url, data, function(err,result){
+		if( err !== null )console.log(err);
+	});
+	initNode(depId);
+	initNode(toParentId);
+	if( fromParentId ){
+		initNode(fromParentId);
+	}
+}
+
+function onSelected(id){
+	//console.log(id);
+	//console.log($(this).treegrid('getSelectedId'));
+}
+
+function rollDepartment(id, action){
+	var $this = $('#'+id); 
+	if( action === 'upgrade' ){
+		$this.treegrid('upgrade');
+		moveDepartment(id, $this.treegrid('getParentNodeId')||'root');
+	}else{
+		postJSON( '/api/team/department/'+id + '/order?action=' + action, function(err,result){
+			if( err !== null ){
+				console.log(err);   
+			}else{
+				var $this = $('#'+id);            
+				if(action==='up'){
+					var $prev = $this.treegrid('prev');
+					$this.treegrid('up');
+					initNode($prev.treegrid('getNodeId'));
+				}else if( action ==='down'){
+					var $next = $this.treegrid('next');
+					$this.treegrid('down');
+					initNode($next.treegrid('getNodeId'));
+				}
+				initNode(id);
+			}         
+		});
+	}
+}
+
+function initTree(deps){
+	var map = makeMap(deps),
+		tree = { id:'root', name:'root', parent: 'none', order: 0, children:[] },
+		$tree = $('#tree');
+
+	saveDeps(deps);
+	buildTree(tree, map);
+	//console.log( tree);
+	sortTree(tree);
+	renderTree(tree, $tree);
+
+	$('.tree').treegrid({
+		expanderExpandedClass: 'uk-icon-folder-open-o',
+		expanderCollapsedClass: 'uk-icon-folder-o',
+		nodeClasses: {
+			user:'uk-icon-user',
+			manager: 'uk-icon-manage',
+			manager_duputy: 'uk-icon-manage-deputy'
+		},
+		draggable: true, 
+		onMove: moveDepartment,
+		selectable: true,
+		selectedClass: 'uk-active',
+		onSelected:onSelected
+	});
+
+	$('#tree').treegrid('getAllNodes').each(function(){
+		initNode($(this).treegrid('getNodeId'));
+	});
+}
+
+function editUser(id){
+
+}
+
+function flushFreeUserList(){
+	var $users = $('.users');
+	if( $users.find('tr').length === 0 ){
+		$users.append('<tr id="users_empty"><td colspan="2">{{ _('None')}}</td></tr>');
+	}else{
+		$('#users_empty').remove();  
+	}
+}
+
+function removeUser(id){
+	postJSON( '/api/team/member/u/'+id + '?department=', function(err,result){
+		if( err !== null )console.log(err);
+		else{
+		   $('#'+id).treegrid('remove');
+		}
+	});
+	
+	var u = Users[id];
+	var txt = '<tr id="u-' + u.id+ '"><td>' + u.name + '</td><td>'
+				+ '<button onClick="addUser(\'' + u.id + '\')" class="uk-button-link uk-icon-user-plus dv-link" title="{{ _('Add member')}}"></button>'
+				+ '</td></tr>';
+	$('.users').append(txt);
+	flushFreeUserList();
+}
+
+function addUser(id, depid, onlyui){
+	var $tree = $('.tree'),
+		depId = depid || $tree.treegrid('getSelectedId'),
+		u = Users[id];
+	if( depId ){
+		var $dep = $('#'+depId),
+			$user;
+		var userEl = '<tr id="' + u.id + '" class="treegrid-' + u.id + ' treegrid-parent-' + depId + '" data-treegrid-type="user" data-treegrid-drag="{droppable:false}"><td>'
+			 + u.name + '</td><td>'
+			 + '<button onclick="editUser(\'' + u.id + '\')" class="uk-button-link uk-icon-edit dv-link uk-icon-small" title="{{ _('Edit')}}" ></button>'
+			 + '<button onclick="removeUser(\'' + u.id + '\')" class="uk-button-link uk-icon-remove dv-link uk-icon-small" title="{{ _('Delete')}}" ></button>'
+			 +'</td></tr>';
+		$dep.after(userEl);
+		$user =  $('#'+u.id);
+		$dep.treegrid('newNode', u.id);
+		//console.log($dep);
+		$dep.treegrid('appendChild', u.id, true );
+		//console.log(depId);
+
+		if(!onlyui){
+			postJSON( '/api/team/member/u/'+u.id + '?department='+ depId, function(err,result){
+				if( err !== null )console.log(err);
+				else{
+				   $('#u-' + u.id).remove();
+				   flushFreeUserList();
+				}
+			});
+		}        
+	}else{
+		UIkit.modal.alert('{{_("Select department first!")}}');
+	}
+}
+
+function initUserList(users){
+	var i,
+		$users = $('.users');
+
+	saveUsers(users);
+
+	for( i = 0; i < users.length; i++){
+		var u = users[i];
+		var txt = '<tr id="u-' + u.id+ '"><td>' + u.name + '</td><td>'
+				+ '<button onClick="addUser(\'' + u.id + '\')" class="uk-button-link uk-icon-user-plus dv-link" title="{{ _('Add member')}}"></button>'
+				+ '</td></tr>';
+		$users.append(txt);
+	}
+	if( users.length === 0){
+		flushFreeUserList();
+	}
+}
+
+function initDepUser(users){
+	saveUsers(users);
+	$.each(users, function(i,u){
+		addUser(u.id, u.department, true );
+	})
+}   
+
+function initFreeUsers(){
+	getJSON( '/api/team/department/freeusers', function(err, users){
+		readyElement('content-block');
+		if(err){
+			fatal(err);
+		}else{
+			$('#content-block').show();
+			initUserList(users);
+		}
+	});
+}
+
+function loadDepUsers(){
+	getJSON( '/api/team/department/users', function(err, users){
+		if(err){
+			fatal(err);
+		}else{
+			initDepUser(users);
+			initFreeUsers();
+		}
+	});
+}
+
+$(function () {
+	loadingElement('content-block');
+	getJSON( '/api/team/department/list', function(err, deps){
+		//readyElement('content-block');
+		if(err){
+			fatal(err);
+		}else{
+			//$('#content-block').show();
+			initTree(deps);
+			loadDepUsers();            
+		}
+	}); 
+	
+
+	/*$('.users').find('tr').on('click', function(ev){
+		$('.user-active').removeClass('user-active');
+		$(this).addClass('user-active');
+	});*/
+
+});
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-block" class="dv-container x-content" style="max-width:800px;display:none;">
+	<h2 class="x-title">{{ _('department structure') }}</h2>        
+	<hr style="margin-top:2px">
+	<div class="uk-grid">
+		<div class="uk-width-8-10">
+			<table id="tree" class="tree uk-table uk-table-hover uk-width-1-1 uk-table-condensed">
+				<thead>
+					<tr>
+						<th>部门列表</th>
+						<th style="width:300px;">操作</th>
+					</tr>
+				</thead>	
+
+		<!--tr class="treegrid-a" ondragover="allowDrop(event)">
+			<td>Root node</td><td>Additional info</td>
+		</tr>
+		<tr class="treegrid-2 treegrid-parent-a">
+			<td>Node 2</td><td>Additional info</td>
+		</tr>
+		<tr class="treegrid-5 treegrid-parent-2" >
+			<td>Node 5</td><td>Additional info</td>
+		</tr>
+		<tr class="treegrid-3 treegrid-parent-a">
+			<td>Node 3</td><td>Additional info</td>
+		</tr>
+		<tr class="treegrid-8 treegrid-parent-3" data-treegrid-type="manager" data-treegrid-drag="{droppable:false}">
+			<td>user_manage</td><td>Additional info</td>
+		</tr>
+		<tr class="treegrid-4 treegrid-parent-3">
+			<td>group1</td><td>Additional info</td>
+		</tr>
+		<tr class="treegrid-6 treegrid-parent-4" data-treegrid-type="manager_duputy"  data-treegrid-drag="{droppable:false}">
+			<td>user1</td><td>Additional info</td>
+		</tr>
+		<tr class="treegrid-7 treegrid-parent-4"  data-treegrid-type="user" data-treegrid-drag="{droppable:false}">
+			<td>user2</td><td>Additional info</td>
+		</tr-->
+
+			</table>
+		</div>
+		<div class="uk-width-2-10">
+			<h3>可添加的成员</h3>
+			<table class="users uk-table uk-table-hover dv-box">
+				<!--tr><td>use1</td><td><button onclick="addUser('test')" class="uk-button-link uk-icon-user-plus dv-link" title="{{ _('Add member')}}" ></button></td></tr>
+				<tr><td>use2</td><td><button onclick="" class="uk-button-link uk-icon-user-plus dv-link " title="{{ _('Add member')}}" ></button></td></tr>
+				<tr><td>usee</td><td><button onclick="" class="uk-button-link uk-icon-user-plus dv-link" title="{{ _('Add member')}}" ></button></td></tr-->
+			</table>
+		</div>
+	</div>
+</div>
+{% endblock %}
+

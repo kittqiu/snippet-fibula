@@ -338,9 +338,10 @@ var schemas = {
 			duration: PROPERTY.MINI_INTEGER,
 			report:PROPERTY.TEXT_EMPTY,
 			plan:PROPERTY.TEXT_EMPTY,
-			time:PROPERTY.TIMESTAMP
+			time:PROPERTY.TIMESTAMP,
+			percent: PROPERTY.MINI_INTEGER
 		},
-		required:['task_id', 'duration', 'report', 'plan', 'time']
+		required:['task_id', 'duration', 'report', 'plan', 'time', 'percent']
 	},
 	editwiki:{
 		type: 'object',

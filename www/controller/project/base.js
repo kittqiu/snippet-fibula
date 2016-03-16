@@ -173,6 +173,7 @@ function* $task_maxOrder(project_id, parent_id){
 	var sql = 'select MAX(`order`) AS maxorder from project_task where project_id=? and parent=?',
     	rs = yield warp.$query( sql, [project_id, parent_id] ),
     	maxorder = rs[0].maxorder;
+    console.log(maxorder)
     return maxorder === null ? -1 : maxorder;
 }
 
@@ -251,6 +252,9 @@ function* $task_changeParent(task_id, parent_id){
 		if( parent === null )
 			return false;
 	}
+	if( r.parent === parent_id ){
+		return true;
+	}
 		
 	yield warp.$query( 'update project_task set `order`=`order`-1 where `project_id`=? and `parent`=? and `order`>?', 
 				[r.project_id, r.parent, r.order]);
@@ -258,6 +262,7 @@ function* $task_changeParent(task_id, parent_id){
 	r.parent = parent_id;
 	r.order = maxOrder + 1;
 	yield r.$update(['parent', 'order']);
+	return true;
 }
 
 function* $task_listExecutingOfUser(uid){
