@@ -7,15 +7,21 @@ var
     api = require('../../api'),
     db = require('../../db'), 
     help = require('./help'),
-    perm = require('./permission');
+    perm = require('./permission'),
+    home = require( __base + 'controller/home');
 
 var 
     modelAtt = db.attachment,
     modelUser = db.user,
     getId = helper.getId;
 
+function* $_render( context, model, view ){
+    context.render( 'system/' + view, yield home.$getModel.apply(context, [model]) );
+}
+
 /*
 GET:
+/sys/error/auth
 /api/file/:id
 /api/help?path=encodeURIComponent(path)
 
@@ -30,6 +36,10 @@ POST:
 
 module.exports = {
     /***************** GET METHOD *********/
+    'GET /sys/error/auth': function* (){
+        yield $_render(this, {__message__:'您无权限访问该资源！'}, 'error.html');
+    },
+
     'GET /api/file/:id': function* (id){
         var att = yield modelAtt.$find(id);
 

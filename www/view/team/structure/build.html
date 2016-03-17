@@ -11,6 +11,7 @@ var ENV = {
 	}
 };
 var mode = "{{ __mode__ }}" || 'ro';
+var perm_edit = {{__perm_Edit__ || false}};
 </script>
 
 {% if __production__ %}
@@ -19,7 +20,7 @@ var mode = "{{ __mode__ }}" || 'ro';
 </script>
 <script type="text/babel">
 ReactDOM.render(
-	<Structure mode={mode}/>,
+	<Structure mode={mode} perm_edit={perm_edit}/>,
 		document.getElementById('vm')
 	);
 </script>
@@ -27,7 +28,7 @@ ReactDOM.render(
 <script type="text/babel">
 {% include './component/src/structure.jsx' %}
 ReactDOM.render(
-	<Structure mode={mode}/>,
+	<Structure mode={mode} perm_edit={perm_edit}/>,
 		document.getElementById('vm')
 	);
 </script>

@@ -3,8 +3,9 @@
 var 
 	db = require( __base + 'db'),
 	config = require( __base + 'config'),
-	co = require('co'), 
-    perm = require( __base + 'controller/system/permission');
+	co = require('co'),
+    perm = require( __base + 'controller/system/permission'),
+    api = require( __base + 'api');
 
 
 var 
@@ -13,10 +14,12 @@ var
 	modelDep = db.team_department,
 	modelMember = db.team_member,
 	DEP_ROOT = 'root',
-	DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires;
+	DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires,
+	PERM_EDIT_STRUCTURE = 'team.structure.edit';
+
 
 function* co_module_init(){
-	var pid = yield perm.perm.$register('team.structure.edit', '有权修改部门架构树');
+	var pid = yield perm.perm.$register(PERM_EDIT_STRUCTURE, '有权修改部门架构树');
 	var rid = yield perm.role.$register('团队规划师', '规划团队结构');
 	yield perm.role.$registerPerm(rid, pid);
 }
@@ -136,6 +139,19 @@ function* $_member_getUsers(){
 	return yield warp.$query(sql);
 }
 
+function* $_havePerm(context,perm_name){
+	return yield perm.user.$havePerm(context.request.user.id, perm_name);
+}
+
+function* $_testPerm(context,perm_name){
+	if( yield $_havePerm(context,perm_name) ){
+		return true;
+	}else{
+		console.log('test')
+		throw api.authFailed(perm_name, '您无权限访问!');
+	}
+}
+
 function setHistoryUrl( context, url ){
     if( arguments.length === 1){
         url = context.request.url;
@@ -169,10 +185,17 @@ module.exports = {
 		$getUsers: $_member_getUsers,
 		$getFree: $member_getFree,
 		$getUser: $member_getUser,
-		$listRoles: perm.user.$listRoles
+		$listRoles: perm.user.$listRoles,
+		$havePerm: perm.user.$havePerm
 	},
 
-	setHistoryUrl: setHistoryUrl,
-	getHistoryUrl: getHistoryUrl
+	perm: perm,
 
+	$havePerm: $_havePerm,
+	$testPerm: $_testPerm,
+
+	setHistoryUrl: setHistoryUrl,
+	getHistoryUrl: getHistoryUrl,
+
+	PERM_EDIT_STRUCTURE: PERM_EDIT_STRUCTURE
 };

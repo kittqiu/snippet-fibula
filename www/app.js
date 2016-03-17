@@ -195,6 +195,9 @@ app.use( function* theMiddleWare(next){
         else if (err.status === 404 || err.error === 'entity:notfound') {
             response.body = '404 Not Found'; //this.render('404.html', {});
         }
+        else if( err.error === 'auth:failed'){
+        	this.redirect('/sys/error/auth');
+        }
         else {
             console.error(new Date().toISOString() + ' [ERROR] 500 ', err.stack);
             response.body = '500 Internal Server Error'; //this.render('500.html', {});

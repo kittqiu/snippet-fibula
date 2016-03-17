@@ -1,7 +1,8 @@
 'use strict';
 
 var 
-	db = require( __base + 'db');
+	db = require( __base + 'db'),
+	sys_cache = require('./sys_cache');
 
 var 
 	modelRole = db.role,
@@ -67,15 +68,7 @@ function* $role_list(){
 }
 
 function* $user_listPerms(uid){
-	var sql = 'select p.* from sys_permission as p INNER JOIN sys_map_role_permission as mrp on mrp.permission_id=p.id '
-			+ ' WHERE mrp.role_id in ( select mur.role_id from sys_map_user_role as mur where mur.user_id=?)',
-		rs = yield warp.$query(sql, uid),
-		ps = {}, i;
-	for( i = 0; i < rs.length; i++ ){
-		var r = rs[i];
-		ps[r.name] = r;
-	}
-	return ps;
+	return yield sys_cache.user.$getPerms(uid);
 }
 
 function* $user_listRoles(uid){
@@ -85,8 +78,8 @@ function* $user_listRoles(uid){
 
 function* $user_setRoles(uid, roles){
 	var old_rs = yield $user_listRoles(uid),
-		i, r, old_roles=[];
-	console.log(old_rs);
+		i, r, old_roles=[], changed = false;;
+
 	for( i = 0; i < old_rs.length; i++ ){
 		old_roles.push( old_rs[i].id)
 	}
@@ -98,14 +91,25 @@ function* $user_setRoles(uid, roles){
 				role_id: r
 			};
 			yield modelUserRole.$create(o);
+			changed = true;
 		}
 	}
 	for( i = 0; i < old_rs.length; i++ ){
 		r = old_rs[i];
 		if( roles.indexOf(r.id) === -1 ){			
 			yield r.$destroy();
+			changed = true;
 		}
 	}
+
+	if( changed ){
+		yield sys_cache.user.flushPerms(uid);
+	}
+}
+
+function* $user_havePerm(uid, perm_name){
+	var ps = yield $user_listPerms(uid);
+	return ps.hasOwnProperty(perm_name);
 }
 
 module.exports = {
@@ -120,6 +124,7 @@ module.exports = {
 	user: {
 		$listPerms: $user_listPerms,
 		$listRoles: $user_listRoles,
-		$setRoles: $user_setRoles
+		$setRoles: $user_setRoles,
+		$havePerm: $user_havePerm
 	}
 };

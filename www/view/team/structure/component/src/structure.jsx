@@ -571,7 +571,11 @@ var Structure = React.createClass({
 				{ this.props.mode === 'rw' ?
 				<ToolBar selectedItem={this.state.selectedItem} deps={this.state.data} updatedCnt={this.state.updatedCnt}
 					onDataChanged={this.onDataChanged} handleDepChangeParent={this.handleDepChangeParent} addUsers={this.addUsers}/>				
-				:null}
+				:(
+					this.props.perm_edit? <div className="uk-text-right"><a href="/team/structure/build" className="dv-link">修改</a></div>
+					: null
+					)
+				}
 				<hr className="dv-hr"/>				
 				<DepartmentTable mode={this.props.mode} deps={this.state.data} onItemSelected={this.onItemSelected} updatedCnt={this.state.updatedCnt}
 					onDragDrop={this.onDragDrop}/>

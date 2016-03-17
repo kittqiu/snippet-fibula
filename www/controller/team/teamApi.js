@@ -11,12 +11,13 @@ GET METHOD:
 
 POST METHOD:
 
+'GET'
 
 *************/
 
 module.exports = {
 	'GET /team': function*(){
-		this.redirect('/team/structure/build');
+		this.redirect('/team/structure');
 	},
 
 	'GET /api/team/member/list': function* (){

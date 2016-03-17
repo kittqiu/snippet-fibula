@@ -39,10 +39,15 @@ POST METHOD:
 
 module.exports = {
 	'GET /team/structure': function* (){
-		yield $_render( this, {__mode__:'ro'}, 'build.html');
+		var canEdit = false;
+		if( yield base.$havePerm(this, base.PERM_EDIT_STRUCTURE)){
+			canEdit = true;
+		}
+		yield $_render( this, {__mode__:'ro', __perm_Edit__:canEdit}, 'build.html');
 		base.setHistoryUrl(this);
 	},
 	'GET /team/structure/build': function* (){
+		yield base.$testPerm(this, base.PERM_EDIT_STRUCTURE);
 		yield $_render( this, {__mode__:'rw'}, 'build.html');
 		base.setHistoryUrl(this);
 	},
@@ -99,6 +104,7 @@ module.exports = {
 		var r,
 			data = this.request.body;
 		json_schema.validate('simpleDepartment', data);
+		yield base.$testPerm(this, base.PERM_EDIT_STRUCTURE);
 
 		r = {
 			name: data.name,
@@ -118,6 +124,7 @@ module.exports = {
 		var r, orgParentId, orgOrder, columns = [],
 			data = this.request.body;
 		json_schema.validate('simpleDepartment', data);
+		yield base.$testPerm(this, base.PERM_EDIT_STRUCTURE);
 
 		r = yield base.$getDepartment(id);
 		if( r === null ){
@@ -149,6 +156,7 @@ module.exports = {
         };
 	}, 
 	'POST /api/team/department/:id/delete':function* (id){
+		yield base.$testPerm(this, base.PERM_EDIT_STRUCTURE);
 		var r = yield base.$getDepartment(id);
 		if( r === null ){
 			throw api.notFound('department');
@@ -169,6 +177,7 @@ module.exports = {
 		if( r === null ){
 			throw api.notFound('department');
 		}
+		yield base.$testPerm(this, base.PERM_EDIT_STRUCTURE);
 		if( action === 'up' ){
 			yield base.department.$changeOrder(id, -1 );
 		}else if( action === 'down' ){
@@ -186,6 +195,7 @@ module.exports = {
 		if( u === null ){
 			throw api.notFound('user');
 		}
+		yield base.$testPerm(this, base.PERM_EDIT_STRUCTURE);
 		if( m === null ){
 			yield base.$member_create(uid,data.department);
 		}else{
@@ -201,6 +211,7 @@ module.exports = {
 	},
 
 	'POST /api/team/member/updateusers': function*(){
+		yield base.$testPerm(this, base.PERM_EDIT_STRUCTURE);
 		var data = this.request.body || [];
 		if( data instanceof(Array)){
 			for( var i = 0; i < data.length; i++ ){
