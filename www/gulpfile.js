@@ -56,7 +56,7 @@ gulp.task('jslint', function () {
 });
 
 gulp.task('uglify', function () {
-    var jsfiles = getJavaScriptFiles('./views/themes/' + theme + '/_base.html');
+    var jsfiles = getJavaScriptFiles('./view/_base.html');
     return gulp.src(jsfiles)
         .pipe(concat('all.js'))
         .pipe(uglify())
@@ -69,12 +69,43 @@ gulp.task('less', function () {
         .pipe(gulp.dest('./static/css/theme'));
 });
 
-gulp.task('babel', () =>
-    gulp.src('./view/project/p/component/*.jsx')
-        .pipe(babel({
-            presets: ['es2015']
-        }))
-        .pipe(gulp.dest('./view/project/p/component/build'))
+gulp.task('babel_project', function() {
+    return gulp.src('./view/project/p/component/src/*.jsx')
+            .pipe(babel({
+                presets: ['es2015','react']
+            }))
+            .pipe(uglify())
+            .pipe(gulp.dest('./view/project/p/component/build'))
+    }
+);
+gulp.task('babel_task', function() {
+    return gulp.src('./view/project/task/component/src/*.jsx')
+            .pipe(babel({
+                presets: ['es2015','react']
+            }))
+            .pipe(uglify())
+            .pipe(gulp.dest('./view/project/task/component/build'))
+    }
+);
+gulp.task('babel_structure', function() {
+    return gulp.src('./view/team/structure/component/src/*.jsx')
+            .pipe(babel({
+                presets: ['es2015','react']
+            }))
+            .pipe(uglify())
+            .pipe(gulp.dest('./view/team/structure/component/build'))
+    }
+);
+
+gulp.task('babel_manage', function() {
+    return gulp.src('./view/manage/component/src/*.jsx')
+            .pipe(babel({
+                presets: ['es2015','react']
+            }))
+            .pipe(uglify())
+            .pipe(gulp.dest('./view/manage/component/build'))
+    }
 );
 
 gulp.task('default', ['less']);
+gulp.task('babel', ['babel_project','babel_task', 'babel_structure', 'babel_manage'])

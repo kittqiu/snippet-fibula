@@ -1,27 +1,17 @@
 {% extends './manage_base.html' %}
 
 {% block head %}
-<script src="/static/js/react.js"></script>
-<script src="/static/js/react-dom.js"></script>
-<script src="/static/js/browser.min.js"></script>
 <script type="text/javascript">
 var ENV = {
 	user: {
 		id: "{{__request__.user.id}}"
 	}
 };
-
 </script>
 
 {% if __production__ %}
 <script type="text/javascript">
 {% include './component/build/UserRole.js' %}
-</script>
-<script type="text/babel">
-ReactDOM.render(
-	<UserRole />,
-		document.getElementById('vm')
-	);
 </script>
 {% else %}
 <script type="text/babel">
@@ -42,4 +32,14 @@ ReactDOM.render(
 		
 	</div>
 </div>
+{% endblock %}
+
+{% block readyscript %}
+{% if __production__ %}
+<script type="text/javascript">
+ReactDOM.render(
+ 	React.createElement(UserRole, null), document.getElementById('vm')
+ 	);
+</script>
+{% endif %}
 {% endblock %}

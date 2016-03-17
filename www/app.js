@@ -59,6 +59,7 @@ if( process.productionMode ){
 	app.on( 'error', function(err){
 		console.error(new Date().toISOString() + ' [Unhandled ERR] ', err);
 	});
+	serveStatic();
 }else{
 	serveStatic();
 }
@@ -153,7 +154,6 @@ app.use( function* theMiddleWare(next){
     		model.__time__ = start;
     		model.__theme__ = activeTheme;
     		model.__request__ = request;
-    		console.log(model)
     		var renderHtml = swig.renderFile( swigTemplatePath + template, model );
     		response.body = renderHtml;
     		response.type = '.html';

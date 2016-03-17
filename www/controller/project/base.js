@@ -4,19 +4,19 @@ var
 	_ = require('lodash'),
 	fs = require('fs'),
 	home = require('../home'),
-    config = require('../../config'),
-    db = require('../../db'),
-    api = require('../../api'), 
-    cache = require('../../cache'),
-    json_schema = require('../../json_schema'),
-    team_base = require( __base + 'controller/team/base'),
-    helper = require( __base + 'helper'),
-    co = require('co'), 
-    perm = require( __base + 'controller/system/permission');
+	config = require('../../config'),
+	db = require('../../db'),
+	api = require('../../api'), 
+	cache = require('../../cache'),
+	json_schema = require('../../json_schema'),
+	team_base = require( __base + 'controller/team/base'),
+	helper = require( __base + 'helper'),
+	co = require('co'), 
+	perm = require( __base + 'controller/system/permission');
 
 var models = {
-    next_id: db.next_id,
-    warp : db.warp
+	next_id: db.next_id,
+	warp : db.warp
 };
 
 var 
@@ -33,7 +33,7 @@ var
 
 var 
 	DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires,
-    PARENT_ROOT = 'root';
+	PARENT_ROOT = 'root';
 
 function* init_database(){
 	//perm.perm.$register('')
@@ -49,23 +49,23 @@ MODULE_init();
 
 
 function* $_render( context, model, view ){
-    context.render( 'project/' + view, yield home.$getModel.apply(context, [model]) );
+	context.render( 'project/' + view, yield home.$getModel.apply(context, [model]) );
 }
 
 function setHistoryUrl( context, url ){
-    if( arguments.length === 1){
-        url = context.request.url;
-    }
-    context.cookies.set( 'PROJECT_HISTORYURL', url, {
-        path: '/',
-        httpOnly: true,
-        expires: new Date(Date.now()+DEFAULT_EXPIRES_IN_MS)
-    });
+	if( arguments.length === 1){
+		url = context.request.url;
+	}
+	context.cookies.set( 'PROJECT_HISTORYURL', url, {
+		path: '/',
+		httpOnly: true,
+		expires: new Date(Date.now()+DEFAULT_EXPIRES_IN_MS)
+	});
 }
 
 function getHistoryUrl( context ){
-    var url = context.cookies.get('PROJECT_HISTORYURL');
-    return url || '/project/';
+	var url = context.cookies.get('PROJECT_HISTORYURL');
+	return url || '/project/';
 }
 
 /***** project *****/
@@ -73,10 +73,10 @@ function* $project_list(offset, limit){
 	offset = offset ? offset : 0;
 	limit = limit ? limit : 10;
 	offset = offset < 0 ? 0: offset;
-    limit = limit < 0 ? 10 : limit;
+	limit = limit < 0 ? 10 : limit;
 
-    var sql = 'select p.id, p.creator_id, p.master_id, u.name as master_name, p.name, p.start_time, p.end_time, p.status,p.details from project as p, ' 
-    	+ 'users as u where u.id = p.master_id order by p.created_at desc limit ? offset ? ';
+	var sql = 'select p.id, p.creator_id, p.master_id, u.name as master_name, p.name, p.start_time, p.end_time, p.status,p.details from project as p, ' 
+		+ 'users as u where u.id = p.master_id order by p.created_at desc limit ? offset ? ';
 	return yield warp.$query(sql, [limit, offset]);
 }
 
@@ -185,10 +185,10 @@ function* $project_listTaskRelies(id){
 
 function* $task_maxOrder(project_id, parent_id){
 	var sql = 'select MAX(`order`) AS maxorder from project_task where project_id=? and parent=?',
-    	rs = yield warp.$query( sql, [project_id, parent_id] ),
-    	maxorder = rs[0].maxorder;
-    console.log(maxorder)
-    return maxorder === null ? -1 : maxorder;
+		rs = yield warp.$query( sql, [project_id, parent_id] ),
+		maxorder = rs[0].maxorder;
+	console.log(maxorder)
+	return maxorder === null ? -1 : maxorder;
 }
 
 function* $task_setRelies(tid, pid, relies){
@@ -440,6 +440,33 @@ function* $daily_listUser(user_id, dateTime){
 	return ts;
 }
 
+function* $user_isProjectMaster(uid, project_id){
+	var r = yield modelProject.$find(project_id);
+	if( r && r.master_id === uid ){
+		return true;
+	}
+	return false;
+}
+
+function* $user_havePermEditProject(context, project_id){
+	var managers = ['leader', 'manager'];
+	var uid = context.request.user.id, 
+		r = yield modelMember.$find({
+			select: '*',
+			where: '`user_id`=? and `project_id`=?',
+			params: [uid, project_id]
+		});
+
+	if( r && managers.indexOf(r.role) !== -1 ){
+		return true;
+	}
+	if( yield $user_isProjectMaster(uid, project_id)){
+		return true;
+	}
+	console.log('no perm')
+	return false;
+}
+
 
 
 /**********cache*********/
@@ -502,7 +529,9 @@ module.exports = {
 	},
 
 	user: {
-		$list: team_base.member.$getUsers
+		$list: team_base.member.$getUsers,
+		$havePermEditProject: $user_havePermEditProject,
+		$isProjectMaster: $user_isProjectMaster
 	}
 	
 };

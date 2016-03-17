@@ -496,6 +496,9 @@ var TaskDialog = React.createClass({
 								<ul className="uk-tab uk-tab-left" data-uk-tab={"{connect:'#tab-" + task.id +"'}"}>
 									{ 
 										this.props.tabs.map(function(t){
+											if( t.type === 'edit' && task.manager_id !== ENV.user.id && this.props.project.master_id !== ENV.user.id){
+												return null;
+											}											
 											return ( 
 												<li key={'tab_view_'+t.type} id={'tab_view_'+task.id} className={ this.state.tab == t.type ? "uk-active": '' } onClick={this.onSwitch.bind(this,t.type)}>
 													<a href="#" >{t.title}</a>
@@ -509,9 +512,13 @@ var TaskDialog = React.createClass({
 									<li className={ this.state.tab == 'view' ? "uk-active": '' }>
 										<TaskTabView task={task} difficulties={difficulties} project={this.props.project}/>
 									</li>
-									<li className={ this.state.tab == 'edit' ? "uk-active": '' }>
-										<TaskTabEdit task={task} difficulties={difficulties} project={this.props.project} hideModal={this.hideModal} onTaskChanged={this.props.onTaskChanged}/>
-									</li>
+									{
+										( task.manager_id === ENV.user.id || this.props.project.master_id === ENV.user.id )?
+										<li className={ this.state.tab == 'edit' ? "uk-active": '' }>
+											<TaskTabEdit task={task} difficulties={difficulties} project={this.props.project} hideModal={this.hideModal} onTaskChanged={this.props.onTaskChanged}/>
+										</li>
+										: null
+									}
 									<li className={ this.state.tab == 'log' ? "uk-active": '' }>
 										<TaskTabLog task={task}/>
 									</li>

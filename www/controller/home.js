@@ -37,7 +37,7 @@ module.exports = {
 
 	'GET /': function* (){
 		var model = {};
-		this.redirect('/snippet');
+		this.redirect( config.home );
 		//this.render( getView('index.html'), yield $getModel.apply(this, [model]) );
 	},
 	'GET /signup': function* (){

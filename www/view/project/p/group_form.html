@@ -106,9 +106,9 @@ function initVM( data ){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
 						{% if __id %}
-						jumpTo( '/project/p/{{__project_id}}/edit', "{{ _('History Page')}}", 2 );
+						jumpTo( '/project/p/{{__project_id}}/edit', "{{ _('History Page')}}", 1 );
 						{% else %}
-						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						jumpTo( result.redirect, "{{ _('History Page')}}", 1 );
 						{% endif %}	
 
 					}

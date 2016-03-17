@@ -27,6 +27,16 @@ function groupMember( groups, members ){
 		}
 		m.role_name = getRoleName(m.role);
 	})
+	groups.forEach( function(g){
+		g.members.sort(function(a,b){
+			var role_order = {
+				leader: 0,
+				manager: 1,
+				executor: 2
+			}
+			return role_order[a.role] - role_order[b.role];
+		});
+	});
 }
 function initVM( data ){
 	groupMember(data.groups || [], data.members|| []);
@@ -106,10 +116,10 @@ $(function () {
 										<span v-text="group.name"></span>
 									</caption>
 									<tr v-for="m in group.members" v-bind:id="'u-'+m.id">
-										<td v-text="m.name"></td>
-										<td v-text="m.role_name"></td>
-										<td v-text="'为'+m.responsibility+'负责'"></td>
-										<td v-text="'工时：' + m.time_cost/60"></td>
+										<td class="uk-width-1-6" v-text="m.name"></td>
+										<td class="uk-width-1-6" v-text="m.role_name"></td>
+										<td class="uk-width-3-6" v-text="'为'+m.responsibility+'负责'"></td>
+										<td class="uk-width-1-6" v-text="'工时：' + m.time_cost/60"></td>
 									</tr>
 								</table>
 							</div>

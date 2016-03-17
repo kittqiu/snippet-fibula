@@ -216,10 +216,10 @@ var TaskFlow = React.createClass({
 			marginSpan = { marginLeft: '5px'},
 			textarea_height = { height: "60px"},
 			cls = this.getFlowProgressClass();
-		if( task.executor_id === ENV.user_id ){
+		if( task.executor_id === ENV.user.id ){
 			actions = actions.concat( ActionOnStatus[task.status].executor );
 		}
-		if( task.manager_id === ENV.user_id ){
+		if( task.manager_id === ENV.user.id ){
 			var list = ActionOnStatus[task.status].manager;
 			for( i = 0; i < list.length; i++){
 				if( actions.indexOf(list[i])===-1){

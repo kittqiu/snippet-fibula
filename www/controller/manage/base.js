@@ -34,7 +34,7 @@ function setHistoryUrl( context, url ){
 }
 
 function getHistoryUrl( context ){
-    var url = context.cookies.get('PROJECT_HISTORYURL');
+    var url = context.cookies.get('MANAGE_HISTORYURL');
     return url || '/manage/';
 }
 

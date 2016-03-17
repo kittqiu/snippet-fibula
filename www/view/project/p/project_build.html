@@ -2,36 +2,37 @@
 
 {% block head %}
 <script src="/static/js/uikit/components/datepicker.js"></script>
-<script src="/static/js/react.js"></script>
-<script src="/static/js/react-dom.js"></script>
-<script src="/static/js/browser.min.js"></script>
+
 <script type="text/javascript">
-var ENV = {};
-ENV.user_id = "{{__request__.user.id}}";
+var ENV = {
+	user: {
+		id: "{{__request__.user.id}}"
+	}
+};
+var mode = "{{ __mode__ }}" || 'ro';
 </script>
 
 {% if __production__ %}
+<script src="/static/js/react.min.js"></script>
+<script src="/static/js/react-dom.min.js"></script>
 <script type="text/javascript">
 {% include '../task/component/build/task.js' %}
 {% include './component/build/task_dlg.js' %}
 {% include './component/build/task_new.js' %}
 {% include './component/build/project.js' %}
 </script>
-<script type="text/babel">
-ReactDOM.render(
-	<Project url="" id="{{__id}}"/>,
-	document.getElementById('vm')
-	);
-</script>
 {% else %}
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
 <script type="text/babel">
 {% include '../task/component/src/task.jsx' %}
 {% include './component/src/task_dlg.jsx' %}
 {% include './component/src/task_new.jsx' %}
 {% include './component/src/project.jsx' %}
 ReactDOM.render(
-	<Project url="" id="{{__id}}"/>,
-	document.getElementById('vm')
+	<Project mode={mode} id="{{__id}}"/>,
+		document.getElementById('vm')
 	);
 </script>
 {% endif %}
@@ -62,4 +63,12 @@ ReactDOM.render(
 </div>
 {% endblock %}
 
-
+{% block readyscript %}
+{% if __production__ %}
+<script type="text/javascript">
+ReactDOM.render(
+ 	React.createElement(Project, {mode:mode, id:"{{__id}}"}), document.getElementById('vm')
+ 	);
+</script>
+{% endif %}
+{% endblock %}

@@ -22,7 +22,9 @@ var Task = React.createClass({
 			statusCls = { created: 'uk-text-primary', doing: 'uk-text-warning', commit: 'uk-text-warning',
 				completed: 'uk-text-success', cancel: 'uk-text-danger', pending: 'uk-text-warning' },
 			start_time = task.status=='created'?formatDate(task.plan_start_time): formatDate(task.start_time),
-			end_time = task.status=='created'?formatDate(task.plan_end_time): formatDate(task.end_time),
+			end_time = task.status=='created'?formatDate(task.plan_end_time): (task.end_time===0?'无' : formatDate(task.end_time)),
+			timeCls = task.status=='created'?'':'uk-text-primary',
+			durationCls = task.isCompleted?'uk-text-primary':'',
 			relies = [];
 			task.rely.forEach(function(r, n){
 				relies.push( this.props.project.TaskMap[r].index );
@@ -37,10 +39,10 @@ var Task = React.createClass({
 				</td>
 				<td className="uk-text-center"><i className={ 'uk-icon-circle ' + statusCls[task.status] }></i></td>
 				<td>{task.executor_name}</td>				
-				<td>{task.isCompleted?task.duration:task.plan_duration}</td>
+				<td><span className={durationCls}>{task.isCompleted?task.duration:task.plan_duration}</span></td>
 				<td>{plan_mode}</td>
-				<td>{start_time}</td>
-				<td>{end_time}</td>
+				<td><span className={timeCls}>{start_time}</span></td>
+				<td><span className={timeCls}>{end_time}</span></td>
 				<td>{relies.toString()||'无'}</td>
 			</tr>
 			);
@@ -60,7 +62,7 @@ var TaskTable = React.createClass({
 			nodeClasses: {
 				task:'uk-icon-tasks'
 			},
-			draggable: true, 
+			draggable: this.props.mode === 'rw', 
 			renderOnDrag: false,
 			onMove: this.dragTask,
 			selectable: true,
@@ -464,12 +466,15 @@ var Project = React.createClass({
 		return (
 			<div className="uk-width-1-1">		
 				<h2 className="x-title">项目: {this.state.project.name}</h2>
-				<ToolBar users={this.state.users} onNewTask={this.onNewTask} project={this.state.project} onTaskOrderChanged={this.onTaskOrderChanged}
-					selected_task={this.state.selected_task} evaluateTaskParent={this.evaluateTaskParent} 
-					handleMoveTo={this.handleMoveTo}/>				
+				{
+					this.props.mode === 'ro'? null :
+					<ToolBar users={this.state.users} onNewTask={this.onNewTask} project={this.state.project} onTaskOrderChanged={this.onTaskOrderChanged}
+						selected_task={this.state.selected_task} evaluateTaskParent={this.evaluateTaskParent} 
+						handleMoveTo={this.handleMoveTo}/>
+				}			
 				<hr className="dv-hr"/>				
 				<TaskTable project={this.state.project} tasks={this.state.tasks} onTaskSelected={this.onTaskSelected} 
-					getTaskById={this.getTaskById} handleMoveTo={this.handleMoveTo}/>
+					getTaskById={this.getTaskById} handleMoveTo={this.handleMoveTo} mode={this.props.mode}/>
 			</div>
 			);
 	}

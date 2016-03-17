@@ -35,7 +35,8 @@ $(function () {
 				form.postJSON( '/api/authenticate', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
-						jumpTo( '/snippet/', "{{ _('Home')}}", 1 );
+						jumpTo( result.redirect, "{{ _('History Page')}}", 1 );
+						//jumpTo( '/snippet/', "{{ _('Home')}}", 1 );
 						
 					}else{
 						console.log(err);

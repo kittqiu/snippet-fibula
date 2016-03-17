@@ -25,7 +25,8 @@ var
 
 var 
     COOKIE_NAME = config.session.cookie,
-    LOCAL_SIGNIN_EXPIRES_IN_MS = 1000 * config.session.expires;
+    LOCAL_SIGNIN_EXPIRES_IN_MS = 1000 * config.session.expires,
+    DEFAULT_EXPIRES_IN_MS = LOCAL_SIGNIN_EXPIRES_IN_MS;
 
 function* $getUserByEmail(email) {
     return yield User.$find({
@@ -78,6 +79,22 @@ function _genEmailConfirm( context, user, verify){
     console.log( model );
     smtp.sendHtml(null, user.email, context.translate('Confirm email'), renderHtml );
     console.log(request.socket.address() );
+}
+
+function setHistoryUrl( context, url ){
+    if( arguments.length === 1){
+        url = context.request.url;
+    }
+    context.cookies.set( 'SYSTEM_HISTORYURL', url, {
+        path: '/',
+        httpOnly: true,
+        expires: new Date(Date.now()+DEFAULT_EXPIRES_IN_MS)
+    });
+}
+
+function getHistoryUrl( context ){
+    var url = context.cookies.get('SYSTEM_HISTORYURL');
+    return url || '/';
 }
 
 module.exports = {
@@ -200,7 +217,7 @@ module.exports = {
             expires: new Date(expires)
         });
         console.log('set session cookie for user: ' + user.email);
-        this.body = user;
+        this.body = { result: 'ok', redirect:getHistoryUrl(this) }        
     },
 
     'GET /auth/CancelEmail/:id': function*(id){
@@ -269,7 +286,8 @@ module.exports = {
             httpOnly: true,
             expires: new Date(0)
         });
-        var redirect = '/';//getReferer(this.request);
+        var redirect = '/login';
+        setHistoryUrl(this, getReferer(this.request) )
         console.log('Signout, goodbye!');
         this.response.redirect(redirect);
     },

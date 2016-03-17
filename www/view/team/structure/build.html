@@ -1,9 +1,6 @@
 {% extends '../team_base.html' %}
 
 {% block head %}
-<script src="/static/js/react.js"></script>
-<script src="/static/js/react-dom.js"></script>
-<script src="/static/js/browser.min.js"></script>
 <script type="text/javascript">
 var ENV = {
 	user: {
@@ -15,16 +12,15 @@ var perm_edit = {{__perm_Edit__ || false}};
 </script>
 
 {% if __production__ %}
+<script src="/static/js/react.min.js"></script>
+<script src="/static/js/react-dom.min.js"></script>
 <script type="text/javascript">
 {% include './component/build/structure.js' %}
 </script>
-<script type="text/babel">
-ReactDOM.render(
-	<Structure mode={mode} perm_edit={perm_edit}/>,
-		document.getElementById('vm')
-	);
-</script>
 {% else %}
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
 <script type="text/babel">
 {% include './component/src/structure.jsx' %}
 ReactDOM.render(
@@ -57,4 +53,15 @@ ReactDOM.render(
 	</div>
 </div>
 {% endblock %}
+
+{% block readyscript %}
+{% if __production__ %}
+<script type="text/javascript">
+ReactDOM.render(
+ 	React.createElement(Structure, {mode:mode, perm_edit:perm_edit}), document.getElementById('vm')
+ 	);
+</script>
+{% endif %}
+{% endblock %}
+
 

@@ -3,9 +3,16 @@
 {% block title %} 后台管理 {% endblock %}
 
 {% block pagehead %}
+{% if __production__ %}
+<script src="/static/js/react.min.js"></script>
+<script src="/static/js/react-dom.min.js"></script>
+{% else %}
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
+{% endif %}
+
 {% block head %}<!-- head  -->{% endblock %}
-
-
 {% endblock %}
 
 

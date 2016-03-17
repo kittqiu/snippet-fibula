@@ -2,27 +2,27 @@
 
 {% block head %}
 <script src="/static/js/uikit/components/datepicker.js"></script>
-<script src="/static/js/react.js"></script>
-<script src="/static/js/react-dom.js"></script>
-<script src="/static/js/browser.min.js"></script>
+
 
 <script type="text/javascript">
-var ENV = {};
-ENV.user_id = "{{__request__.user.id}}";
+var ENV = {
+	user: {
+		id: "{{__request__.user.id}}"
+	}
+};
 </script>
 
 {% if __production__ %}
+<script src="/static/js/react.min.js"></script>
+<script src="/static/js/react-dom.min.js"></script>
 <script type="text/javascript">
 {% include './component/build/task.js' %}
 {% include './component/build/mydaily.js' %}
 </script>
-<script type="text/babel">
-ReactDOM.render(
-	<MyDaily />,
-	document.getElementById('vm')
-	);
-</script>
 {% else %}
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
 <script type="text/babel">
 {% include './component/src/task.jsx' %}
 {% include './component/src/mydaily.jsx' %}
@@ -43,6 +43,16 @@ ReactDOM.render(
 		
 	</div>
 </div>
+{% endblock %}
+
+{% block readyscript %}
+{% if __production__ %}
+<script type="text/javascript">
+ReactDOM.render(
+ 	React.createElement(MyDaily, null), document.getElementById('vm')
+ 	);
+</script>
+{% endif %}
 {% endblock %}
 
 

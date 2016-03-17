@@ -12,7 +12,7 @@
 	<link rel="stylesheet" href="/static/css/theme/{{ __theme__ }}.css"/>	
 	{% block css %}<!-- css -->{% endblock %}
 	{% if __production__ %}
-	<script src="/static/themes/{{ __theme__ }}/js/all.js"></script>
+	<script src="/static/js/all.js"></script>
 	{% else %}
 	<!-- BEGIN JAVASCRIPT COMPRESS -->
 	<script src="/static/js/jquery.js"></script>
@@ -33,7 +33,7 @@
 	<div id="header">
 		{% block header %}
 		<ul class="dv-navbar-nav uk-navbar-nav">
-			<li><a href="https://github.com/kittqiu/snippet-fibula">devo-hub</a></li>
+			<li><a href="/">devo-hub</a></li>
 	        <li><a href="/snippet/">snippet</a></li>
 	        <li><a href="/project/">project</a></li>
 	        <li><a href="/req/">requirement</a></li>
@@ -51,7 +51,7 @@
                         <ul class="uk-nav uk-nav-navbar uk-subnav-pill">
                         	<li><a href="/user/changepassword">{{ _('change password')}}</a></li>
                             <li class="uk-nav-divider"></li>
-                            <li class="uk-active"><a href="/auth/signout">{{ _('logout')}}</a></li>
+                            <li class="uk-active"><a href="/auth/signout?referer={{__request__.url}}">{{ _('logout')}}</a></li>
                         </ul>
                     </div>
             </li>

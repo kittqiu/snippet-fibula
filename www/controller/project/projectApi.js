@@ -88,9 +88,11 @@ module.exports = {
 	},
 
 	'GET /project/p/:id/build': function* (id){
-		var project = yield base.project.$get(id) || {},
+		var hasPerm = yield base.user.$havePermEditProject(this,id),
+			project = yield base.project.$get(id) || {},
 			model = {
-				__id: id
+				__id: id,
+				__mode__: hasPerm?'rw':'ro'
 			};
 		yield $_render( this, model, 'p/project_build.html');
 	},

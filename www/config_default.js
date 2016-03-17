@@ -16,6 +16,7 @@
     ip: '',
     // the theme used, default to 'default':
     theme: 'default',
+    home: '/snippet',
     security: {
         //password salt
         salt: 'rCZNC2S2ZN7FIkFBMzZL'
