@@ -19,7 +19,7 @@ var Task = React.createClass({
 			parentCls = task.parent !=='root' ? 'treegrid-parent-' + task.parent : '',
 			plan_mode = task.automode === 0 ? '自动' : '手动',
 			noMargin = {marginRight:'0px'},
-			statusCls = { created: 'uk-text-primary', doing: 'uk-text-warning', commit: 'uk-text-warning',
+			statusCls = { created: 'uk-text-primary', clear:'uk-text-primary', doing: 'uk-text-warning', commit: 'uk-text-warning',
 				completed: 'uk-text-success', cancel: 'uk-text-danger', pending: 'uk-text-warning' },
 			start_time = task.status=='created'?formatDate(task.plan_start_time): formatDate(task.start_time),
 			end_time = task.status=='created'?formatDate(task.plan_end_time): (task.end_time===0?'无' : formatDate(task.end_time)),

@@ -38,11 +38,14 @@ function getDateTimeAt0(millisecond){
     var n = millisecond || Date.now(),
         offset = 0,
         day = new Date(millisecond);
-    day.setHours(0,0,0,0);
-    //return n - (n%86400000);
     if( process.env.TZ === 'Asia/Shanghai' && day.getTimezoneOffset() !== -480){
         offset = (-480 - day.getTimezoneOffset())*60000;
+        day = new Date(millisecond-offset)
     }
+
+    day.setHours(0,0,0,0);
+    //return n - (n%86400000);
+    
     return day.getTime() + offset;
 }
 

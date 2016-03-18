@@ -150,7 +150,7 @@ module.exports = {
 			reply: data.reply
 		}
 
-		if( task.status === 'created' && data.action === 'accept'){
+		if( task.status === 'clear' && data.action === 'accept'){
 			task.start_time = Date.now();
 			yield task.$update(['start_time']);
 		}else if( data.action === 'cancel' || data.action === 'complete'){

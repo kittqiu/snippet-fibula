@@ -1,5 +1,6 @@
 var taskStatusMap = {
 	created: '待接收执行',
+	clear: '要求已确认',
 	doing: '正在执行',
 	pending: '已暂停执行',
 	cancel: '已取消', 
@@ -65,13 +66,13 @@ var TaskInfo = React.createClass({
 
 var ActionOnStatus = {
 	created: {
-		executor: ['accept', 'reply'],
+		executor: ['reply'],
 		manager: ['confirm', 'reply', 'cancel']
 	},
-	/*confirm: {
-		executor: ['understand', 'reply'],
+	clear: {
+		executor: ['accept', 'reply'],
 		manager: ['reply', 'cancel']
-	},
+	},/*
 	understood: {
 		executor: ['accept', 'reply'],
 		manager: ['reply', 'cancel']
@@ -153,8 +154,10 @@ var TaskFlow = React.createClass({
 				this.resetFields();
 				this.loadFlow();
 				getJSON( '/api/project/task/'+ tid, function(err, data ){
-					this.setState({actionType:'reply'})					
+					this.setState({actionType:'reply'})	
 					if( !err && this.props.task.status !== data.status ){
+						this.props.task.status = data.status;
+						this.setState({myUpdatedCnt:this.state.myUpdatedCnt+1})
 						this.props.resetDialog(data);
 					}
 				}.bind(this));
@@ -174,17 +177,23 @@ var TaskFlow = React.createClass({
 		return false;
 	},
 	getFlowProgressClass: function(){
-		var progresses = ['accept', 'do', 'commit', 'complete', 'cancel'],
+		var progresses = ['confirm', 'accept', 'do', 'commit', 'complete', 'cancel'],
 			cls = {}, task = this.props.task;
 		for(var i = 0;i <progresses.length; i++){
 			cls[progresses[i]] = 'dv-badge-muted';
 		}
 		cls['cancel'] = 'uk-hidden';
+		if( this.haveFlow('confirm') ){
+			cls['confirm'] = 'uk-badge-success';
+		}else if(task.status === 'created'){
+			cls['confirm'] = 'uk-badge-warning';
+		}
 		if( this.haveFlow('accept') ){
 			cls['accept'] = 'uk-badge-success';
-		}else if(task.status === 'created'){
+		}else if(task.status === 'clear'){
 			cls['accept'] = 'uk-badge-warning';
 		}
+
 		if( task.status === 'doing'){
 			cls['do'] = 'uk-badge-warning';
 		}else if( this.haveFlow('commit') ){
@@ -204,7 +213,7 @@ var TaskFlow = React.createClass({
 		return cls;
 	},
 	getInitialState: function() {
-		return {flows:[], actionType:'reply'}
+		return {flows:[], actionType:'reply', myUpdatedCnt:0}
 	},
 	componentDidMount: function(){
 		this.loadFlow();
@@ -216,6 +225,7 @@ var TaskFlow = React.createClass({
 			marginSpan = { marginLeft: '5px'},
 			textarea_height = { height: "60px"},
 			cls = this.getFlowProgressClass();
+
 		if( task.executor_id === ENV.user.id ){
 			actions = actions.concat( ActionOnStatus[task.status].executor );
 		}
@@ -240,6 +250,7 @@ var TaskFlow = React.createClass({
 				<h2>工作流</h2>
 				<div>
 					<span className="uk-badge uk-badge-success" style={marginSpan}>创建</span>
+					<span className={ 'uk-badge ' + cls['confirm'] } style={marginSpan}>确认需求</span>
 					<span className={ 'uk-badge ' + cls['accept'] } style={marginSpan}>接收</span>
 					<span className={ 'uk-badge ' + cls['do'] } style={marginSpan}>执行</span>
 					<span className={ 'uk-badge ' + cls['commit'] } style={marginSpan}>提交</span>
@@ -371,15 +382,15 @@ var TaskDialog = React.createClass({
 	},
 	reset: function(newtask){
 		if( this.props.task ){
-			var id = "modal_task_"+this.props.task.id;
-			var modal = new UIkit.modal('#'+id);
-			
-			modal.on({
-			 	'hide.uk.modal': function(e){
-			 		this.props.onTaskChanged(newtask);
-			 	}.bind(this)
-			 });
-			modal.hide();
+			// var id = "modal_task_"+this.props.task.id;
+			// var modal = new UIkit.modal('#'+id);
+			// modal.on({
+			//  	'hide.uk.modal': function(e){
+			//  		this.props.onTaskChanged(newtask);
+			//  	}.bind(this)
+			//  });
+			// modal.hide();
+			this.props.onTaskChanged(newtask);
 		}		
 	},
 	componentDidMount: function(){

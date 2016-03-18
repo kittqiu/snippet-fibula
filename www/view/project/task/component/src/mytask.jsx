@@ -14,25 +14,26 @@ var ManageTaskList = React.createClass({
 			);
 	},
 	onTaskChanged: function(newtask){
-		var tasks = this.state.tasks, 
-			oldtask_index = null;
-		for(var i = 0; i < tasks.length; i++){
-			if( tasks[i].id === newtask.id ){
-				oldtask_index = i;
-				break;
-			}
-		}
-		if( oldtask_index !== null){
-			if( newtask.status !== 'doing'){
-				tasks.splice(oldtask_index,1);
-				this.setState({tasks:tasks});
-				console.log("ExecutingTaskList delete")
-			}
-		}else if( newtask.status === 'doing' ){
-			tasks.push(newtask);
-			this.setState({tasks:tasks});
-			console.log("ExecutingTaskList add")
-		}
+		// var tasks = this.state.tasks, 
+		// 	oldtask_index = null;
+		// for(var i = 0; i < tasks.length; i++){
+		// 	if( tasks[i].id === newtask.id ){
+		// 		oldtask_index = i;
+		// 		break;
+		// 	}
+		// }
+		// if( oldtask_index !== null){
+		// 	if( newtask.status !== 'doing'){
+		// 		tasks.splice(oldtask_index,1);
+		// 		this.setState({tasks:tasks});
+		// 		console.log("ExecutingTaskList delete")
+		// 	}
+		// }else if( newtask.status === 'doing' ){
+		// 	tasks.push(newtask);
+		// 	this.setState({tasks:tasks});
+		// 	console.log("ExecutingTaskList add")
+		// }
+		this.loadTasks();
 	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listManage', {uid:this.props.uid}, function(err, data ){
@@ -49,6 +50,7 @@ var ManageTaskList = React.createClass({
 	},
 	componentWillMount: function(){
 		this.loadTasks();
+		listeners.push(this);
 	},
 	render: function(){
 		return (
@@ -109,25 +111,26 @@ var ExecutingTaskList = React.createClass({
 			);
 	},
 	onTaskChanged: function(newtask){
-		var tasks = this.state.tasks, 
-			oldtask_index = null;
-		for(var i = 0; i < tasks.length; i++){
-			if( tasks[i].id === newtask.id ){
-				oldtask_index = i;
-				break;
-			}
-		}
-		if( oldtask_index !== null){
-			if( newtask.status !== 'doing' && newtask.status !== 'commit'){
-				tasks.splice(oldtask_index,1);
-				this.setState({tasks:tasks});
-				console.log("ExecutingTaskList delete")
-			}
-		}else if( newtask.status === 'doing' ){
-			tasks.push(newtask);
-			this.setState({tasks:tasks});
-			console.log("ExecutingTaskList add")
-		}
+		// var tasks = this.state.tasks, 
+		// 	oldtask_index = null;
+		// for(var i = 0; i < tasks.length; i++){
+		// 	if( tasks[i].id === newtask.id ){
+		// 		oldtask_index = i;
+		// 		break;
+		// 	}
+		// }
+		// if( oldtask_index !== null){
+		// 	if( newtask.status !== 'doing' && newtask.status !== 'commit'){
+		// 		tasks.splice(oldtask_index,1);
+		// 		this.setState({tasks:tasks});
+		// 		console.log("ExecutingTaskList delete")
+		// 	}
+		// }else if( newtask.status === 'doing' ){
+		// 	tasks.push(newtask);
+		// 	this.setState({tasks:tasks});
+		// 	console.log("ExecutingTaskList add")
+		// }
+		this.loadTasks();
 	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listExecuting', {uid:this.props.uid}, function(err, data ){
@@ -202,19 +205,35 @@ var QueueTaskList = React.createClass({
 			);
 	},
 	onTaskChanged: function(newtask){
-		var tasks = this.state.tasks, 
-			oldtask_index = null;
-		for(var i = 0; i < tasks.length; i++){
-			if( tasks[i].id === newtask.id ){
-				oldtask_index = i;
-				break;
-			}
-		}
-		if( oldtask_index !== null && newtask.status !== 'created'){
-			tasks.splice(oldtask_index,1);
-			this.setState({tasks:tasks});
-			console.log("ExecutingTaskList delete")
-		}
+		// var tasks = this.state.tasks, 
+		// 	oldtask_index = null;
+		// for(var i = 0; i < tasks.length; i++){
+		// 	if( tasks[i].id === newtask.id ){
+		// 		oldtask_index = i;
+		// 		break;
+		// 	}
+		// }
+		// if( oldtask_index !== null ){
+		// 	if( newtask.status === 'doing'){
+		// 		console.log('doing')
+		// 		var id = "modal_task_"+newtask.id;
+		// 		var modal = new UIkit.modal('#'+id);
+		// 		modal.on({
+		// 		 	'hide.uk.modal': function(e){
+		// 		 		tasks.splice(oldtask_index,1);
+		// 				this.setState({tasks:tasks});
+		// 				console.log("ExecutingTaskList delete")
+		// 		 	}.bind(this)
+		// 		 });
+		// 		console.log(modal);
+		// 		modal.hide();
+				
+		// 	}else if(  newtask.status === 'clear'){
+		// 		tasks[oldtask_index] = newtask;
+		// 		this.setState({tasks:tasks});
+		// 	}
+		// }
+		this.loadTasks();
 	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listQueue', {uid:this.props.uid}, function(err, data ){

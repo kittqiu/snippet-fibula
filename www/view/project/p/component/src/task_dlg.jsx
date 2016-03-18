@@ -99,14 +99,9 @@ var TaskTabEdit = React.createClass({
 		return false;
 	},
 	getPostData: function(){
-		console.log(this.refs.plan_start_time.value);
-		console.log(this.refs.plan_end_time.value);
-		console.log(new Date(this.state.plan_end_time));
 		var plan_start_time = toDateTime(this.refs.plan_start_time.value||0),
 			plan_end_time = toDateTime(this.refs.plan_end_time.value||0),
 			automode = parseInt(this.refs.automode.value);
-		console.log('start:'+plan_start_time)
-		console.log('end:'+plan_end_time)
 		if( automode === 1 ){
 			plan_start_time = wd_formatStart(plan_start_time);
 			plan_end_time = wd_formatEnd(plan_end_time);
@@ -150,7 +145,6 @@ var TaskTabEdit = React.createClass({
 			details: this.refs.details.value,
 			relyTo: rs
 		};
-		console.log(data)
 		if(validateJsonObj('editTask', data)){
 			if(data.start_time > data.end_time){
 				throw  { error:'invalid parameter', data:'end_time', message:"结束时间应该大于开始时间"}; 
@@ -436,7 +430,10 @@ var TaskTabLog = React.createClass({
 
 	},
 	reset: function(newtask){
-
+		var task = this.props.task;
+		task.status = newtask.status;
+		//this.props.hideModal();
+		this.props.onTaskChanged();
 	},
 	render: function(){
 		var marginTop = {marginTop:'50px'};
@@ -520,7 +517,7 @@ var TaskDialog = React.createClass({
 										: null
 									}
 									<li className={ this.state.tab == 'log' ? "uk-active": '' }>
-										<TaskTabLog task={task}/>
+										<TaskTabLog task={task} onTaskChanged={this.props.onTaskChanged} hideModal={this.hideModal}/>
 									</li>
 								</ul>
 							</div>

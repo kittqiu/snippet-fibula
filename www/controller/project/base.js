@@ -306,8 +306,8 @@ function* $task_listQueueOfUser(uid){
 		});*/
 	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
 		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
-		+ ' where t.executor_id =? and t.status=? order by t.plan_end_time asc';
-	var rs = yield warp.$query(sql, [uid, 'created']);
+		+ ' where t.executor_id =? and ( t.status=? or t.status=? )order by t.plan_end_time asc';
+	var rs = yield warp.$query(sql, [uid, 'created', 'clear']);
 	return rs;
 }
 
@@ -330,13 +330,13 @@ function* $task_listFlow(task_id){
 //created,doing, pending, cancel, commit, completed
 var statusFlow = {
 	created: {
+		confirm: 'clear',
+		cancel: 'cancel'
+	},
+	clear: {
 		accept: 'doing',
 		cancel: 'cancel'
-	},
-	/*confirm: {
-		understand: 'understood',
-		cancel: 'cancel'
-	},
+	},/*
 	understood: {
 		accept: 'doing',
 		cancel: 'cancel'
