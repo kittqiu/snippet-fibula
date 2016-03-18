@@ -54,7 +54,7 @@ var TaskTabView = React.createClass({
 							<td>{ task.percent }%</td>
 						</tr>
 						<tr className={task.isLeaf()?'uk-hidden':''}>
-							<td className="uk-block-muted">下属总工期:</td>
+							<td className="uk-block-muted">下属总工期(已执行):</td>
 							<td colSpan="3" >{ task.total_duration }小时</td>
 						</tr>
 						<tr>
@@ -385,7 +385,7 @@ var TaskTabEdit = React.createClass({
 									</div>
 								</td>
 								<td className="uk-width-2-10 uk-block-muted">实际开始时间：</td>
-								<td className="uk-width-3-10">{ formatDate(task.start_time) }</td>								
+								<td className="uk-width-3-10">{ task.start_time!==0?formatDate(task.start_time):'无' }</td>								
 							</tr>
 							<tr>
 								<td className="uk-width-2-10 uk-block-muted">计划结束时间：</td>
@@ -396,7 +396,7 @@ var TaskTabEdit = React.createClass({
 									</div>
 								</td>
 								<td className="uk-width-2-10 uk-block-muted">实际结束时间：</td>
-								<td className="uk-width-3-10">{ formatDate(task.end_time)}</td>
+								<td className="uk-width-3-10">{ task.end_time!==0?formatDate(task.end_time):'无'}</td>
 							</tr>
 							<tr>
 								<td className="uk-width-2-10 uk-block-muted">前置任务：</td>

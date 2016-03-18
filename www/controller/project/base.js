@@ -259,7 +259,7 @@ function* $task_moveDown(id){
 	}
 }
 
-function* $task_changeParent(task_id, parent_id){
+function* $task_changeParent(task_id, parent_id, new_order ){
 	var r = yield modelTask.$find(task_id);
 	if( parent_id !== 'root'){
 		var parent = yield modelTask.$find(parent_id);
@@ -272,9 +272,15 @@ function* $task_changeParent(task_id, parent_id){
 		
 	yield warp.$query( 'update project_task set `order`=`order`-1 where `project_id`=? and `parent`=? and `order`>?', 
 				[r.project_id, r.parent, r.order]);
-	var maxOrder = yield $task_maxOrder(r.project_id, parent_id);
+	if( new_order !== undefined ){
+		yield warp.$query( 'update project_task set `order`=`order`+1 where `project_id`=? and `parent`=? and `order`>=?', 
+				[r.project_id, parent_id, new_order]);
+		r.order = new_order;
+	}else{
+		var maxOrder = yield $task_maxOrder(r.project_id, parent_id);
+		r.order = maxOrder + 1;
+	}	
 	r.parent = parent_id;
-	r.order = maxOrder + 1;
 	yield r.$update(['parent', 'order']);
 	return true;
 }

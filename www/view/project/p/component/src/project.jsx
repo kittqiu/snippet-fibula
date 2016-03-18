@@ -167,8 +167,14 @@ var ToolBar = React.createClass({
 		this.resetMoveStatus(selected_task);
 	},
 	handleMoveToRoot: function(){
-		this.props.handleMoveTo('root');
-		this.resetMoveStatus(this.state.selected_task);
+		var selected_task = this.state.selected_task,
+			TaskMap = this.props.project.TaskMap,
+			task = TaskMap[selected_task];
+		while( task.parent !== 'root' ){
+			task = TaskMap[task.parent];
+		} 
+		this.props.handleMoveTo('root', selected_task, task.order+1);
+		this.resetMoveStatus(selected_task);
 	},
 	resetMoveStatus: function(selected_task){
 		var task = this.props.project.TaskMap[selected_task],
@@ -259,13 +265,12 @@ var Project = React.createClass({
 		this.sortTasks(ts);
 		this.setState({tasks:ts});
 	},
-	handleMoveTo: function(parent, task_id){
+	handleMoveTo: function(parent, task_id, new_order){
 		var selected_task = task_id || this.state.selected_task,
 			task = this.state.TaskMap[selected_task],
 			tasks = this.state.tasks,
 			params = {action:'update_parent', parent:parent },
 			i;
-
 		if( task.parent === parent ){
 			return;
 		}
@@ -276,15 +281,30 @@ var Project = React.createClass({
 				t.order--;
 			}				
 		}
-		var maxOrder = -1;
-		for( i = 0; i < tasks.length; i++ ){
-			var t = tasks[i];
-			if( t.parent === parent){
-				maxOrder = Math.max(maxOrder, t.order);
+
+		if( new_order === undefined ){
+			var maxOrder = -1;
+			for( i = 0; i < tasks.length; i++ ){
+				var t = tasks[i];
+				if( t.parent === parent){
+					maxOrder = Math.max(maxOrder, t.order);
+				}
 			}
+			task.order = maxOrder + 1;
+		}else{
+			for( i = 0; i < tasks.length; i++ ){
+				var t = tasks[i];
+				if( t.parent === parent){
+					if(t.order >= new_order){
+						t.order++;
+					}
+				}
+			}
+			task.order = new_order;
+			params.new_order = new_order;
 		}
-		task.parent = parent;
-		task.order = maxOrder + 1;
+		
+		task.parent = parent;		
 
 		postJSON( '/api/project/task/'+task.id+'/move', params, function(err, result){
 			if(err)

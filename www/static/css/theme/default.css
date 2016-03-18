@@ -11026,25 +11026,45 @@ form p.help-text {
 .dv-border {
   border: 1px solid #ddd;
 }
+.wiki-content {
+  font-family: Georgia, serif;
+  letter-spacing: -0.01em;
+  word-spacing: 0.2em;
+  line-height: 1.8em;
+  color: #111111;
+}
 .wiki-content > h1 {
-  font-size: 1.8em;
+  font-size: 2.88em;
   font-weight: bold;
 }
 .wiki-content > h2 {
-  font-size: 1.5em;
+  font-size: 2.4em;
   font-weight: bold;
 }
 .wiki-content > h3 {
-  font-size: 1.2em;
+  font-size: 1.87em;
   font-weight: bold;
 }
 .wiki-content > h4 {
-  font-size: 1.1em;
+  font-size: 1.5em;
   font-weight: bold;
 }
 .wiki-content > h5 {
-  font-size: 1em;
+  font-size: 1.2em;
   font-weight: bold;
+}
+.wiki-content p {
+  margin-top: 1em;
+  margin-left: 0.8em;
+  font-size: 1.2em;
+  line-height: 180%;
+}
+.wiki-content li {
+  font-size: 1.2em;
+  line-height: 180%;
+}
+.wiki-content li li {
+  font-size: 1em;
 }
 .dv-text-selected {
   color: #fff;

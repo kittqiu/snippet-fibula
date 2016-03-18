@@ -284,7 +284,7 @@ module.exports = {
 		}else if (action === 'down') {
 			yield base.task.$moveDown(id);
 		}else if( action === 'update_parent'){
-			yield base.task.$changeParent(id, data.parent||'root');
+			yield base.task.$changeParent(id, data.parent||'root', data.new_order);
 		}
 		this.body = { result: 'ok'}
 	},
