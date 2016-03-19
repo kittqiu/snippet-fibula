@@ -9,19 +9,19 @@ var ManageTaskList = React.createClass({
 	handleView: function(task, e){
 		e.preventDefault();
 		ReactDOM.render(
-			<TaskDialog task={task} onTaskChanged={noticeTaskChanged}/>,
+			<TaskDialog task={task} onTaskChanged={noticeTaskChanged} role="manager" />,
 				document.getElementById('modal_task_'+task.id)
 			);
 	},
 	onTaskChanged: function(newtask){
-		// var tasks = this.state.tasks, 
-		// 	oldtask_index = null;
-		// for(var i = 0; i < tasks.length; i++){
-		// 	if( tasks[i].id === newtask.id ){
-		// 		oldtask_index = i;
-		// 		break;
-		// 	}
-		// }
+		var tasks = this.state.tasks, 
+			oldtask_index = null;
+		for(var i = 0; i < tasks.length; i++){
+			if( tasks[i].id === newtask.id ){
+				oldtask_index = i;
+				break;
+			}
+		}
 		// if( oldtask_index !== null){
 		// 	if( newtask.status !== 'doing'){
 		// 		tasks.splice(oldtask_index,1);
@@ -33,7 +33,20 @@ var ManageTaskList = React.createClass({
 		// 	this.setState({tasks:tasks});
 		// 	console.log("ExecutingTaskList add")
 		// }
-		this.loadTasks();
+		if( oldtask_index !== null){
+			if( newtask.status === 'completed' || newtask.status === 'cancel'){
+				var id = "modal_task_"+newtask.id;
+					var modal = new UIkit.modal('#'+id);
+					modal.on({
+					 	'hide.uk.modal': function(e){
+					 		this.loadTasks();
+					 	}.bind(this)
+					 });
+					modal.hide();
+			}else{
+				this.loadTasks();
+			}
+		}		
 	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listManage', {uid:this.props.uid}, function(err, data ){
@@ -50,21 +63,20 @@ var ManageTaskList = React.createClass({
 	},
 	componentWillMount: function(){
 		this.loadTasks();
-		listeners.push(this);
+		//listeners.push(this);
 	},
 	render: function(){
 		return (
 			<div className="uk-width-1-1">		
-				<h2><b>管理的任务</b></h2>		
 				<hr className="dv-hr"/>
 				<table className="uk-table">
 					<thead>
 						<tr>
 							<th className="uk-width-2-10">任务名称</th>
+							<th className="uk-width-1-10">任务状态</th>
 							<th className="uk-width-1-10">任务执行人</th>
 							<th className="uk-width-1-10">计划开始时间</th>
 							<th className="uk-width-1-10">计划结束时间</th>
-							<th className="uk-width-1-10">实际开始时间</th>
 							<th className="uk-width-1-10">当前进度</th>
 							<th className="uk-width-1-10">已用工期</th>
 							<th className="uk-width-1-10">计划工期</th>
@@ -82,10 +94,10 @@ var ManageTaskList = React.createClass({
 											<div id={"modal_task_"+t.id} className="uk-modal">
 											</div>
 										</td>
+										<td>{taskStatusMap[t.status]}</td>
 										<td>{t.executor_name}</td>
 										<td>{formatDate(t.plan_start_time)}</td>
 										<td>{formatDate(t.plan_end_time)}</td>
-										<td>{t.start_time===0?'无':formatDate(t.start_time)}</td>
 										<td>{t.percent}%</td>
 										<td>{t.duration}小时</td>									
 										<td>{t.plan_duration}小时</td>										
@@ -106,20 +118,20 @@ var ExecutingTaskList = React.createClass({
 	handleView: function(task, e){
 		e.preventDefault();
 		ReactDOM.render(
-			<TaskDialog task={task} onTaskChanged={noticeTaskChanged}/>,
+			<TaskDialog task={task} onTaskChanged={noticeTaskChanged} role="executor"/>,
 				document.getElementById('modal_task_'+task.id)
 			);
 	},
 	onTaskChanged: function(newtask){
-		// var tasks = this.state.tasks, 
-		// 	oldtask_index = null;
-		// for(var i = 0; i < tasks.length; i++){
-		// 	if( tasks[i].id === newtask.id ){
-		// 		oldtask_index = i;
-		// 		break;
-		// 	}
-		// }
-		// if( oldtask_index !== null){
+		var tasks = this.state.tasks, 
+			oldtask_index = null;
+		for(var i = 0; i < tasks.length; i++){
+			if( tasks[i].id === newtask.id ){
+				oldtask_index = i;
+				break;
+			}
+		}
+		//if( oldtask_index !== null){
 		// 	if( newtask.status !== 'doing' && newtask.status !== 'commit'){
 		// 		tasks.splice(oldtask_index,1);
 		// 		this.setState({tasks:tasks});
@@ -130,7 +142,19 @@ var ExecutingTaskList = React.createClass({
 		// 	this.setState({tasks:tasks});
 		// 	console.log("ExecutingTaskList add")
 		// }
-		this.loadTasks();
+		if( oldtask_index !== null && ( newtask.status === 'completed' 
+			|| newtask.status === 'pending' || newtask.status === 'cancel')){
+			var id = "modal_task_"+newtask.id;
+				var modal = new UIkit.modal('#'+id);
+				modal.on({
+				 	'hide.uk.modal': function(e){
+				 		this.loadTasks();
+				 	}.bind(this)
+				 });
+				modal.hide();
+		}else{
+			this.loadTasks();
+		}
 	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listExecuting', {uid:this.props.uid}, function(err, data ){
@@ -147,12 +171,11 @@ var ExecutingTaskList = React.createClass({
 	},
 	componentWillMount: function(){
 		this.loadTasks();
-		listeners.push(this);
+		//listeners.push(this);
 	},
 	render: function(){
 		return (
 			<div className="uk-width-1-1">		
-				<h2><b>今日任务</b></h2>		
 				<hr className="dv-hr"/>
 				<table className="uk-table">
 					<thead>
@@ -200,19 +223,19 @@ var QueueTaskList = React.createClass({
 	handleView: function(task, e){
 		e.preventDefault();
 		ReactDOM.render(
-			<TaskDialog task={task} onTaskChanged={noticeTaskChanged}/>,
+			<TaskDialog task={task} onTaskChanged={noticeTaskChanged} role="executor"/>,
 				document.getElementById('modal_task_'+task.id)
 			);
 	},
 	onTaskChanged: function(newtask){
-		// var tasks = this.state.tasks, 
-		// 	oldtask_index = null;
-		// for(var i = 0; i < tasks.length; i++){
-		// 	if( tasks[i].id === newtask.id ){
-		// 		oldtask_index = i;
-		// 		break;
-		// 	}
-		// }
+		var tasks = this.state.tasks, 
+			oldtask_index = null;
+		for(var i = 0; i < tasks.length; i++){
+			if( tasks[i].id === newtask.id ){
+				oldtask_index = i;
+				break;
+			}
+		}
 		// if( oldtask_index !== null ){
 		// 	if( newtask.status === 'doing'){
 		// 		console.log('doing')
@@ -233,7 +256,24 @@ var QueueTaskList = React.createClass({
 		// 		this.setState({tasks:tasks});
 		// 	}
 		// }
-		this.loadTasks();
+		if( oldtask_index !== null ){
+			var oldtask = tasks[oldtask_index]
+			if( (oldtask.status === 'clear' || oldtask.status === 'pending') && (
+				newtask.status === 'doing' )){
+				var id = "modal_task_"+newtask.id;
+					var modal = new UIkit.modal('#'+id);
+					modal.on({
+					 	'hide.uk.modal': function(e){
+					 		this.loadTasks();
+					 	}.bind(this)
+					 });
+					modal.hide();
+			}else{
+				this.loadTasks();
+			}
+		}else{
+			this.loadTasks();
+		}		
 	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listQueue', {uid:this.props.uid}, function(err, data ){
@@ -250,17 +290,17 @@ var QueueTaskList = React.createClass({
 	},
 	componentWillMount: function(){
 		this.loadTasks();
-		listeners.push(this);
+		//listeners.push(this);
 	},
 	render: function(){
 		return (
 			<div className="uk-width-1-1">		
-				<h2><b>待执行的任务</b></h2>		
 				<hr className="dv-hr"/>
 				<table className="uk-table">
 					<thead>
 						<tr>
 							<th className="uk-width-3-10">任务名称</th>
+							<th className="uk-width-1-10">任务状态</th>
 							<th className="uk-width-1-10">计划开始时间</th>
 							<th className="uk-width-1-10">计划结束时间</th>
 							<th className="uk-width-1-10">任务审核人</th>
@@ -279,6 +319,7 @@ var QueueTaskList = React.createClass({
 											<div id={"modal_task_"+t.id} className="uk-modal">
 											</div>
 										</td>
+										<td>{taskStatusMap[t.status]}</td>
 										<td>{formatDate(t.plan_start_time)}</td>
 										<td>{formatDate(t.plan_end_time)}</td>
 										<td>{t.manager_name}</td>
@@ -303,10 +344,33 @@ var MyTask = React.createClass({
 			<div className="uk-width-1-1">
 				<h1 className="uk-text-center"><b>我的任务</b></h1>
 				<ExecutingTaskList uid={this.props.uid}/>
-				<div style={marginTop}></div>
+				<div style={marginTop}></div>				
+			</div>
+			)
+	}
+});
+
+var MyManageTask = React.createClass({
+	render: function(){
+		var marginTop = {marginTop:'50px'}
+		return (
+			<div className="uk-width-1-1">
+				<h1 className="uk-text-center"><b>我管理的任务</b></h1>
 				<ManageTaskList uid={this.props.uid}/>
 				<div style={marginTop}></div>
+			</div>
+			)
+	}
+});
+
+var MyPlanTask = React.createClass({
+	render: function(){
+		var marginTop = {marginTop:'50px'}
+		return (
+			<div className="uk-width-1-1">
+				<h1 className="uk-text-center"><b>待执行的任务</b></h1>
 				<QueueTaskList uid={this.props.uid}/>
+				<div style={marginTop}></div>
 			</div>
 			)
 	}

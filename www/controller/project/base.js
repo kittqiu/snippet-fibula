@@ -306,8 +306,8 @@ function* $task_listQueueOfUser(uid){
 		});*/
 	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
 		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
-		+ ' where t.executor_id =? and ( t.status=? or t.status=? )order by t.plan_end_time asc';
-	var rs = yield warp.$query(sql, [uid, 'created', 'clear']);
+		+ ' where t.executor_id =? and ( t.status=? or t.status=? or t.status=?)order by t.plan_end_time asc';
+	var rs = yield warp.$query(sql, [uid, 'created', 'clear', 'pending']);
 	return rs;
 }
 

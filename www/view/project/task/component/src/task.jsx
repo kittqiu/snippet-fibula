@@ -4,7 +4,7 @@ var taskStatusMap = {
 	doing: '正在执行',
 	pending: '已暂停执行',
 	cancel: '已取消', 
-	commit: '已提交，待审核',
+	commit: '已提交',
 	completed: '已完成'
 };
 
@@ -83,7 +83,7 @@ var ActionOnStatus = {
 	},
 	commit: {
 		executor: ['reply'],
-		manager: ['complete', 'reopen']
+		manager: ['complete', 'reopen', 'reply']
 	},
 	pending: {
 		executor: ['reply'],
@@ -220,16 +220,17 @@ var TaskFlow = React.createClass({
 	},
 	render: function(){
 		var task = this.props.task,
+			role = this.props.role || 'all',
 			actions = [], i, radios = [],
 			marginRadio = { marginLeft: '15px'},
 			marginSpan = { marginLeft: '5px'},
 			textarea_height = { height: "60px"},
 			cls = this.getFlowProgressClass();
 
-		if( task.executor_id === ENV.user.id ){
+		if( (role==='executor'|| role==='all') && task.executor_id === ENV.user.id ){
 			actions = actions.concat( ActionOnStatus[task.status].executor );
 		}
-		if( task.manager_id === ENV.user.id ){
+		if( task.manager_id === ENV.user.id && (role==='manager'|| role==='all') ){
 			var list = ActionOnStatus[task.status].manager;
 			for( i = 0; i < list.length; i++){
 				if( actions.indexOf(list[i])===-1){
@@ -410,7 +411,8 @@ var TaskDialog = React.createClass({
 					<div>
 						<TaskInfo task={task}/>
 						<div style={marginTop}/>
-						<TaskFlow task={task} onTaskChanged={this.props.onTaskChanged} resetDialog={this.reset}/>
+						<TaskFlow task={task} onTaskChanged={this.props.onTaskChanged} resetDialog={this.reset}
+							role={this.props.role}/>
 						<div style={marginTop}/>
 						<TaskDailyList task={task}/>
 					</div>

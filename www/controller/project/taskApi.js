@@ -30,6 +30,8 @@ var ACTIONMAP = {
 GET METHOD:
 /project/daily
 /project/task
+/project/task/manage
+/project/task/plan
 
 /api/project/daily?date=xx
 /api/project/t/listExecuting?uid=xx
@@ -55,6 +57,15 @@ module.exports = {
 	},
 	'GET /project/task': function* (){
 		yield $_render( this, {}, 'task_index.html');
+		base.setHistoryUrl(this);
+	},
+
+	'GET /project/task/manage': function* (){
+		yield $_render( this, {}, 'task_manage.html');
+		base.setHistoryUrl(this);
+	},
+	'GET /project/task/plan': function* (){
+		yield $_render( this, {}, 'task_plan.html');
 		base.setHistoryUrl(this);
 	},
 

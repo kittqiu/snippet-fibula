@@ -124,7 +124,7 @@ var TaskDaily = React.createClass({
 		e.preventDefault();
 		var task = this.props.task;
 		ReactDOM.render(
-			<TaskDialog task={task} onTaskChanged={this.onTaskChanged}/>,
+			<TaskDialog task={task} onTaskChanged={this.onTaskChanged} role="executor"/>,
 				document.getElementById('modal_task_'+task.id)
 			);
 	},
@@ -142,11 +142,14 @@ var TaskDaily = React.createClass({
 			daily = t.daily,
 			org_plan = daily.org_plan || '未填写',
 			plan = daily.plan || '未填写',
-			report = daily.report || '未填写';
+			report = daily.report || '未填写',
+			marginTop = {marginTop:'40px'},
+			nopadding = {padding:'0'},
+			nomargin = {margin:'0', borderRadius: '0'};
 		return (
-			<div >
-				<h3 onClick={this.handleViewTask} className="uk-accordion-title" style={styles.smallBottomMargin}>任务：{t.name}</h3>
-				<div className="uk-accordion-content">
+			<div style={marginTop}>
+				<h3 onClick={this.handleViewTask} className="uk-accordion-title" style={nomargin}>任务：{t.name}</h3>
+				<div className="uk-accordion-content" style={nopadding}>
 					<table className="uk-width-1-1 dv-border" style={styles.tableBorder} >
 						<thead>
 							<tr>
@@ -160,7 +163,7 @@ var TaskDaily = React.createClass({
 								<td className="dv-border">{org_plan}</td>
 								<td className="dv-border">
 									<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
-									{ report }<br/>用时：{daily.duration||0}小时									
+									{ report }<br/>{daily.duration ? '用时：' + daily.duration + '小时':''}								
 								</td>
 								<td className=" dv-border">
 									<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
