@@ -1,6 +1,6 @@
 var taskStatusMap = {
-	created: '待接收执行',
-	clear: '要求已确认',
+	created: '待需求确认',
+	clear: '待接收执行',
 	doing: '正在执行',
 	pending: '已暂停执行',
 	cancel: '已取消', 

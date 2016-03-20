@@ -194,9 +194,11 @@ var ExecutingTaskList = React.createClass({
 					<tbody>
 						{
 							this.state.tasks.map(function(t, index){
+								var tip = <span className="uk-badge uk-badge-danger uk-badge-notification">紧急</span>
 								return (
 									<tr key={t.id}>
 										<td><a className="dv-link" onClick={this.handleView.bind(this, t)}>{t.name}</a>
+											{getDateTimeAt0(t.plan_end_time)<Date.now()?tip:''}
 											<div id={"modal_task_"+t.id} className="uk-modal">
 											</div>
 										</td>

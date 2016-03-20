@@ -32,11 +32,11 @@
 <body>
 	<div id="header">
 		{% block header %}
-		<ul class="dv-navbar-nav uk-navbar-nav">
+		<ul id="top" class="dv-navbar-nav uk-navbar-nav">
 			<li><a href="/">devo-hub</a></li>
 	        <li><a href="/snippet/">snippet</a></li>
 	        <li><a href="/project/">project</a></li>
-	        <li><a href="/req/">requirement</a></li>
+	        <!--li><a href="/req/">requirement</a></li-->
 	        <li><a href="/team/">team</a></li>
 	        {% if __user__.username == 'Admin' %}
 	        <li><a href="/manage/">manage</a></li>

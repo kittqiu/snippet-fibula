@@ -1,3 +1,8 @@
 {
-	"/project/p/:id/build": "[project_build.md]"
+	"/project": "[project_list.md]",
+	"/project/daily": "[project_daily.md]",
+	"/project/p/:id/build": "[project_build.md]",
+	"/project/task": "[project_mytask.md]",
+	"/project/task/manage": "[project_task_manage.md]",
+	"/project/task/plan": "[project_task_plan.md]"
 }
