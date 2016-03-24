@@ -160,14 +160,14 @@ var TaskDaily = React.createClass({
 						</thead>
 						<tbody>
 							<tr>
-								<td className="dv-border">{org_plan}</td>
+								<td className="dv-border"><pre className="dv-pre-clear">{org_plan}</pre></td>
 								<td className="dv-border">
 									<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
-									{ report }<br/>{daily.duration ? '用时：' + daily.duration + '小时':''}								
+									<pre className="dv-pre-clear">{ report }</pre><br/>{daily.duration ? '用时：' + daily.duration + '小时':''}								
 								</td>
 								<td className=" dv-border">
 									<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
-									{plan}
+									<pre className="dv-pre-clear">{plan}</pre>
 								</td>
 							</tr>
 						</tbody>

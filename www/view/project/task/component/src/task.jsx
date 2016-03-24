@@ -8,6 +8,13 @@ var taskStatusMap = {
 	completed: '已完成'
 };
 
+function taskIsInPlan(task){
+	if( task.status === 'created' || task.status === 'clear'){
+		return true;
+	}
+	return false;
+}
+
 var TaskInfo = React.createClass({
 	render: function(){
 		var task = this.props.task;
@@ -55,7 +62,7 @@ var TaskInfo = React.createClass({
 						</tr>
 						<tr>
 							<td className="uk-block-muted">任务说明:</td>
-							<td colSpan="3" >{ task.details }</td>
+							<td colSpan="3" ><pre>{ task.details }</pre></td>
 						</tr>
 					</tbody>
 				</table>
@@ -277,7 +284,7 @@ var TaskFlow = React.createClass({
 										<td>{ACTIONMAP[f.action]}</td>
 										<td>{f.user_name}</td>
 										<td>{formatDate(f.created_at)}</td>
-										<td>{f.reply}</td>
+										<td><pre className="dv-pre-clear">{f.reply}</pre></td>
 									</tr>
 									)
 							}.bind(this))

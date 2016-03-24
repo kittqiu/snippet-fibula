@@ -197,7 +197,7 @@ module.exports = {
 			name: data.name, 
 			master_id: data.master_id,
 			start_time: data.start_time,
-			end_time: data.start_time,
+			end_time: data.end_time,
 			details: data.details
 		};
 		yield base.modelProject.$create( r );

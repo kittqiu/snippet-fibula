@@ -59,7 +59,7 @@ var TaskTabView = React.createClass({
 						</tr>
 						<tr>
 							<td className="uk-block-muted">任务说明:</td>
-							<td colSpan="3" >{ task.details }</td>
+							<td colSpan="3" ><pre className="dv-pre-clear">{ task.details }</pre></td>
 						</tr>
 					</tbody>
 				</table>
@@ -314,8 +314,8 @@ var TaskTabEdit = React.createClass({
 	render: function(){
 		var task = this.props.task,
 			difficulties = this.props.difficulties,
-			textarea_height = { height: "60px"};
-
+			textarea_height = { height: "120px"};
+			console.log(task);
 		return ( 
 			<div id={'modal_task_'+task.id + '_edit'}>
 				<form onSubmit={this.handleSubmit}>
@@ -402,7 +402,7 @@ var TaskTabEdit = React.createClass({
 							<tr>
 								<td className="uk-block-muted">任务说明:</td>
 								<td colSpan="3" >
-									<textarea ref="details" name="details" className="uk-width-1-1" style={textarea_height} defautValue={ task.details }>
+									<textarea ref="details" name="details" className="uk-width-1-1" style={textarea_height} defaultValue={ task.details }>
 									</textarea>
 								</td>
 							</tr>							

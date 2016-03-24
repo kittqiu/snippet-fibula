@@ -14,16 +14,16 @@ var Task = React.createClass({
 				document.getElementById('modal_task_'+this.props.task.id)
 			);
 	},
-	render: function(){		
+	render: function(){
 		var task = this.props.task,
 			parentCls = task.parent !=='root' ? 'treegrid-parent-' + task.parent : '',
 			plan_mode = task.automode === 0 ? '自动' : '手动',
 			noMargin = {marginRight:'0px'},
-			statusCls = { created: 'uk-text-primary', clear:'uk-text-primary', doing: 'uk-text-warning', commit: 'uk-text-warning',
-				completed: 'uk-text-success', cancel: 'uk-text-danger', pending: 'uk-text-warning' },
-			start_time = task.status=='created'?formatDate(task.plan_start_time): formatDate(task.start_time),
-			end_time = task.status=='created'?formatDate(task.plan_end_time): (task.end_time===0?'无' : formatDate(task.end_time)),
-			timeCls = task.status=='created'?'':'uk-text-primary',
+			statusCls = { created: 'uk-text-muted', clear:'uk-text-muted', doing: 'uk-text-primary', commit: 'uk-text-primary',
+				completed: 'uk-text-success', cancel: 'uk-text-warning', pending: 'uk-text-warning' },
+			start_time = taskIsInPlan(task)?formatDate(task.plan_start_time): formatDate(task.start_time),
+			end_time = taskIsInPlan(task)?formatDate(task.plan_end_time): (task.end_time===0?'无' : formatDate(task.end_time)),
+			timeCls = taskIsInPlan(task)?'':'uk-text-primary',
 			durationCls = task.isCompleted?'uk-text-primary':'',
 			relies = [];
 			task.rely.forEach(function(r, n){
