@@ -130,54 +130,44 @@ var TaskDaily = React.createClass({
 	},
 	onTaskChanged: function(){
 
-	},
+	}, 
 	onUpdate: function(){
 		this.setState({updateCnt:this.state.updateCnt+1})
 	},
-	getInitialState: function() {
-		return {updateCnt:0}
-	},
+	getInitialState:function() {
+		return {updateCnt:0}     
+	},     
 	render: function(){
 		var t = this.props.task,
-			daily = t.daily,
+		    daily = t.daily,
 			org_plan = daily.org_plan || '未填写',
 			plan = daily.plan || '未填写',
 			report = daily.report || '未填写',
 			marginTop = {marginTop:'40px'},
+			marginLeft = {marginLeft:'0px', paddingTop:'10px'},
 			nopadding = {padding:'0'},
-			nomargin = {margin:'0', borderRadius: '0'};
+			nomargin = {margin:'0', borderRadius:'0'};
 		return (
-			<div style={marginTop}>
-				<h3 onClick={this.handleViewTask} className="uk-accordion-title" style={nomargin}>任务：{t.name}</h3>
-				<div className="uk-accordion-content" style={nopadding}>
-					<table className="uk-width-1-1 dv-border" style={styles.tableBorder} >
-						<thead>
-							<tr>
-								<th className="uk-width-1-3 dv-border">今日计划</th>
-								<th className="uk-width-1-3 dv-border">今日工作</th>
-								<th className="uk-width-1-3 dv-border">明日计划</th>					
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td className="dv-border"><pre className="dv-pre-clear">{org_plan}</pre></td>
-								<td className="dv-border">
-									<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
-									<pre className="dv-pre-clear">{ report }</pre><br/>{daily.duration ? '用时：' + daily.duration + '小时':''}								
-								</td>
-								<td className=" dv-border">
-									<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
-									<pre className="dv-pre-clear">{plan}</pre>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-					<div id={"modal_task_daily_"+t.id} className="uk-modal"></div>
-					<div id={"modal_task_"+t.id} className="uk-modal"></div>
-				</div>
-			</div>
-			)
-	}
+		    <tr>
+		        <td className="dv-border">
+                    <a onClick={this.handleViewTask} className="uk-button-link dv-link">{t.name}</a>
+                    <div id={"modal_task_daily_"+t.id} className="uk-modal"></div>
+                    <div id={"modal_task_"+t.id} className="uk-modal"></div>
+                </td>
+                <td className="dv-border"><pre className="dv-pre-clear" style={nopadding}>{org_plan}</pre></td>
+                <td className="dv-border"> 
+                    <pre className="dv-pre-clear" style={nopadding}>{ report }</pre>
+                    {daily.duration ? <span style={marginLeft}> {'用时：' + daily.duration + '小时'}</span>:''}
+                </td>
+                <td className="dv-border">
+                	<pre className="dv-pre-clear" style={nopadding}>{plan}</pre>
+                </td>
+                <td className="dv-border">
+                	<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
+                </td>
+            </tr>
+        )
+    }
 });
 
 var MyDaily = React.createClass({
@@ -239,13 +229,26 @@ var MyDaily = React.createClass({
 				</div>
 				<hr className="dv-hr"/>
 				<div className="uk-accordion">
-				{
-					this.state.tasks.map(function(t, n){
-						return (
-							<TaskDaily key={n} task={t} dayTime={this.state.dayTime} />
-							)
-					}.bind(this))
-				}
+					<table	className="uk-width-1-1 uk-table" style={styles.tableBorder} >
+						<thead>
+							<tr>
+								<th className="uk-width-2-10">任务</th>
+								<th className="uk-width-2-10">今日计划</th>
+								<th className="uk-width-3-10">今日工作</th>
+								<th className="uk-width-2-10">明日计划</th>					
+								<th className="uk-width-1-10">操作</th>					
+							</tr>
+						</thead>
+						<tbody>
+						{
+							this.state.tasks.map(function(t, n){
+								return (
+									<TaskDaily key={n} task={t} dayTime={this.state.dayTime} />
+									)
+							}.bind(this))
+						}
+						</tbody>
+					</table>
 					<div className={this.state.tasks.length>0?'uk-hidden':''}>无执行任务</div>
 				</div>
 			</div>

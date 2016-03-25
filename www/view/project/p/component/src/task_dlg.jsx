@@ -314,8 +314,8 @@ var TaskTabEdit = React.createClass({
 	render: function(){
 		var task = this.props.task,
 			difficulties = this.props.difficulties,
+			isdoing = taskIsInDoing(task),
 			textarea_height = { height: "120px"};
-			console.log(task);
 		return ( 
 			<div id={'modal_task_'+task.id + '_edit'}>
 				<form onSubmit={this.handleSubmit}>
@@ -329,13 +329,13 @@ var TaskTabEdit = React.createClass({
 								</td>
 								<td className="uk-width-2-10 uk-block-muted">计划工期(小时)：</td>
 								<td className="uk-width-3-10">
-									<input type="number" min="0" max="256" name="plan_duration" ref="plan_duration" className="uk-width-1-1" placeholder="填入整数" value={this.state.plan_duration} onChange={this.onDurationChanged}/>
+									<input type="number" min="0" max="256" name="plan_duration" ref="plan_duration" disabled={isdoing} className="uk-width-1-1" placeholder="填入整数" value={this.state.plan_duration} onChange={this.onDurationChanged}/>
 								</td>
 							</tr>
 							<tr>
 								<td className="uk-width-2-10 uk-block-muted">执行人：</td>
 								<td className="uk-width-3-10">
-									<select name="executor" ref="executor" className="uk-width-1-1" defaultValue={task.executor_id}>
+									<select name="executor" ref="executor" className="uk-width-1-1" defaultValue={task.executor_id}  disabled={isdoing} >
 										{ this.props.project.members.map(function(u){
 											return <option key={u.user_id} value={u.user_id}>{u.name}</option>
 											})
@@ -355,14 +355,14 @@ var TaskTabEdit = React.createClass({
 							<tr>
 								<td className="uk-width-2-10 uk-block-muted">计划模式：</td>
 								<td className="uk-width-3-10">
-									<select name="automode" ref="automode" className="uk-width-1-1" value={this.state.automode} onChange={this.onAutoModeChanged}>
+									<select name="automode" ref="automode" className="uk-width-1-1" value={this.state.automode} onChange={this.onAutoModeChanged}  disabled={isdoing} >
 										<option value="0">自动</option>
 										<option value="1">手动</option>
 									</select>
 								</td>
 								<td className="uk-width-2-10 uk-block-muted">任务难度：</td>
 								<td className="uk-width-3-10">
-									<select name="difficulty" ref="difficulty" className="uk-width-1-1" defaultValue={task.difficulty}>
+									<select name="difficulty" ref="difficulty" className="uk-width-1-1" defaultValue={task.difficulty}  disabled={isdoing}>
 										{ difficulties.map(function(u, index){
 											return <option key={index} value={index}>{u}</option>
 											})
@@ -375,7 +375,7 @@ var TaskTabEdit = React.createClass({
 								<td className="uk-width-3-10">
 									<div className="uk-form-icon uk-width-1-1">
 										<i className="uk-icon-calendar"></i>
-										<input type="text" name="plan_start_time" className="uk-width-1-1" ref="plan_start_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}" value={formatDate(this.state.plan_start_time)} onChange={this.onPlanStartTimeChanged}/>
+										<input type="text" name="plan_start_time" className="uk-width-1-1" ref="plan_start_time"  disabled={isdoing}  data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}" value={formatDate(this.state.plan_start_time)} onChange={this.onPlanStartTimeChanged}/>
 									</div>
 								</td>
 								<td className="uk-width-2-10 uk-block-muted">实际开始时间：</td>
@@ -386,7 +386,7 @@ var TaskTabEdit = React.createClass({
 								<td className="uk-width-3-10">
 									<div className="uk-form-icon uk-width-1-1">
 										<i className="uk-icon-calendar"></i>
-										<input type="text" name="plan_end_time" className="uk-width-1-1" ref="plan_end_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}" value={formatDate(this.state.plan_end_time)} onChange={this.onPlanEndTimeChanged}/>
+										<input type="text" name="plan_end_time" className="uk-width-1-1" ref="plan_end_time"  disabled={isdoing}  data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}" value={formatDate(this.state.plan_end_time)} onChange={this.onPlanEndTimeChanged}/>
 									</div>
 								</td>
 								<td className="uk-width-2-10 uk-block-muted">实际结束时间：</td>
@@ -395,14 +395,14 @@ var TaskTabEdit = React.createClass({
 							<tr>
 								<td className="uk-width-2-10 uk-block-muted">前置任务：</td>
 								<td colSpan="3">
-									<input type="text" name="rely_to" className="uk-width-1-1" ref="rely_to" 
+									<input type="text" name="rely_to" className="uk-width-1-1" ref="rely_to"  disabled={isdoing} 
 										value={this.state.relies} onChange={this.onRelyChanged}/>
 								</td>
 							</tr>	
 							<tr>
 								<td className="uk-block-muted">任务说明:</td>
 								<td colSpan="3" >
-									<textarea ref="details" name="details" className="uk-width-1-1" style={textarea_height} defaultValue={ task.details }>
+									<textarea ref="details" name="details" className="uk-width-1-1" style={textarea_height} defaultValue={ task.details }  disabled={isdoing} >
 									</textarea>
 								</td>
 							</tr>							
@@ -493,9 +493,11 @@ var TaskDialog = React.createClass({
 								<ul className="uk-tab uk-tab-left" data-uk-tab={"{connect:'#tab-" + task.id +"'}"}>
 									{ 
 										this.props.tabs.map(function(t){
-											if( t.type === 'edit' && task.manager_id !== ENV.user.id && this.props.project.master_id !== ENV.user.id){
+
+											if( t.type === 'edit' && ((task.manager_id !== ENV.user.id && this.props.project.master_id !== ENV.user.id)
+												|| task.closed )) {
 												return null;
-											}											
+											}								
 											return ( 
 												<li key={'tab_view_'+t.type} id={'tab_view_'+task.id} className={ this.state.tab == t.type ? "uk-active": '' } onClick={this.onSwitch.bind(this,t.type)}>
 													<a href="#" >{t.title}</a>
@@ -510,7 +512,8 @@ var TaskDialog = React.createClass({
 										<TaskTabView task={task} difficulties={difficulties} project={this.props.project}/>
 									</li>
 									{
-										( task.manager_id === ENV.user.id || this.props.project.master_id === ENV.user.id )?
+										(( task.manager_id === ENV.user.id || this.props.project.master_id === ENV.user.id )
+											&& (task.closed===false))?
 										<li className={ this.state.tab == 'edit' ? "uk-active": '' }>
 											<TaskTabEdit task={task} difficulties={difficulties} project={this.props.project} hideModal={this.hideModal} onTaskChanged={this.props.onTaskChanged}/>
 										</li>

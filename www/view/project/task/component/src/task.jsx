@@ -15,6 +15,13 @@ function taskIsInPlan(task){
 	return false;
 }
 
+function taskIsInDoing(task){
+	if( task.status === 'doing' || task.status === 'commit' || task.status === 'pending'){
+		return true;
+	}
+	return false;
+}
+
 var TaskInfo = React.createClass({
 	render: function(){
 		var task = this.props.task;
@@ -62,7 +69,7 @@ var TaskInfo = React.createClass({
 						</tr>
 						<tr>
 							<td className="uk-block-muted">任务说明:</td>
-							<td colSpan="3" ><pre>{ task.details }</pre></td>
+							<td colSpan="3" ><pre className="dv-pre-clear">{ task.details }</pre></td>
 						</tr>
 					</tbody>
 				</table>
@@ -231,6 +238,7 @@ var TaskFlow = React.createClass({
 			actions = [], i, radios = [],
 			marginRadio = { marginLeft: '15px'},
 			marginSpan = { marginLeft: '5px'},
+			nopadding = { padding: '0'},
 			textarea_height = { height: "60px"},
 			cls = this.getFlowProgressClass();
 
@@ -284,7 +292,7 @@ var TaskFlow = React.createClass({
 										<td>{ACTIONMAP[f.action]}</td>
 										<td>{f.user_name}</td>
 										<td>{formatDate(f.created_at)}</td>
-										<td><pre className="dv-pre-clear">{f.reply}</pre></td>
+										<td><pre className="dv-pre-clear" style={nopadding}>{f.reply}</pre></td>
 									</tr>
 									)
 							}.bind(this))
@@ -344,11 +352,11 @@ var TaskDailyList = React.createClass({
 				<table className="uk-width-1-1 uk-table">
 					<thead>
 						<tr>
-							<th className="uk-width-2-10">时间</th>
+							<th className="uk-width-1-10">时间</th>
 							<th className="uk-width-1-10">执行人</th>
 							<th className="uk-width-1-10">用时</th>
-							<th className="uk-width-3-10">当日工作</th>
-							<th className="uk-width-2-10">明日计划</th>					
+							<th className="uk-width-4-10">当日工作</th>
+							<th className="uk-width-3-10">明日计划</th>					
 						</tr>
 					</thead>
 					<tbody>
@@ -399,6 +407,7 @@ var TaskDialog = React.createClass({
 			//  });
 			// modal.hide();
 			this.props.onTaskChanged(newtask);
+			this.setState({updatedCnt:this.updatedCnt+1})
 		}		
 	},
 	componentDidMount: function(){
@@ -406,6 +415,9 @@ var TaskDialog = React.createClass({
 	},
 	componentDidUpdate:function(){
 		this.showModal();
+	},
+	getInitialData: function(){
+		return {updatedCnt:0};
 	},
 	render: function(){
 		var task = this.props.task;

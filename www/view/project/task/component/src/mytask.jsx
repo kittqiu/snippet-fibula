@@ -14,56 +14,69 @@ var ManageTaskList = React.createClass({
 			);
 	},
 	onTaskChanged: function(newtask){
-		var tasks = this.state.tasks, 
-			oldtask_index = null;
-		for(var i = 0; i < tasks.length; i++){
-			if( tasks[i].id === newtask.id ){
-				oldtask_index = i;
-				break;
-			}
-		}
-		// if( oldtask_index !== null){
-		// 	if( newtask.status !== 'doing'){
-		// 		tasks.splice(oldtask_index,1);
-		// 		this.setState({tasks:tasks});
-		// 		console.log("ExecutingTaskList delete")
+		// var tasks = this.state.tasks, 
+		// 	oldtask_index = null;
+		// for(var i = 0; i < tasks.length; i++){
+		// 	if( tasks[i].id === newtask.id ){
+		// 		oldtask_index = i;
+		// 		break;
 		// 	}
-		// }else if( newtask.status === 'doing' ){
-		// 	tasks.push(newtask);
-		// 	this.setState({tasks:tasks});
-		// 	console.log("ExecutingTaskList add")
 		// }
-		if( oldtask_index !== null){
-			if( newtask.status === 'completed' || newtask.status === 'cancel'){
-				var id = "modal_task_"+newtask.id;
-					var modal = new UIkit.modal('#'+id);
-					modal.on({
-					 	'hide.uk.modal': function(e){
-					 		this.loadTasks();
-					 	}.bind(this)
-					 });
-					modal.hide();
+		// // if( oldtask_index !== null){
+		// // 	if( newtask.status !== 'doing'){
+		// // 		tasks.splice(oldtask_index,1);
+		// // 		this.setState({tasks:tasks});
+		// // 		console.log("ExecutingTaskList delete")
+		// // 	}
+		// // }else if( newtask.status === 'doing' ){
+		// // 	tasks.push(newtask);
+		// // 	this.setState({tasks:tasks});
+		// // 	console.log("ExecutingTaskList add")
+		// // }
+		// if( oldtask_index !== null){
+		// 	if( newtask.status === 'completed' || newtask.status === 'cancel'){
+		// 		var id = "modal_task_"+newtask.id;
+		// 			var modal = new UIkit.modal('#'+id);
+		// 			modal.on({
+		// 			 	'hide.uk.modal': function(e){
+		// 			 		this.loadTasks();
+		// 			 	}.bind(this)
+		// 			 });
+		// 			modal.hide();
+		// 	}else{
+		// 		this.loadTasks();
+		// 	}
+		// }
+		this.setState({updatedCnt:this.state.updatedCnt+1})	
+	},
+	sortTasks: function(tasks){
+		var statusOrder = ['created','clear', 'pending', 'doing', 'commit'];
+		tasks.sort(function(a,b){
+			if(a.status === b.status){
+				return a.plan_start_time - b.plan_start_time;
 			}else{
-				this.loadTasks();
+				return statusOrder.indexOf(b.status) - statusOrder.indexOf(a.status);
 			}
-		}		
+		}.bind(this));
+		return tasks;
 	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listManage', {uid:this.props.uid}, function(err, data ){
 				if(err){
 					fatal(err);
-				}else{					
-					this.setState({tasks:data});
+				}else{
+					var ts = this.sortTasks(data);		
+					this.setState({tasks:ts});
 				}
 			}.bind(this)
 		);
 	},
 	getInitialState: function() {
-		return {tasks:[]}
+		return {tasks:[], updatedCnt:0}
 	},
 	componentWillMount: function(){
 		this.loadTasks();
-		//listeners.push(this);
+		listeners.push(this);
 	},
 	render: function(){
 		return (
@@ -87,6 +100,8 @@ var ManageTaskList = React.createClass({
 						{
 							this.state.tasks.map(function(t, index){
 								var tip = <span className="uk-badge uk-badge-danger uk-badge-notification">紧急</span>
+								var statusCls = { created: 'uk-text-warning', clear:'', doing: 'uk-text-primary', commit: 'uk-text-success',
+				completed: 'uk-text-success', pending: 'uk-text-warning' };
 								return (
 									<tr key={t.id}>
 										<td><a className="dv-link" onClick={this.handleView.bind(this, t)}>{t.name}</a>
@@ -94,7 +109,7 @@ var ManageTaskList = React.createClass({
 											<div id={"modal_task_"+t.id} className="uk-modal">
 											</div>
 										</td>
-										<td>{taskStatusMap[t.status]}</td>
+										<td><span className={statusCls[t.status]}>{taskStatusMap[t.status]}</span></td>
 										<td>{t.executor_name}</td>
 										<td>{formatDate(t.plan_start_time)}</td>
 										<td>{formatDate(t.plan_end_time)}</td>
@@ -156,12 +171,24 @@ var ExecutingTaskList = React.createClass({
 			this.loadTasks();
 		}
 	},
+	sortTasks: function(tasks){
+		var statusOrder = ['pending', 'doing', 'commit'];
+		tasks.sort(function(a,b){
+			if(a.status === b.status){
+				return a.plan_end_time - b.plan_end_time;
+			}else{
+				return statusOrder.indexOf(b.status) - statusOrder.indexOf(a.status);
+			}
+		}.bind(this));
+		return tasks;
+	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listExecuting', {uid:this.props.uid}, function(err, data ){
 				if(err){
 					fatal(err);
-				}else{					
-					this.setState({tasks:data});
+				}else{
+					var ts = this.sortTasks(data);			
+					this.setState({tasks:ts});
 				}
 			}.bind(this)
 		);
@@ -195,6 +222,7 @@ var ExecutingTaskList = React.createClass({
 						{
 							this.state.tasks.map(function(t, index){
 								var tip = <span className="uk-badge uk-badge-danger uk-badge-notification">紧急</span>
+								var statusCls = { doing: 'uk-text-primary', commit: 'uk-text-success', pending: '' };
 								return (
 									<tr key={t.id}>
 										<td><a className="dv-link" onClick={this.handleView.bind(this, t)}>{t.name}</a>
@@ -202,7 +230,7 @@ var ExecutingTaskList = React.createClass({
 											<div id={"modal_task_"+t.id} className="uk-modal">
 											</div>
 										</td>
-										<td>{taskStatusMap[t.status]}</td>
+										<td><span className={statusCls[t.status]}>{taskStatusMap[t.status]}</span></td>
 										<td>{formatDate(t.plan_start_time)}</td>
 										<td>{formatDate(t.plan_end_time)}</td>
 										<td>{t.percent}%</td>
@@ -277,12 +305,24 @@ var QueueTaskList = React.createClass({
 			this.loadTasks();
 		}		
 	},
+	sortTasks: function(tasks){
+		var statusOrder = ['created', 'pending', 'clear', 'doing'];
+		tasks.sort(function(a,b){
+			if(a.status === b.status){
+				return a.plan_start_time - b.plan_start_time;
+			}else{
+				return statusOrder.indexOf(b.status) - statusOrder.indexOf(a.status);
+			}
+		}.bind(this));
+		return tasks;
+	},
 	loadTasks: function(){
 		getJSON( '/api/project/t/listQueue', {uid:this.props.uid}, function(err, data ){
 				if(err){
 					fatal(err);
-				}else{					
-					this.setState({tasks:data});
+				}else{
+					var ts = this.sortTasks(data);		
+					this.setState({tasks:ts});
 				}
 			}.bind(this)
 		);
@@ -314,6 +354,8 @@ var QueueTaskList = React.createClass({
 						{
 							this.state.tasks.map(function(t, index){
 								var tip = <span className="uk-badge uk-badge-danger uk-badge-notification">紧急</span>
+								var statusCls = { created: '', clear:'uk-text-warning', doing: 'uk-text-primary', 
+				 							pending: '' };
 								return (
 									<tr key={t.id}>
 										<td><a className="dv-link" onClick={this.handleView.bind(this, t)}>{t.name}</a>
@@ -321,7 +363,7 @@ var QueueTaskList = React.createClass({
 											<div id={"modal_task_"+t.id} className="uk-modal">
 											</div>
 										</td>
-										<td>{taskStatusMap[t.status]}</td>
+										<td><span className={statusCls[t.status]}>{taskStatusMap[t.status]}</span></td>
 										<td>{formatDate(t.plan_start_time)}</td>
 										<td>{formatDate(t.plan_end_time)}</td>
 										<td>{t.manager_name}</td>

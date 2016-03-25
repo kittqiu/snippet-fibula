@@ -10936,6 +10936,7 @@ a.uk-datepicker-table-muted {
   white-space: -o-pre-wrap;
   /* Opera 7 */
   word-wrap: break-word;
+  font-size: 14px;
 }
 .dv-text-caution {
   color: #CC525E;
