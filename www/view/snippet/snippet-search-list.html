@@ -44,7 +44,7 @@ $(function(){
 						<li><a href="/snippet/search?q={{ __request__.query.q|url}}&page={{ index }}">{{ index }}</a></li>
 						{% endif %}
 					{% endfor %}
-					{% if page.index == page.total %}
+					{% if page.index == page.pages %}
 						<li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
 					{% else %}
 						<li><a href="/snippet/search?q={{ __request__.query.q|url}}&page={{ page.index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>

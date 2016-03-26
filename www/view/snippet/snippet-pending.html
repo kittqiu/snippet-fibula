@@ -33,13 +33,13 @@
 				{% for m, record in __records[n] %}
 				<tr>
 					{% if __user__.id == record.user_id %}				
-					<td><a href="/snippet/pending/{{ record.id }}/edit" class="dv-link"><b>{{ record.name }}</b></a></td>
-					<td>{{ record.brief }}</td>
-					<td><a href="/snippet/pending/{{ record.id }}/edit" class="dv-link">{{ _('Change') }}</a></td>
+					<td class="uk-width-2-6"><a href="/snippet/pending/{{ record.id }}/edit" class="dv-link"><b>{{ record.name }}</b></a></td>
+					<td class="uk-width-3-6">{{ record.brief }}</td>
+					<td class="uk-width-1-6"><a href="/snippet/pending/{{ record.id }}/edit" class="dv-link">{{ _('Change') }}</a></td>
 					{% else %}
-					<td><a href="/snippet/pending/{{ record.id }}/check" class="dv-link"><b>{{ record.name }}</b></a></td>
-					<td>{{ record.brief }}</td>
-					<td>
+					<td class="uk-width-2-6"><a href="/snippet/pending/{{ record.id }}/check" class="dv-link"><b>{{ record.name }}</b></a></td>
+					<td class="uk-width-3-6">{{ record.brief }}</td>
+					<td class="uk-width-1-6">
 						{% if record.contributor && record.contributor|find(__user__.id) %}
 						<span>已审核({{ record.score }}%)</span>
 						{% else %}

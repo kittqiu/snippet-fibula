@@ -80,8 +80,7 @@ var ManageTaskList = React.createClass({
 	},
 	render: function(){
 		return (
-			<div className="uk-width-1-1">		
-				<hr className="dv-hr"/>
+			<div className="uk-width-1-1">				
 				<table className="uk-table">
 					<thead>
 						<tr>
@@ -202,8 +201,7 @@ var ExecutingTaskList = React.createClass({
 	},
 	render: function(){
 		return (
-			<div className="uk-width-1-1">		
-				<hr className="dv-hr"/>
+			<div className="uk-width-1-1">
 				<table className="uk-table">
 					<thead>
 						<tr>
@@ -387,6 +385,8 @@ var MyTask = React.createClass({
 		return (
 			<div className="uk-width-1-1">
 				<h1 className="uk-text-center"><b>我的任务</b></h1>
+				<div className="uk-text-right"><a href="/project/task/history" className="dv-link">已结束的历史任务</a></div>
+				<hr className="dv-hr"/>
 				<ExecutingTaskList uid={this.props.uid}/>
 				<div style={marginTop}></div>				
 			</div>
@@ -400,6 +400,8 @@ var MyManageTask = React.createClass({
 		return (
 			<div className="uk-width-1-1">
 				<h1 className="uk-text-center"><b>我管理的任务</b></h1>
+				<div className="uk-text-right"><a href="/project/task/manage/history" className="dv-link">已结束的历史任务</a></div>
+				<hr className="dv-hr"/>
 				<ManageTaskList uid={this.props.uid}/>
 				<div style={marginTop}></div>
 			</div>

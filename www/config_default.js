@@ -83,6 +83,10 @@
         port: 6379
     },
 
+    project: {
+        page_size: 20
+    },
+
     snippet: {
         page_size: 10,
         large_page_size: 20,

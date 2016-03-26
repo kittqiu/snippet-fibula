@@ -3,6 +3,7 @@
 var 
 	db = require( __base + 'db'),
 	api = require( __base + 'api'),
+	Page = require( __base + 'page'),
 	home = require( __base + 'controller/home'), 
 	json_schema = require( __base + 'json_schema'),
 	base = require('./base');
@@ -30,13 +31,17 @@ var ACTIONMAP = {
 GET METHOD:
 /project/daily
 /project/task
+/project/task/history
 /project/task/manage
+/project/task/manage/history
 /project/task/plan
 
 /api/project/daily?date=xx
 /api/project/t/listExecuting?uid=xx
 /api/project/t/listManage?uid=xx
 /api/project/t/listQueue?uid=xx
+/api/project/t/history/listCompleted?uid=xx&&page=x
+/api/project/t/history/listManage?uid=xx&&page=x
 /api/project/t/:id/listFlow
 /api/project/t/:id/daily
 
@@ -60,10 +65,23 @@ module.exports = {
 		base.setHistoryUrl(this);
 	},
 
+	'GET /project/task/history': function* (){
+		var page = this.request.query.page || 1;
+		yield $_render( this, {__page__:page}, 'task_history.html');
+		base.setHistoryUrl(this);
+	},
+
 	'GET /project/task/manage': function* (){
 		yield $_render( this, {}, 'task_manage.html');
 		base.setHistoryUrl(this);
 	},
+
+	'GET /project/task/manage/history': function* (){
+		var page = this.request.query.page || 1;
+		yield $_render( this, {__page__:page}, 'task_manage_history.html');
+		base.setHistoryUrl(this);
+	},
+
 	'GET /project/task/plan': function* (){
 		yield $_render( this, {}, 'task_plan.html');
 		base.setHistoryUrl(this);
@@ -88,6 +106,28 @@ module.exports = {
 	'GET /api/project/t/listQueue': function* (){
 		var uid = this.request.query.uid || '';
 		this.body = yield base.task.$listQueueOfUser(uid);
+	},
+
+	'GET /api/project/t/history/listCompleted': function* (){
+		var uid = this.request.query.uid || this.request.user.id,
+			index = this.request.query.page || '1',
+			index = parseInt(index),
+			page_size = base.config.PAGE_SIZE,
+			page = new Page(index, page_size), 
+			rs = yield base.task.$listHistoryExecuteOfUser(uid, page_size*(index-1), page_size);
+		page.total = yield base.task.$countHistoryExecuteOfUser(uid);
+		this.body = { page:page, tasks: rs};
+	},
+
+	'GET /api/project/t/history/listManage': function* (){
+		var uid = this.request.query.uid || this.request.user.id,
+			index = this.request.query.page || "1",
+			index = parseInt(index),
+			page_size = base.config.PAGE_SIZE,
+			page = new Page(index, page_size), 
+			rs = yield base.task.$listHistoryManageOfUser(uid, page_size*(index-1), page_size);
+		page.total = yield base.task.$countHistoryManageOfUser(uid);
+		this.body = { page:page, tasks: rs};
 	},
 
 	'GET /api/project/t/:id/listFlow': function* (id){

@@ -390,6 +390,38 @@ function* $task_listDaily(tid){
 	return yield warp.$query(sql, [tid]);
 }
 
+function* $task_listHistoryManageOfUser(uid, offset, limit){
+	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
+		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
+		+ ' where t.manager_id =? and t.closed=? order by t.end_time desc limit ? offset ?';
+	var rs = yield warp.$query(sql, [uid, true, limit, offset]);
+	return rs;
+}
+
+function* $task_countHistoryManageOfUser(uid){
+	return yield modelTask.$findNumber( {
+				select: 'count(*)',
+				where: '`manager_id`=? and `closed`=?',
+				params: [uid, true]
+			});
+}
+
+function* $task_listHistoryExecuteOfUser(uid, offset, limit){
+	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
+		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
+		+ ' where t.executor_id =? and t.closed=? order by t.end_time desc limit ? offset ?';
+	var rs = yield warp.$query(sql, [uid, true, limit, offset]);
+	return rs;
+}
+
+function* $task_countHistoryExecuteOfUser(uid){
+	return yield modelTask.$findNumber( {
+				select: 'count(*)',
+				where: '`executor_id`=? and `closed`=?',
+				params: [uid, true]
+			});
+}
+
 function* $group_getMembers(id){
 	var sql = 'select m.*, u.`name` from project_member as m, users as u where m.user_id = u.id and m.group_id=?';
 	return yield warp.$query(sql, [id]);
@@ -499,6 +531,10 @@ module.exports = {
 		
 	},
 
+	config: {
+		PAGE_SIZE: config.project.page_size
+	},
+
 	project: {
 		$list: $project_list,
 		$get: $project_get,
@@ -527,7 +563,11 @@ module.exports = {
 		$listFlow: $task_listFlow,
 		$nextFlow: $task_nextFlow,
 		$listDaily: $task_listDaily,
-		$get: $task_get
+		$get: $task_get,
+		$listHistoryManageOfUser: $task_listHistoryManageOfUser,
+		$countHistoryManageOfUser: $task_countHistoryManageOfUser,
+		$listHistoryExecuteOfUser: $task_listHistoryExecuteOfUser,
+		$countHistoryExecuteOfUser: $task_countHistoryExecuteOfUser
 	},
 
 	daily: {

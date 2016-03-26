@@ -1,0 +1,53 @@
+{% extends '../project_base.html' %}
+
+{% block head %}
+<script type="text/javascript">
+var ENV = {
+	user: {
+		id: "{{__request__.user.id}}"
+	}
+};
+</script>
+
+{% if __production__ %}
+<script src="/static/js/react.min.js"></script>
+<script src="/static/js/react-dom.min.js"></script>
+<script type="text/javascript">
+{% include './component/build/task.js' %}
+{% include './component/build/historytask.js' %}
+</script>
+{% else %}
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
+<script type="text/babel">
+{% include './component/src/task.jsx' %}
+{% include './component/src/historytask.jsx' %}
+ReactDOM.render( <MyManageHistory page="{{__page__}}"/>, document.getElementById('vm'));
+</script>
+{% endif %}
+
+
+{% endblock %}
+
+
+{% block content %}
+<div id="content-block" class="dv-container x-content" style="max-width:1080px">
+	<div id="vm" class="dv-container uk-width-1-1"  style="max-width:1080px">
+		
+	</div>
+</div>
+{% endblock %}
+
+
+{% block readyscript %}
+{% if __production__ %}
+<script type="text/javascript">
+ReactDOM.render(
+ 	React.createElement(MyManageHistory, {page:"{{__page__}}"}), document.getElementById('vm')
+ 	);
+</script>
+{% endif %}
+{% endblock %}
+
+

@@ -24,17 +24,17 @@ $(function(){
 				{% if count %}
 				{% for r in snippets %}		
 				<tr>					
-					<td>
+					<td class="uk-width-2-10">
 						{% if type == 'create' %}
 						<a href="/snippet/s/{{ r.id }}" class="dv-link"><b>{{ r.name }}</b></a>
 						{% else %}
 						<a href="/snippet/s/{{ r.snippet_id }}" class="dv-link"><b>{{ r.name }}</b></a>
 						{% endif %}
 					</td>
-					<td>{{ r.brief }}</td>
-					<td>{{ r.language }}</td>
-					<td>{{ r.environment }}</td>
-					<td>
+					<td  class="uk-width-5-10">{{ r.brief }}</td>
+					<td  class="uk-width-1-10">{{ r.language }}</td>
+					<td  class="uk-width-1-10">{{ r.environment }}</td>
+					<td class="uk-width-1-10">
 						{% if type == 'create' %}
 						<a data-clipboard-text="[{{r.name}}](/snippet/s/{{ r.id }})" class="dv-link referbtn">{{ _('Refer')}}</a>
 						{% else %}
@@ -67,7 +67,7 @@ $(function(){
 						<li><a href="?page={{ index }}">{{ index }}</a></li>
 						{% endif %}
 					{% endfor %}
-					{% if page.index == page.total %}
+					{% if page.index == page.pages %}
 						<li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
 					{% else %}
 						<li><a href="?page={{ page.index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>

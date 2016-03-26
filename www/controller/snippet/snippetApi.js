@@ -286,7 +286,8 @@ module.exports = {
     }, 
 
     'GET /snippet/s/:id/history': function* (id){
-        var index = this.request.query.page||1,
+        var index = this.request.query.page||'1',
+            index = parseInt(index),
             page = new Page(index, LARGE_PAGE_SIZE),
             snippets = yield $_getSnippetHistory( id, (index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE ),
             record = yield model.snippet.$find(id),
@@ -319,7 +320,8 @@ module.exports = {
 
     'GET /snippet/mine/own': function* (){
         var pageModel,
-            index = this.request.query.page||1,
+            index = this.request.query.page||'1',
+            index = parseInt(index),
             page = new Page(index, LARGE_PAGE_SIZE),
             user_id = this.request.user.id,
             snippets;
@@ -333,7 +335,9 @@ module.exports = {
 
     'GET /snippet/mine/edit': function* (){
         var pageModel,
-            page = new Page(this.request, LARGE_PAGE_SIZE),
+            index = this.request.query.page || '1',
+            index = parseInt(index),
+            page = new Page(index, LARGE_PAGE_SIZE),
             user_id = this.request.user.id,
             snippets;
         base.setHistoryUrl(this);
