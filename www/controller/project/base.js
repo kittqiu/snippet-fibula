@@ -478,6 +478,45 @@ function* $daily_listUser(user_id, dateTime){
 	return ts;
 }
 
+function* $daily_listProject(project_id, dateTime){
+	var begin_time = helper.getDateTimeAt0(dateTime),
+		end_time = helper.getNextDateTime(dateTime),
+		yes_time = helper.getPreviousDateTime(dateTime),
+		sql = 'select t.*, u.`name` as manager_name, e.name as executor_name from project_task as t '
+			+ 'left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id where t.project_id=? and t.start_time<>0 and t.start_time<? and (t.end_time>=? or t.end_time=0)',
+		ts, ds, os, i, j;
+
+	ts = yield warp.$query(sql, [project_id, end_time, begin_time]);
+	ds = yield modelDaily.$findAll({
+		select: '*',
+		where: '`project_id`=? and `time` >=? and `time`<?',
+		params: [project_id, begin_time, end_time]
+	});
+	os = yield modelDaily.$findAll({
+		select: '*',
+		where: '`project_id`=? and `time` >=? and `time`<?',
+		params: [project_id, yes_time, begin_time]
+	});
+
+	for( i = 0; i < ts.length; i++ ){
+		var task = ts[i];
+		task.daily = {};
+		for( j = 0; j < ds.length; j++ ){
+			if( ds[j].task_id === task.id ){
+				task.daily = ds[j];
+				break;
+			}
+		}
+		for( j = 0; j < os.length; j++ ){
+			if( os[j].task_id === task.id ){
+				task.daily.org_plan = os[j].plan;
+				break;
+			}
+		}
+	}
+	return ts;
+}
+
 function* $user_isProjectMaster(uid, project_id){
 	var r = yield modelProject.$find(project_id);
 	if( r && r.master_id === uid ){
@@ -571,7 +610,8 @@ module.exports = {
 	},
 
 	daily: {
-		$listUser: $daily_listUser
+		$listUser: $daily_listUser,
+		$listProject: $daily_listProject
 	},
 
 	user: {

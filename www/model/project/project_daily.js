@@ -4,6 +4,7 @@ var base = require('../_base');
 
 module.exports = function(warp){
 	return base.defineModel(warp, 'ProjectDaily', [
+		base.column_id('project_id', {index:true}),
 		base.column_id('task_id', {index:true}),
 		base.column_id('user_id', {index:true}),
 		base.column_bigint('duration', {defaultValue:0}),//hour

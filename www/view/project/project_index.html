@@ -31,6 +31,7 @@
 							{% if p.master_id == __request__.user.id %}
 							<a href="/project/p/{{p.id}}/edit" class="dv-link">修改</a>
 							{% endif %}
+							<a href="/project/p/{{p.id}}/daily" class="dv-link">工作进展</a>
 						</td>
 					</tr>
 					{% endfor %}

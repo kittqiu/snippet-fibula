@@ -20,10 +20,12 @@ GET METHOD:
 /project/group/:id/edit
 /project/p/creation
 /project/p/:id/build
+/project/p/:id/daily
 /project/p/:id/edit
 /project/p/:id
 
 
+/api/project/p/:id/daily?date=?
 /api/project/p/:id/tasklist
 /api/project/p/:id/taskrelylist
 /api/project/p/:id
@@ -96,6 +98,10 @@ module.exports = {
 			};
 		yield $_render( this, model, 'p/project_build.html');
 	},
+	'GET /project/p/:id/daily': function* (id){
+		yield $_render( this, {__id:id}, 'p/project_daily.html');
+		base.setHistoryUrl(this);
+	},
 	'GET /project/p/:id/edit': function* (id){
 		var model = {
 				__id: id,
@@ -122,6 +128,11 @@ module.exports = {
 
 	'GET /api/project/group/:id': function* (id){
 		this.body = yield base.group.$get(id);
+	},
+
+	'GET /api/project/p/:id/daily': function* (id){
+		var date = parseInt(this.request.query.date||'0') || Date.now();
+		this.body = yield base.daily.$listProject(id, date);
 	},
 
 	'GET /api/project/p/:id/tasklist': function* (id){
