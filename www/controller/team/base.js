@@ -112,6 +112,12 @@ function* $member_getUser(uid){
 	return r;
 }
 
+function* $member_collectUser(uid){
+	var sql = "select u.id,u.name, m.* from users as u LEFT JOIN team_member as m on u.id=m.user_id where u.id=?";
+	var rs = yield warp.$query(sql, [uid]);
+	return rs[0];
+}
+
 function* $department_listUsers(){
 	var sql = "select u.id, u.name, m.department from users as u,team_member as m where u.id=m.user_id and m.department <>''";
 	return yield warp.$query(sql);
@@ -186,7 +192,8 @@ module.exports = {
 		$getFree: $member_getFree,
 		$getUser: $member_getUser,
 		$listRoles: perm.user.$listRoles,
-		$havePerm: perm.user.$havePerm
+		$havePerm: perm.user.$havePerm,
+		$collectUser: $member_collectUser
 	},
 
 	perm: perm,

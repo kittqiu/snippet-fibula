@@ -443,8 +443,8 @@ function* $daily_listUser(user_id, dateTime){
 	var begin_time = helper.getDateTimeAt0(dateTime),
 		end_time = helper.getNextDateTime(dateTime),
 		yes_time = helper.getPreviousDateTime(dateTime),
-		sql = 'select t.*, u.`name` as manager_name, e.name as executor_name from project_task as t '
-			+ 'left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id where t.executor_id=? and t.start_time<>0 and t.start_time<? and (t.end_time>=? or t.end_time=0)',
+		sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
+			+ 'left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id left JOIN project as p on p.id=t.project_id where t.executor_id=? and t.start_time<>0 and t.start_time<? and (t.end_time>=? or t.end_time=0)',
 		ts, ds, os, i, j;
 
 	ts = yield warp.$query(sql, [user_id, end_time, begin_time]);

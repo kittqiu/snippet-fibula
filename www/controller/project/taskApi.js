@@ -30,6 +30,7 @@ var ACTIONMAP = {
 /******
 GET METHOD:
 /project/daily
+/project/daily/team
 /project/task
 /project/task/history
 /project/task/manage
@@ -44,7 +45,7 @@ GET METHOD:
 /api/project/t/history/listManage?uid=xx&&page=x
 /api/project/t/:id/listFlow
 /api/project/t/:id/daily
-
+/api/project/u/:id/daily?date=xx
 
 
 POST METHOD:
@@ -60,6 +61,12 @@ module.exports = {
 		yield $_render( this, {}, 'mydaily.html');
 		base.setHistoryUrl(this);
 	},
+
+	'GET /project/daily/team': function* (){
+		yield $_render( this, {}, 'team_daily.html');
+		base.setHistoryUrl(this);
+	},
+
 	'GET /project/task': function* (){
 		yield $_render( this, {}, 'task_index.html');
 		base.setHistoryUrl(this);
@@ -138,6 +145,11 @@ module.exports = {
 		this.body = yield base.task.$listDaily(id);
 	},
 
+	'GET /api/project/u/:uid/daily': function* (uid){
+		var date = parseInt(this.request.query.date||'0') || Date.now();
+		this.body = yield base.daily.$listUser(uid, date);
+	},
+
 	'POST /api/project/daily/creation': function* (){
 		var data = this.request.body,
 			task, daily;
@@ -149,6 +161,7 @@ module.exports = {
 		}
 		daily = {
 			id: db.next_id(),
+			project_id: task.project_id,
 			task_id: data.task_id,
 			user_id: this.request.user.id,
 			report: data.report,

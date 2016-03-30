@@ -513,7 +513,7 @@ var TaskDialog = React.createClass({
 									</li>
 									{
 										(( task.manager_id === ENV.user.id || this.props.project.master_id === ENV.user.id )
-											&& (task.closed===false))?
+											&& (!task.closed))?
 										<li className={ this.state.tab == 'edit' ? "uk-active": '' }>
 											<TaskTabEdit task={task} difficulties={difficulties} project={this.props.project} hideModal={this.hideModal} onTaskChanged={this.props.onTaskChanged}/>
 										</li>

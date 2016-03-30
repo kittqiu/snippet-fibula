@@ -109,7 +109,6 @@ var NewTaskDlg = React.createClass({
 					rs.push(parseInt(r));
 				}
 			});
-		console.log(automode)
 		if( automode == 0 && rs.length > 0 ){
 			var tasks = this.props.project.tasks,
 				max_end_time = 0, new_end_time;
@@ -171,7 +170,7 @@ var NewTaskDlg = React.createClass({
 		datepicker.on('change', this.onEndTimeChanged);
 	},
 	render: function(){
-		var textarea_height = { height: "100px"};
+		var textarea_height = { height: "150px"};
 		return (
 			<div id="modal_new_task" className="uk-modal uk-text-left">
 				<div className="uk-modal-dialog">
@@ -260,7 +259,7 @@ var NewTaskDlg = React.createClass({
 								<div className="uk-form-row uk-width-1-1">
 									<label className="uk-form-label">任务说明</label>
 									<div className="uk-form-controls">
-										<textarea ref="details" name="details" className="uk-width-2-3" style={textarea_height} placeholder="可暂时不填">
+										<textarea ref="details" name="details" className="uk-width-4-5" style={textarea_height} placeholder="可暂时不填">
 										</textarea>
 									</div>
 								</div>
