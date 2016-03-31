@@ -52,6 +52,7 @@ function initVM( data ){
 			details: data.details || '',
 			groups: data.groups || [],
 			members: data.members || [],
+			status: data.status || 'ready',
 			newgroup: ''
 		},
 		error_msgs:{
@@ -59,6 +60,10 @@ function initVM( data ){
 			master: '请选择项目负责人'
 		},
 		methods:{
+			parseStatus: function(){
+				var ss = {ready:'准备就绪', running:'正在执行', end:'已结束'};
+				return ss[this.status]
+			}
 		}
 	});
 	
@@ -104,7 +109,7 @@ $(function () {
 					<td class="uk-block-muted">结束时间：</td>
 					<td v-text="end_time"></td>					
 					<td class="uk-block-muted">状态：</td>
-					<td>正在执行</td>
+					<td><span v-text="parseStatus()"></span></td>
 				</tr>
 				<tr>
 					<td class="uk-block-muted">参与成员：</td>
@@ -128,7 +133,7 @@ $(function () {
 				</tr>
 				<tr>
 					<td class="uk-block-muted">描述：</td>
-					<td colspan="3" v-text="details"></td>
+					<td colspan="3" ><pre class="dv-pre-clear" v-text="details"></pre></td>
 				</tr>
 			</tbody>
 		</table>

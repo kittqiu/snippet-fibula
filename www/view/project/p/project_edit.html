@@ -43,6 +43,7 @@ function initVM( data ){
 			details: data.details || '',
 			groups: data.groups || [],
 			members: data.members || [],
+			status: data.status || 'ready',
 			newgroup: ''
 		},
 		error_msgs:{
@@ -50,6 +51,10 @@ function initVM( data ){
 			master: '请选择项目负责人'
 		},
 		methods:{
+			parseStatus: function(){
+				var ss = {ready:'准备就绪', running:'正在执行', end:'已结束'};
+				return ss[this.status]
+			},
 			correctErrMsg: function(err){
 				_.each(err, function(e,n){
 					var options = vm.$options;
@@ -81,7 +86,8 @@ function initVM( data ){
 					start_time: toDateTime(this.start_time),
 					end_time: toDateTime(this.end_time),
 					master_id: $("#master").find('option:selected').attr('id'),
-					details: this.details
+					details: this.details,
+					status: this.status
 				};
 				//console.log(data)
 				if(validateJsonObj('createProject', data)){
@@ -163,7 +169,13 @@ $(function () {
 						<td class="uk-width-1-10 uk-block-muted">名称：</td>
 						<td class="uk-width-4-10"><input v-model="name" name="name"  type="text" class="uk-width-1-1" autofucus></td>
 						<td class="uk-block-muted">状态：</td>
-						<td>正在执行</td>
+						<td>
+							<select v-model="status" name="status" id="status" class="uk-width-1-1">
+								<option value="ready">准备就绪</option>
+								<option value="running">正在执行</option>
+								<option value="end">已结束</option>
+							</select>
+						</td>
 					</tr>
 					<tr>
 						<td class="uk-width-1-10 uk-block-muted">负责人：</td>

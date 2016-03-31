@@ -33,7 +33,8 @@ var
 
 var 
 	DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires,
-	PARENT_ROOT = 'root';
+	PARENT_ROOT = 'root',
+	MASTER_GROUP = 'manager';
 
 function* init_database(){
 	//perm.perm.$register('')
@@ -78,6 +79,77 @@ function* $project_list(offset, limit){
 	var sql = 'select p.id, p.creator_id, p.master_id, u.name as master_name, p.name, p.start_time, p.end_time, p.status,p.details from project as p, ' 
 		+ 'users as u where u.id = p.master_id order by p.created_at desc limit ? offset ? ';
 	return yield warp.$query(sql, [limit, offset]);
+}
+
+function* $_project_forUser(uid, status ){
+	var sql = 'select p.*, u.name as master_name from project as p left join users as u on u.id=p.master_id '
+		+ ' where p.status=? and p.master_id=? order by p.created_at desc ';
+	return yield warp.$query(sql, [status, uid]);		
+}
+
+function _project_combine(rs1, rs2){
+	var pids = [], i;
+	for(i = 0; i < rs1.length; i++ ){
+		pids.push(rs1[i].id);
+	}
+	for(i = 0; i < rs2.length; i++ ){
+		var r = rs2[i];
+		if(pids.indexOf(r.id) === -1 ){
+			rs1.push(r)
+		}
+	}
+}
+
+function* $project_listUserJoinOnRun(uid, offset, limit){
+	var sql = 'select p.*, u.name as master_name from project as p left join users as u on u.id=p.master_id '
+		+ ' where ( p.status=? or p.status=? ) and p.id in ( select m.project_id from project_member as m where m.user_id=? ) order by p.created_at desc ',
+		rs/*, ps, ps_ready*/;
+	if( offset !== undefined ){
+		sql += ' limit ? offset ?';
+		offset = offset ? offset : 0;
+		limit = limit ? limit : 10;
+		offset = offset < 0 ? 0: offset;
+		limit = limit < 0 ? 10 : limit;
+		rs = yield warp.$query(sql, ['running', 'ready', uid, limit, offset]);
+	}else{
+		rs = yield warp.$query(sql, ['running', 'ready', uid]);	
+	}
+
+	// ps = yield $_project_forUser(uid, 'running');
+	// ps_ready = yield $_project_forUser(uid, 'ready');
+	// ps = ps.concat(ps_ready);
+	// _project_combine(rs, ps);
+	return rs;
+}
+
+function* $project_countUserJoinOnRun(uid){
+	return yield modelProject.$findNumber( {
+				select: 'count(*)',
+				where: '( `status`=? or `status`=? ) and id in ( select m.project_id from project_member as m where m.user_id=? )',
+				params: ['running', 'ready', uid]
+			});
+}
+
+function* $project_listUserJoinOnEnd(uid, offset, limit){
+	var sql = 'select p.*, u.name as master_name from project as p left join users as u on u.id=p.master_id '
+		+ ' where p.status=? and p.id in ( select m.project_id from project_member as m where m.user_id=? ) order by p.created_at desc';
+	if( offset !== undefined ){
+		sql += ' limit ? offset ?';
+		offset = offset ? offset : 0;
+		limit = limit ? limit : 10;
+		offset = offset < 0 ? 0: offset;
+		limit = limit < 0 ? 10 : limit;
+		return yield warp.$query(sql, ['end', uid, limit, offset]);
+	}else
+		return yield warp.$query(sql, ['end', uid]);	
+}
+
+function* $project_countUserJoinOnEnd(uid){
+	return yield modelProject.$findNumber( {
+				select: 'count(*)',
+				where: '`status`=? and id in ( select m.project_id from project_member as m where m.user_id=? )',
+				params: ['end', uid]
+			});
 }
 
 /* get: project record, creator name, master name, groups, members*/
@@ -181,6 +253,18 @@ function* $project_listTaskRelies(id){
 		where: '`project_id`=?',
 		params: [id]
 	})
+}
+
+function* $project_changeMaster(project_id, new_uid){
+	var m = yield modelMember.$find({
+		select: '*',
+		where: '`project_id`=? and `group_id`=?',
+		params: [project_id, MASTER_GROUP]
+	});
+	if( m ){
+		m.user_id = new_uid;
+		yield m.$update(['user_id']);
+	}
 }
 
 function* $task_maxOrder(project_id, parent_id){
@@ -571,17 +655,23 @@ module.exports = {
 	},
 
 	config: {
-		PAGE_SIZE: config.project.page_size
+		PAGE_SIZE: config.project.page_size,
+		MASTER_GROUP: MASTER_GROUP
 	},
 
 	project: {
 		$list: $project_list,
+		$listUserJoinOnRun: $project_listUserJoinOnRun,
+		$listUserJoinOnEnd: $project_listUserJoinOnEnd,
 		$get: $project_get,
 		statusOptions: project_optionStatus,
 		roleOptions: project_optionRole,
 		$listOptionalUsers: $project_listOptionalUsers,
 		$listTasks : $project_listTasks,
-		$listTaskRelies: $project_listTaskRelies
+		$listTaskRelies: $project_listTaskRelies,
+		$countUserJoinOnRun: $project_countUserJoinOnRun,
+		$countUserJoinOnEnd: $project_countUserJoinOnEnd,
+		$changeMaster: $project_changeMaster
 	},
 
 	group: {

@@ -3,6 +3,7 @@
 var 
 	db = require( __base + 'db'),
 	api = require( __base + 'api'),
+	Page = require( __base + 'page'),
 	home = require( __base + 'controller/home'), 
 	json_schema = require( __base + 'json_schema'),
 	base = require('./base');
@@ -18,6 +19,9 @@ function* $_render( context, model, view ){
 GET METHOD:
 /project
 /project/group/:id/edit
+/project/history
+/project/p/myDoing?page=xx
+/project/p/myHistory?page=xx
 /project/p/creation
 /project/p/:id/build
 /project/p/:id/daily
@@ -25,6 +29,8 @@ GET METHOD:
 /project/p/:id
 
 
+/api/project/p/myDoing?page=xx
+/api/project/p/myHistory?page=xx
 /api/project/p/:id/daily?date=?
 /api/project/p/:id/tasklist
 /api/project/p/:id/taskrelylist
@@ -52,11 +58,13 @@ POST METHOD:
 
 module.exports = {
 	'GET /project': function*(){
-		var model = {
-			projects: yield base.project.$list( 0, 20 )
-		};
-		yield $_render( this, model, 'project_index.html');
-		base.setHistoryUrl(this);
+		this.redirect( '/project/p/myDoing' );
+		// var model = {
+		// 	//projects: yield base.project.$list( 0, 20 )
+		// 	projects: yield base.project.$listUserJoinOnRun( this.request.user.id )
+		// };
+		// yield $_render( this, model, 'project_index.html');
+		// base.setHistoryUrl(this);
 	},
 
 	'GET /project/group/:id/edit': function* (id){
@@ -73,6 +81,30 @@ module.exports = {
 			users: yield base.project.$listOptionalUsers(group.project_id||'none')
 		};
 		yield $_render( this, model, 'p/group_form.html');
+	},
+
+	'GET /project/history': function*(){
+		var model = {
+			projects: yield base.project.$listUserJoinOnEnd( this.request.user.id )
+		};
+		yield $_render( this, model, 'project_index.html');
+		base.setHistoryUrl(this);
+	},
+
+	'GET /project/p/myDoing': function*(){
+		var model = {
+			__page: this.request.query.page || 1
+		};
+		yield $_render( this, model, 'p/project_mine.html');
+		base.setHistoryUrl(this);
+	},
+
+	'GET /project/p/myHistory': function*(){
+		var model = {
+			__page: this.request.query.page || 1
+		};
+		yield $_render( this, model, 'p/project_my_history.html');
+		base.setHistoryUrl(this);
 	},
 
 	'GET /project/p/creation': function*(){
@@ -124,6 +156,28 @@ module.exports = {
 				roleOptions: base.project.roleOptions()
 			};
 		yield $_render( this, model, 'p/project_view.html');
+	},
+
+	'GET /api/project/p/myDoing': function*(){
+		var uid = this.request.query.uid || this.request.user.id,
+			index = this.request.query.page || '1',
+			index = parseInt(index),
+			page_size = base.config.PAGE_SIZE,
+			page = new Page(index, page_size), 
+			rs = yield yield base.project.$listUserJoinOnRun( uid, page_size*(index-1), page_size);
+		page.total = yield base.project.$countUserJoinOnRun(uid);
+		this.body = { page:page, projects: rs};
+	},
+
+	'GET /api/project/p/myHistory': function*(){
+		var uid = this.request.query.uid || this.request.user.id,
+			index = this.request.query.page || '1',
+			index = parseInt(index),
+			page_size = base.config.PAGE_SIZE,
+			page = new Page(index, page_size), 
+			rs = yield yield base.project.$listUserJoinOnEnd( uid, page_size*(index-1), page_size);
+		page.total = yield base.project.$countUserJoinOnEnd(uid);
+		this.body = { page:page, projects: rs};
 	},
 
 	'GET /api/project/group/:id': function* (id){
@@ -199,18 +253,28 @@ module.exports = {
 	},
 
 	'POST /api/project/p': function* (){
-		var r,
+		var r, user,
 			data = this.request.body;
-		json_schema.validate('project', data);
+		json_schema.validate('project_create', data);
 
 		r = {
+			id: db.next_id(),
 			creator_id: this.request.user.id,
 			name: data.name, 
 			master_id: data.master_id,
 			start_time: data.start_time,
 			end_time: data.end_time,
 			details: data.details
-		};
+		};		
+
+		user = {
+					project_id: r.id,
+					user_id: r.master_id,
+					group_id: base.config.MASTER_GROUP,
+					responsibility: '',
+					role: 'master'
+				};
+		yield base.modelMember.$create(user);
 		yield base.modelProject.$create( r );
 		this.body = {
 			result: 'ok',
@@ -276,7 +340,10 @@ module.exports = {
 			throw api.notFound('project', this.translate('Record not found'));
 		}
 
-		yield db.op.$update_record( r, data, ['name', 'start_time', 'end_time', 'details', 'master_id'])
+		if( r.master_id !== data.master_id ){
+			yield base.project.$changeMaster(id, data.master_id);
+		}
+		yield db.op.$update_record( r, data, ['name', 'start_time', 'end_time', 'details', 'master_id', 'status'])
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)

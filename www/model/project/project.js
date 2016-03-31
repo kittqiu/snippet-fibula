@@ -9,7 +9,7 @@ module.exports = function(warp){
 		base.column_varchar_50('name'),
 		base.column_bigint('start_time'),
 		base.column_bigint('end_time'),
-		base.column_varchar_20('status', {defaultValue:'ready'}),//options: ready, ,running, stopped, pending, cancel
+		base.column_varchar_20('status', {defaultValue:'ready'}),//options: ready, running, end
 		base.column_text('details')
 		], {
 			table: 'project'

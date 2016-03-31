@@ -73,7 +73,7 @@ var ManageHistoryList = React.createClass({
 					</tbody>
 				</table>
 				<div className={this.state.tasks.length>0?'uk-hidden':''}>无记录</div>
-				<div className={this.state.tasks.length>0?'uk-text-center':'uk-hidden'}>
+				<div className={this.state.page.pages>1?'uk-text-center':'uk-hidden'}>
 					<ul className="uk-pagination">
 						{ left }
 						{
@@ -162,7 +162,7 @@ var ExecuteHistoryList = React.createClass({
 					</tbody>
 				</table>
 				<div className={this.state.tasks.length>0?'uk-hidden':''}>无记录</div>
-				<div className={this.state.tasks.length>0?'uk-text-center':'uk-hidden'}>
+				<div className={this.state.page.pages>1?'uk-text-center':'uk-hidden'}>
 					<ul className="uk-pagination">
 						{ left }
 						{

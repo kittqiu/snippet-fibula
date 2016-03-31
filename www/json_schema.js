@@ -390,6 +390,18 @@ var schemas = {
 			start_time: PROPERTY.TIMESTAMP,
 			end_time:PROPERTY.TIMESTAMP,
 			master_id:PROPERTY.ID,
+			details:PROPERTY.TEXT,
+			status:PROPERTY.EMPTYSTRING
+		},
+		required:['name', 'start_time', 'end_time', 'master_id', 'details','status']
+	},
+	project_create:{
+		type: 'object',
+		properties: {
+			name: PROPERTY.NAME,
+			start_time: PROPERTY.TIMESTAMP,
+			end_time:PROPERTY.TIMESTAMP,
+			master_id:PROPERTY.ID,
 			details:PROPERTY.TEXT
 		},
 		required:['name', 'start_time', 'end_time', 'master_id', 'details']
