@@ -96,7 +96,7 @@ var ProjectDaily = React.createClass({
 		this.loadData(dayTime);
 	},
 	getInitialState: function() {
-		return {dayTime:Date.now(), tasks:[], project:{}}
+		return {dayTime:Date.now()-86400000, tasks:[], project:{}}
 	},
 	componentDidMount: function(){
 		var datepicker = UIkit.datepicker(this.refs.time, {weekstart:0, format:'YYYY-MM-DD'});

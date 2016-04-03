@@ -100,6 +100,56 @@ function _project_combine(rs1, rs2){
 	}
 }
 
+function*  $project_listAllOnRun(offset, limit){
+	var sql = 'select p.*, u.name as master_name from project as p left join users as u on u.id=p.master_id '
+		+ ' where p.status=? or p.status=? order by p.created_at desc ',
+		rs;
+	if( offset !== undefined ){
+		sql += ' limit ? offset ?';
+		offset = offset ? offset : 0;
+		limit = limit ? limit : 10;
+		offset = offset < 0 ? 0: offset;
+		limit = limit < 0 ? 10 : limit;
+		rs = yield warp.$query(sql, ['running', 'ready', limit, offset]);
+	}else{
+		rs = yield warp.$query(sql, ['running', 'ready']);	
+	}
+	return rs;
+}
+
+function* $project_countAllOnRun(){
+	return yield modelProject.$findNumber( {
+				select: 'count(*)',
+				where: '`status`=? or `status`=?',
+				params: ['running', 'ready']
+			});
+}
+
+function*  $project_listAllOnEnd(offset, limit){
+	var sql = 'select p.*, u.name as master_name from project as p left join users as u on u.id=p.master_id '
+		+ ' where p.status=? order by p.created_at desc ',
+		rs;
+	if( offset !== undefined ){
+		sql += ' limit ? offset ?';
+		offset = offset ? offset : 0;
+		limit = limit ? limit : 10;
+		offset = offset < 0 ? 0: offset;
+		limit = limit < 0 ? 10 : limit;
+		rs = yield warp.$query(sql, ['end', limit, offset]);
+	}else{
+		rs = yield warp.$query(sql, ['end']);	
+	}
+	return rs;
+}
+
+function* $project_countAllOnEnd(){
+	return yield modelProject.$findNumber( {
+				select: 'count(*)',
+				where: '`status`=? ',
+				params: ['end']
+			});
+}
+
 function* $project_listUserJoinOnRun(uid, offset, limit){
 	var sql = 'select p.*, u.name as master_name from project as p left join users as u on u.id=p.master_id '
 		+ ' where ( p.status=? or p.status=? ) and p.id in ( select m.project_id from project_member as m where m.user_id=? ) order by p.created_at desc ',
@@ -661,6 +711,8 @@ module.exports = {
 
 	project: {
 		$list: $project_list,
+		$listAllOnRun: $project_listAllOnRun,
+		$listAllOnEnd: $project_listAllOnEnd,
 		$listUserJoinOnRun: $project_listUserJoinOnRun,
 		$listUserJoinOnEnd: $project_listUserJoinOnEnd,
 		$get: $project_get,
@@ -669,6 +721,8 @@ module.exports = {
 		$listOptionalUsers: $project_listOptionalUsers,
 		$listTasks : $project_listTasks,
 		$listTaskRelies: $project_listTaskRelies,
+		$countAllOnRun: $project_countAllOnRun,
+		$countAllOnEnd: $project_countAllOnEnd,
 		$countUserJoinOnRun: $project_countUserJoinOnRun,
 		$countUserJoinOnEnd: $project_countUserJoinOnEnd,
 		$changeMaster: $project_changeMaster

@@ -20,6 +20,8 @@ GET METHOD:
 /project
 /project/group/:id/edit
 /project/history
+/project/p/allDoing?page=xx
+/project/p/allHistory?page=xx
 /project/p/myDoing?page=xx
 /project/p/myHistory?page=xx
 /project/p/creation
@@ -29,6 +31,8 @@ GET METHOD:
 /project/p/:id
 
 
+/api/project/p/allDoing?page=xx
+/api/project/p/allHistory?page=xx
 /api/project/p/myDoing?page=xx
 /api/project/p/myHistory?page=xx
 /api/project/p/:id/daily?date=?
@@ -88,6 +92,21 @@ module.exports = {
 			projects: yield base.project.$listUserJoinOnEnd( this.request.user.id )
 		};
 		yield $_render( this, model, 'project_index.html');
+		base.setHistoryUrl(this);
+	},
+	'GET /project/p/allDoing': function* (){
+		var model = {
+			__page: this.request.query.page || 1
+		};
+		yield $_render( this, model, 'p/project_all.html');
+		base.setHistoryUrl(this);
+	},
+
+	'GET /project/p/allHistory': function*(){
+		var model = {
+			__page: this.request.query.page || 1
+		};
+		yield $_render( this, model, 'p/project_all_history.html');
 		base.setHistoryUrl(this);
 	},
 
@@ -156,6 +175,26 @@ module.exports = {
 				roleOptions: base.project.roleOptions()
 			};
 		yield $_render( this, model, 'p/project_view.html');
+	},
+
+	'GET /api/project/p/allDoing': function*(){
+		var index = this.request.query.page || '1',
+			index = parseInt(index),
+			page_size = base.config.PAGE_SIZE,
+			page = new Page(index, page_size), 
+			rs = yield yield base.project.$listAllOnRun( page_size*(index-1), page_size);
+		page.total = yield base.project.$countAllOnRun();
+		this.body = { page:page, projects: rs};
+	},
+
+	'GET /api/project/p/allHistory': function*(){
+		var	index = this.request.query.page || '1',
+			index = parseInt(index),
+			page_size = base.config.PAGE_SIZE,
+			page = new Page(index, page_size), 
+			rs = yield yield base.project.$listAllOnEnd( page_size*(index-1), page_size);
+		page.total = yield base.project.$countAllOnEnd();
+		this.body = { page:page, projects: rs};
 	},
 
 	'GET /api/project/p/myDoing': function*(){

@@ -1,7 +1,15 @@
 {
 	"/project": "[project_list.md]",
-	"/project/daily": "[project_daily.md]",
+	"/project/p/allDoing": "[project_list.md]",
+	"/project/p/creation": "[project_create.md]",
+	"/project/p/myDoing": "[project_list.md]",
+	"/project/daily/team": "[project_team_daily.md]",
+	"/project/daily": "[project_my_daily.md]",
 	"/project/p/:id/build": "[project_build.md]",
+	"/project/p/:id/daily": "[project_daily.md]",
+	"/project/p/:id/edit": "[project_edit.md]",
+	"/project/p/:id": "[project_view.md]",
+	"/project/group/:id/edit": "[project_group_edit.md]",
 	"/project/task": "[project_mytask.md]",
 	"/project/task/manage": "[project_task_manage.md]",
 	"/project/task/plan": "[project_task_plan.md]"

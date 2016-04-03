@@ -155,3 +155,122 @@ var MyHistoryProject = React.createClass({
 			)
 	}
 });
+
+
+var AllProject = React.createClass({
+	loadData: function(){
+		getJSON( '/api/project/p/allDoing', {page:this.props.page}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.setState({projects:data.projects, page:data.page, pagelist: data.page.list});
+				}
+			}.bind(this)
+		);
+	},
+	getInitialState: function(){		
+		return {page:{}, pagelist:[], projects:[]}
+	},
+	componentWillMount: function(){
+		this.loadData();
+	},
+	render: function(){
+		var page = this.state.page,
+			left = page.index == 1 ? <li className="uk-disabled"><span><i className="uk-icon-angle-double-left"></i></span></li> 
+				: <li><a href={"?page=" + (page.index-1)}><i className="uk-icon-angle-double-left"></i></a></li>,
+			right = page.index == Math.floor(page.total/page.size)+1 ? <li className="uk-disabled"><span><i className="uk-icon-angle-double-right"></i></span></li> 
+				: <li><a href={"?page=" + (page.index+1)}><i className="uk-icon-angle-double-right"></i></a></li>;
+		
+		return (
+			<div>
+				<h1 className="uk-text-center"><b>所有正在执行的项目</b></h1>				
+				<div className="uk-text-right">
+					<a href="/project/p/allHistory" className="dv-link">查看历史项目</a>
+				</div>
+				<hr className="dv-hr"/>
+				<div>
+					{
+						this.state.projects.length > 0 ? <ProjectList projects={this.state.projects}/>
+							: <span>无符合条件记录</span>
+					}
+					<div className={this.state.page.pages>1?'uk-text-center':'uk-hidden'}>
+						<ul className="uk-pagination">
+							{ left }
+							{
+								this.state.pagelist.map(function(i, index){
+									if( i === '...' ){
+										return <li key={index} className="uk-disabled"><span>...</span></li>
+									}else if( i == page.index ){
+										return <li key={index} className="uk-active"><span>{i}</span></li>
+									}else{
+										return <li key={index}><a href={"?page=" + i + '&uid=' + ENV.user.id}>{ i }</a></li>
+									}
+								}.bind(this))
+							}
+							{ right }
+						</ul>
+					</div>
+				</div>
+			</div>
+			)
+	}
+});
+
+var AllHistoryProject = React.createClass({
+	loadData: function(){
+		getJSON( '/api/project/p/allHistory', {page:this.props.page}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.setState({projects:data.projects, page:data.page, pagelist: data.page.list});
+				}
+			}.bind(this)
+		);
+	},
+	getInitialState: function(){		
+		return {page:{}, pagelist:[], projects:[]}
+	},
+	componentWillMount: function(){
+		this.loadData();
+	},
+	render: function(){
+		var page = this.state.page,
+			left = page.index == 1 ? <li className="uk-disabled"><span><i className="uk-icon-angle-double-left"></i></span></li> 
+				: <li><a href={"?page=" + (page.index-1)}><i className="uk-icon-angle-double-left"></i></a></li>,
+			right = page.index == Math.floor(page.total/page.size)+1 ? <li className="uk-disabled"><span><i className="uk-icon-angle-double-right"></i></span></li> 
+				: <li><a href={"?page=" + (page.index+1)}><i className="uk-icon-angle-double-right"></i></a></li>;
+		
+		return (
+			<div>
+				<h1 className="uk-text-center"><b>所有历史项目</b></h1>				
+				<div className="uk-text-right">
+					<a href="/project/p/allDoing" className="dv-link">所有正在执行的项目</a>
+				</div>
+				<hr className="dv-hr"/>
+				<div>
+					{
+						this.state.projects.length > 0 ? <ProjectList projects={this.state.projects}/>
+							: <span>无符合条件记录</span>
+					}
+					<div className={this.state.page.pages>1?'uk-text-center':'uk-hidden'}>
+						<ul className="uk-pagination">
+							{ left }
+							{
+								this.state.pagelist.map(function(i, index){
+									if( i === '...' ){
+										return <li key={index} className="uk-disabled"><span>...</span></li>
+									}else if( i == page.index ){
+										return <li key={index} className="uk-active"><span>{i}</span></li>
+									}else{
+										return <li key={index}><a href={"?page=" + i + '&uid=' + ENV.user.id}>{ i }</a></li>
+									}
+								}.bind(this))
+							}
+							{ right }
+						</ul>
+					</div>
+				</div>
+			</div>
+			)
+	}
+});
