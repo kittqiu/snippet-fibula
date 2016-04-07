@@ -130,7 +130,7 @@ module.exports = {
 
 		if( email_suffix ){
 			if( !email.endsWith(email_suffix)){
-				throw api.notAllowed( 'email', 'Email must be end with ' + email_suffix );
+				throw api.invalidParam( 'email', 'Email must be end with ' + email_suffix );
 			}
 		}
 
