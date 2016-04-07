@@ -367,8 +367,8 @@ var TaskDailyList = React.createClass({
 									<td>{formatDate(d.time,true)}</td>
 									<td>{d.user_name}</td>
 									<td>{d.duration}小时</td>
-									<td>{d.report}</td>
-									<td>{d.plan}</td>
+									<td><pre className="dv-pre-clear">{d.report}</pre></td>
+									<td><pre className="dv-pre-clear">{d.plan}</pre></td>
 								</tr>
 								)
 							}.bind(this))
