@@ -92,7 +92,8 @@
     snippet: {
         page_size: 10,
         large_page_size: 20,
-        score_delta: 34
+        score_delta: 34,
+        create_search_engine: true
     },
 
     // END:

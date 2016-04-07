@@ -13,7 +13,8 @@ var
 	search,
 	model = base.model,
 	warp = model.warp,
-	Snippet = model.snippet;
+	Snippet = model.snippet,
+	enableEngine = config.snippet.create_search_engine;
 
 function createEngine(){
 	reds.client = redis.createClient({host:config.search.host, port:config.search.port});
@@ -105,12 +106,14 @@ function resetJob(){
 }
 
 function MODULE_init(){
-	// search = createEngine();
-	// co( indexSnippet ).then( function (val) {
-	// 	  setTimeout(resetJob, 1800000 );
-	// 	}, function (err) {
-	// 	  console.error(err.stack);
-	// 	});
+	if( enableEngine ){
+		search = createEngine();
+		co( indexSnippet ).then( function (val) {
+			  setTimeout(resetJob, 1800000 );
+			}, function (err) {
+			  console.error(err.stack);
+			});
+	}
 }
 
 MODULE_init();
@@ -118,11 +121,15 @@ MODULE_init();
 var MAX_LIMIT = 20;
 
 function* $count(str){
+	if(!enableEngine)return 0;
+
 	var q = search.query( str );
 	return yield q.$count();
 }
 
 function* $query( str, offset, limit ){
+	if(!enableEngine)return [];
+
 	if( arguments.length === 1 ){
 		offset = 0;
 		limit = MAX_LIMIT;
@@ -148,6 +155,7 @@ function* $query( str, offset, limit ){
 }
 
 function* $queryAndCount( str, offset, limit ){
+	if(!enableEngine)return {};
 	if( arguments.length === 1 ){
 		offset = 0;
 		limit = MAX_LIMIT;
@@ -174,6 +182,7 @@ function* $queryAndCount( str, offset, limit ){
 }
 
 function* $index( str, id){
+	if(!enableEngine)return;
 	search.index( str, id );
 }
 
