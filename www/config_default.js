@@ -14,6 +14,7 @@
      // server domain name:
     domain: 'www.example.com',
     ip: '',
+    port: 80,
     // the theme used, default to 'default':
     theme: 'default',
     home: '/snippet',

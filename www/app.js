@@ -336,5 +336,5 @@ _.each(controllers, function(ctrl, filename){
 });
 
 
-app.listen(80);
-console.log( 'application start in %s mode at 80', (process.productionMode ? 'production' : 'development'));
+app.listen(config.port);
+console.log( 'application start in %s mode at %d', (process.productionMode ? 'production' : 'development', config.port));

@@ -8,11 +8,16 @@ Nodejs: v4.2.2
 
 
 ## Install packages
+	* install codash
+		$ npm install codash
 
-Run `npm install` to install all required packages.
+	* Run `npm install` to install all required packages.
+		$ npm install
+		$ npm install gulp -g
 
-	$ npm install
-	$ npm install gulp -g
+	* make static files by gulp
+		$ gulp
+		$ gulp babel
 
 
 
