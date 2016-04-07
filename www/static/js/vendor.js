@@ -63,7 +63,7 @@ $(function () {
 					console.error('Cannot call showFormLoading() on non-form object.');
 					return;
 				}
-				console.log($form.find('button[type=submit]'));
+				//console.log($form.find('button[type=submit]'));
 				if ($i && (!iconClass || iconClass.indexOf('uk-icon') < 0)) {
 					console.warn('Icon <i class="uk-icon-*"> not found.');
 					return;
@@ -225,7 +225,7 @@ function parseDocBlock( lines ){
 			// @return {object} User object.
 			m = value.match(/^(?:\@|\\)retval\s+(\w+)\s+([\w\W]*)$/);
 			if (m) {
-				console.log(m[2]);
+				//console.log(m[2]);
 				result = {
 					value: m[1],
 					description: m[2]
@@ -267,7 +267,7 @@ function codeToHtml( src, cls ){
 	var html = cls ? '<div class="' + cls + '">' : '<div class="dv-snippet">';
 	if( codeobj.doc ){
 		var doc = codeobj.doc;
-		console.log(doc);
+		//console.log(doc);
 		if( doc.name ){
 			html += '<h2>' + _.escape(doc.name) + '</h2>';
 		}

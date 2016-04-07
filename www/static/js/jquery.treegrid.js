@@ -136,7 +136,7 @@
 					if( $this.treegrid('getSetting', 'renderOnDrag')){
 						$(this).treegrid('appendChild', id );
 					}
-					console.log('drop')
+					
 					$this.treegrid('getSetting', 'onMove').apply($this, [id,$this.treegrid('getNodeId'),orgParentId]);
 					return false;
 				});
@@ -609,7 +609,6 @@
 		 * @returns {String}
 		 */
 		getParentNodeId: function() {
-			//console.log($(this));
 			return $(this).treegrid('getSetting', 'getParentNodeId').apply(this);
 		},
 		/**

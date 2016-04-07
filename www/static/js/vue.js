@@ -8430,7 +8430,6 @@
           data[key] = clean(this[key]);
         }
       }
-      console.log(data);
     };
 
     /**
