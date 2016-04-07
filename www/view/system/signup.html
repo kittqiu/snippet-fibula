@@ -49,7 +49,7 @@ $(function () {
 				form.postJSON( '/api/signup', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
-						jumpTo( '/login', "{{ _('Login')}}", 5 );							
+						jumpTo( '/login', "{{ _('Login')}}", 2 );							
 					}
 				});
 			}

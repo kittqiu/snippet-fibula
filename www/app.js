@@ -59,7 +59,7 @@ if( process.productionMode ){
 	app.on( 'error', function(err){
 		console.error(new Date().toISOString() + ' [Unhandled ERR] ', err);
 	});
-	serveStatic();
+	//serveStatic();
 }else{
 	serveStatic();
 }
