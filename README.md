@@ -18,6 +18,7 @@ Nodejs: v4.2.2
 	* make static files by gulp
 		$ gulp
 		$ gulp babel
+		$ gulp uglify
 
 
 

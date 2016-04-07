@@ -20,7 +20,8 @@
     home: '/snippet',
     security: {
         //password salt
-        salt: 'rCZNC2S2ZN7FIkFBMzZL'
+        salt: 'rCZNC2S2ZN7FIkFBMzZL',
+        email_suffix: '@example.com'
     },
     session: {
         cookie: 'devnosession',

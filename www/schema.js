@@ -45,7 +45,7 @@ function generateDDL(email, password) {
     //passwd = crypto.createHash('sha1').update(lid + ':' + crypto.createHash('sha1').update(email + ':' + password).digest('hex')).digest('hex');
     passwd = crypto.createHash('sha1').update(email + ':' + crypto.createHash('sha1').update(password+config.security.salt).digest('hex')).digest('hex');
 
-    sql_init_admin_user = 'insert into users (id, role, username, name, email, verified, image_url, locked_until, created_at, updated_at, version) values (\'' + id + '\', 0, \'Admin\',\'Admin\', \'' + email + '\', 1, \'/static/img/user.png\', 0, 1394002009000, 1394002009000, 0);\n\n' +
+    sql_init_admin_user = 'insert into users (id, role, username, name, email, verified, actived,image_url, locked_until, created_at, updated_at, version) values (\'' + id + '\', 0, \'Admin\',\'Admin\', \'' + email + '\', 1,1, \'/static/img/user.png\', 0, 1394002009000, 1394002009000, 0);\n\n' +
                           'insert into localusers (id, user_id, passwd, created_at, updated_at, version) values (\'' + lid + '\', \'' + id + '\', \'' + passwd + '\', 1394002009000, 1394002009000, 0);';
 
     output = output + log(sql_init_admin_user);
