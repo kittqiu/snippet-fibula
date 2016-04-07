@@ -73,7 +73,7 @@ function setHistoryUrl( context, url ){
     if( arguments.length === 1){
         url = context.request.url;
     }
-    context.cookies.set( 'HISTORYURL', url, {
+    context.cookies.set( 'SNIPPET_HISTORYURL', url, {
         path: '/snippet',
         httpOnly: true,
         expires: new Date(Date.now()+DEFAULT_EXPIRES_IN_MS)
@@ -81,7 +81,7 @@ function setHistoryUrl( context, url ){
 }
 
 function getHistoryUrl( context ){
-    var url = context.cookies.get('HISTORYURL');
+    var url = context.cookies.get('SNIPPET_HISTORYURL');
     return url || '/snippet/';
 }
 

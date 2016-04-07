@@ -31,8 +31,8 @@ function initPage( data ){
 				form.postJSON( '/api/snippet/wiki/{{ title }}', data, function(err, result){
 					if( !err ){
 						$('#content-block').addClass('uk-hidden');
-						//jumpTo( result.redirect, "{{ _('History Page')}}", 3 );
-						location.assign(result.redirect);
+						jumpTo( result.redirect, "{{ _('History Page')}}", 2 );
+						//location.assign(result.redirect);
 					}
 				});
 			}

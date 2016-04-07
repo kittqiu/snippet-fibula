@@ -224,6 +224,8 @@ module.exports = {
 							yield m.$update(['department'])
 						}
 					}
+				}else{
+					yield base.$member_create(item.id,item.department);
 				}
 			}
 		}

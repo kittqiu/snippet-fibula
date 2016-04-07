@@ -821,5 +821,6 @@ module.exports = {
         };
     },
 
+
     'LoginRequired': [ /^\/snippet[\s\S]*/, /^\/api\/snippet[\s\S]*/]
 };
