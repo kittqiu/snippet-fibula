@@ -66,7 +66,7 @@ function _makeSessionCooike(localuser, cookies){
 
 function _genEmailConfirm( context, user, verify){
 	var request = context.request,
-		origin = 'http://' + (config.ip||config.domain) + (config.port===80?'': ':' + config.port),
+		origin = 'http://' + (config.ip||config.domain)  /*+ (config.port===80?'': ':' + config.port)*/,
 		model = {
 			ip: requestIp.getClientIp(context.request),
 			system: config.name,

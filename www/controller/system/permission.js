@@ -103,7 +103,7 @@ function* $user_setRoles(uid, roles){
 	}
 
 	if( changed ){
-		yield sys_cache.user.flushPerms(uid);
+		yield sys_cache.user.$flushPerms(uid);
 	}
 }
 
