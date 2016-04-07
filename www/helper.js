@@ -37,7 +37,7 @@ function string2Integer(s) {
 function getDateTimeAt0(millisecond){    
     var n = millisecond || Date.now(),
         offset = 0,
-        day = new Date(millisecond);
+        day = new Date(n);
     if( process.env.TZ === 'Asia/Shanghai' && day.getTimezoneOffset() !== -480){
         offset = (-480 - day.getTimezoneOffset())*60000;
         day = new Date(millisecond-offset)
@@ -52,7 +52,7 @@ function getDateTimeAt0(millisecond){
 function getNextDateTime(millisecond){
     var n = millisecond || Date.now();
     //return n - (n%86400000) + 86400000;
-    return getDateTimeAt0(millisecond) + 86400000;
+    return getDateTimeAt0(n) + 86400000;
 }
 
 function getPreviousDateTime(millisecond){

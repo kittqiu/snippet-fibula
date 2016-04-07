@@ -351,7 +351,7 @@ function toDateTime(strdate){
 }
 function getDateTimeAt0(millisecond){    
     var n = millisecond || Date.now();
-    var day = new Date(millisecond);
+    var day = new Date(n);
     day.setHours(0,0,0,0);
     return day.getTime();
 }
