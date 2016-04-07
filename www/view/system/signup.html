@@ -30,7 +30,7 @@ $(function () {
 					}
 					//salt password
 					delete(data['verifypassword']);
-					data.password = CryptoJS.SHA1( this.password + "{{model.__salt__}} {{__request__.__user__.id}}1" ).toString();
+					data.password = CryptoJS.SHA1( this.password + "{{__salt__}}" ).toString();
 
 					return data;
 				}				
