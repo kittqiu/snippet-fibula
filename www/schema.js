@@ -1,5 +1,6 @@
 'use strict';
 
+process.productionMode = (process.env.NODE_ENV === 'production');
 // generate schema:
 
 var
@@ -9,6 +10,7 @@ var
     readline = require('readline'),
     config = require('./config'),
     db = require('./db');
+
 
 var keys = _.filter(_.map(db, function (value, key) {
     return key;
