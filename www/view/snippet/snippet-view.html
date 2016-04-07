@@ -121,11 +121,11 @@ $(function () {
 });
 
 function showCode(shown){
-	$('#orgcode').parent().attr('style', shown? 'height: auto; position: relative;' :'overflow:hidden;height:0;position:relative;');
+	$('#orgcode').parent().parent().parent().attr('style', shown? 'height: auto; position: relative;' :'overflow:hidden;height:0;position:relative;');
 }
 
 function copyToClipboard(){
-	var orgStyle = $('#orgcode').parent().attr('style');
+	var orgStyle = $('#orgcode').parent().parent().parent().attr('style');
 	if( orgStyle.indexOf('hidden') !== -1){
 		ishidden = true;
 	}else{
@@ -159,7 +159,9 @@ function copyToClipboard(){
 					<!--div class=""><textarea id="orgcode" v-text="code" class="uk-width-1-1" ></textarea></div-->
 					<div class="uk-accordion" data-uk-accordion="{showfirst:false}">
 					    <label class="uk-accordion-title uk-form-label uk-text-muted" style="font-size: 14px;" >{{ _('Raw Code')}} <i class="uk-icon-caret-square-o-down"></i></label>
-						<div  class="uk-accordion-content uk-width-1-1" style="max-height:600px;"><pre><code id="orgcode" v-text="code"></code></pre></div>
+						<div  class="uk-accordion-content uk-width-1-1" style="max-height:600px;">
+							<pre><code id="orgcode" v-text="code"></code></pre>
+						</div>
 					</div>
 				</div>
 				<div style="margin-top:40px">
