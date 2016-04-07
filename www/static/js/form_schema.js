@@ -71,14 +71,14 @@ var SCHEMA_PROPERTY = {
 		type: 'string',
 		minLength: 6,
 		maxLength: 20,
-		pattern: '^[a-f0-9A-Z]{6,20}$',
+		pattern: '^[a-z0-9A-Z]{6,20}$',
 		desc: '密码'
 	},
 	PASSWORDVERIFY:{
 		type: 'string',
 		minLength: 6,
 		maxLength: 20,
-		pattern: '^[a-f0-9A-Z]{6,20}$',
+		pattern: '^[a-z0-9A-Z]{6,20}$',
 		desc: '确认密码'
 	},
 	SNIPPET:{

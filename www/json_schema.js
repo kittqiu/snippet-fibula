@@ -142,7 +142,7 @@ var PROPERTY = {
 
 	PASSWD: {
 		type: 'string',
-		pattern: '^[a-f0-9]{40}$'
+		pattern: '^[a-zA-Z0-9]{40}$'
 	},
 	SNIPPET:{
 		type: 'string',
