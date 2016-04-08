@@ -15,12 +15,17 @@ var
 	modelMember = db.team_member,
 	DEP_ROOT = 'root',
 	DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires,
-	PERM_EDIT_STRUCTURE = 'team.structure.edit';
+	PERM_EDIT_STRUCTURE = 'team.structure.edit',
+	PERM_CREATE_PROJECT = 'project.create';
 
 
 function* co_module_init(){
 	var pid = yield perm.perm.$register(PERM_EDIT_STRUCTURE, '有权修改部门架构树');
 	var rid = yield perm.role.$register('团队规划师', '规划团队结构');
+	yield perm.role.$registerPerm(rid, pid);
+
+	pid = yield perm.perm.$register(PERM_CREATE_PROJECT, '有权创建项目');
+	rid = yield perm.role.$register('项目管理员', '项目管理');
 	yield perm.role.$registerPerm(rid, pid);
 }
 
@@ -153,7 +158,6 @@ function* $_testPerm(context,perm_name){
 	if( yield $_havePerm(context,perm_name) ){
 		return true;
 	}else{
-		console.log('test')
 		throw api.authFailed(perm_name, '您无权限访问!');
 	}
 }
@@ -204,5 +208,6 @@ module.exports = {
 	setHistoryUrl: setHistoryUrl,
 	getHistoryUrl: getHistoryUrl,
 
-	PERM_EDIT_STRUCTURE: PERM_EDIT_STRUCTURE
+	PERM_EDIT_STRUCTURE: PERM_EDIT_STRUCTURE,
+	PERM_CREATE_PROJECT: PERM_CREATE_PROJECT
 };

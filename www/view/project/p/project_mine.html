@@ -1,8 +1,6 @@
 {% extends '../project_base.html' %}
 
-{% block right_toolbar %}
-<a href="/project/p/creation" class="dv-link" style="margin-right:15px">{{ _('Create project') }}</a-->
-{% endblock %}
+
 
 {% block head %}
 
@@ -34,6 +32,12 @@ ReactDOM.render(
 {% endif %}
 
 
+{% endblock %}
+
+{% block right_toolbar %}
+{% if __perm_Create %}
+<a href="/project/p/creation" class="dv-link" style="margin-right:15px">{{ _('Create project') }}</a>
+{% endif %}
 {% endblock %}
 
 

@@ -88,45 +88,56 @@ module.exports = {
 	},
 
 	'GET /project/history': function*(){
-		var model = {
-			projects: yield base.project.$listUserJoinOnEnd( this.request.user.id )
-		};
+		var canCreate = yield base.user.$havePerm(this, base.config.PERM_CREATE_PROJECT),
+			model = {
+				projects: yield base.project.$listUserJoinOnEnd( this.request.user.id ),
+				__perm_Create: canCreate
+			};
 		yield $_render( this, model, 'project_index.html');
 		base.setHistoryUrl(this);
 	},
 	'GET /project/p/allDoing': function* (){
-		var model = {
-			__page: this.request.query.page || 1
+		var canCreate = yield base.user.$havePerm(this, base.config.PERM_CREATE_PROJECT),
+			model = {
+			__page: this.request.query.page || 1,
+			__perm_Create: canCreate
 		};
 		yield $_render( this, model, 'p/project_all.html');
 		base.setHistoryUrl(this);
 	},
 
 	'GET /project/p/allHistory': function*(){
-		var model = {
-			__page: this.request.query.page || 1
-		};
+		var canCreate = yield base.user.$havePerm(this, base.config.PERM_CREATE_PROJECT),
+			model = {
+				__page: this.request.query.page || 1,
+				__perm_Create: canCreate
+			};
 		yield $_render( this, model, 'p/project_all_history.html');
 		base.setHistoryUrl(this);
 	},
 
 	'GET /project/p/myDoing': function*(){
-		var model = {
-			__page: this.request.query.page || 1
-		};
+		var canCreate = yield base.user.$havePerm(this, base.config.PERM_CREATE_PROJECT),
+			model = {
+				__page: this.request.query.page || 1,
+				__perm_Create: canCreate
+			};
 		yield $_render( this, model, 'p/project_mine.html');
 		base.setHistoryUrl(this);
 	},
 
 	'GET /project/p/myHistory': function*(){
-		var model = {
-			__page: this.request.query.page || 1
-		};
+		var canCreate = yield base.user.$havePerm(this, base.config.PERM_CREATE_PROJECT),
+			model = {
+				__page: this.request.query.page || 1,
+				__perm_Create: canCreate
+			};
 		yield $_render( this, model, 'p/project_my_history.html');
 		base.setHistoryUrl(this);
 	},
 
 	'GET /project/p/creation': function*(){
+		yield base.user.$testPerm(this, base.config.PERM_CREATE_PROJECT);
 		var 
 			form = {
 				name: this.translate('Create project'),
@@ -295,6 +306,7 @@ module.exports = {
 		var r, user,
 			data = this.request.body;
 		json_schema.validate('project_create', data);
+		yield base.user.$testPerm(this, base.config.PERM_CREATE_PROJECT);
 
 		r = {
 			id: db.next_id(),

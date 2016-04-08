@@ -76,9 +76,7 @@ function _genEmailConfirm( context, user, verify){
 			deadline: verify.expired
 		},
 		renderHtml = swig.renderFile( __dirname + '/../view/system/confirmemail.html', model );
-	console.log( model );
 	smtp.sendHtml(null, user.email, context.translate('Confirm email'), renderHtml );
-	console.log(request.socket.address() );
 }
 
 function setHistoryUrl( context, url ){

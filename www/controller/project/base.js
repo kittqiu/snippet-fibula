@@ -706,7 +706,8 @@ module.exports = {
 
 	config: {
 		PAGE_SIZE: config.project.page_size,
-		MASTER_GROUP: MASTER_GROUP
+		MASTER_GROUP: MASTER_GROUP,
+		PERM_CREATE_PROJECT: team_base.PERM_CREATE_PROJECT
 	},
 
 	project: {
@@ -761,7 +762,9 @@ module.exports = {
 	user: {
 		$list: team_base.member.$getUsers,
 		$havePermEditProject: $user_havePermEditProject,
-		$isProjectMaster: $user_isProjectMaster
+		$isProjectMaster: $user_isProjectMaster,
+		$havePerm: team_base.$havePerm,
+		$testPerm: team_base.$testPerm
 	}
 	
 };

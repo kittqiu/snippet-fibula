@@ -76,6 +76,17 @@ function* $user_listRoles(uid){
 	return yield warp.$query(sql, [uid]);
 }
 
+function* $_user_removeRole(uid, rid){
+	var r = yield modelUserRole.$find({
+		select: '*',
+		where: '`user_id`=? and `role_id`=?',
+		params: [uid, rid]
+	});
+	if( r !== null ){
+		yield r.$destroy();
+	}
+}
+
 function* $user_setRoles(uid, roles){
 	var old_rs = yield $user_listRoles(uid),
 		i, r, old_roles=[], changed = false;;
@@ -96,8 +107,8 @@ function* $user_setRoles(uid, roles){
 	}
 	for( i = 0; i < old_rs.length; i++ ){
 		r = old_rs[i];
-		if( roles.indexOf(r.id) === -1 ){			
-			yield r.$destroy();
+		if( roles.indexOf(r.id) === -1 ){
+			yield $_user_removeRole(uid, r.id);
 			changed = true;
 		}
 	}
