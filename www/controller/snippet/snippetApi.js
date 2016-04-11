@@ -258,6 +258,7 @@ module.exports = {
         page.total = yield base.$countSnippets(lang);
         rs = yield base.$getSnippets( lang, (page.index-1)*LARGE_PAGE_SIZE, LARGE_PAGE_SIZE );
         pageModel = { lang:lang, page:page, snippets:rs, count: rs.length };
+        base.setHistoryUrl(this);
         yield $_render( this, pageModel, 'snippet-all.html');      
     },
 

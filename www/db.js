@@ -45,7 +45,8 @@ var MODELPATHS = [
 	'./model/system',
 	'./model/requirement',
 	'./model/team',
-	'./model/project'
+	'./model/project',
+	'./model/train'
 ];
 
 function loadModels( relativepath ){
