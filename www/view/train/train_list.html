@@ -1,0 +1,20 @@
+{% extends './train_base.html' %}
+
+{% block right_toolbar %}
+<a href="/train/c/creation" class="dv-link" style="margin-right:15px">创建课程</a>
+{% endblock %}
+
+{% block production_readyscript %}
+{% include './component/build/train_list.js' %}
+ReactDOM.render(
+ 	React.createElement(AllCourses, {page:'{{__page}}'}), document.getElementById('vm')
+ 	);
+{% endblock %}
+
+{% block developmode_readyscript %}
+{% include './component/src/train_list.jsx' %}
+ReactDOM.render(
+	<AllCourses  page='{{__page}}' />,
+		document.getElementById('vm')
+	);
+{% endblock %}

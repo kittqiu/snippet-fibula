@@ -307,6 +307,15 @@ var schemas = {
 		},
 		required:['email']
 	},
+	courseCreate: {
+		type: 'object',
+		properties: {
+			name: PROPERTY.NAME,
+			brief: PROPERTY.BRIEF,
+			details: PROPERTY.DESCRIPTION
+		},
+		required:['name', 'brief', 'details']
+	},
 	createAccount:{
 		type: 'object',
 		properties: {

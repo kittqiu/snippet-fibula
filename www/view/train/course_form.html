@@ -1,0 +1,30 @@
+{% extends './train_base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/codemirror.css"/>
+<script src="/static/js/codemirror.js"></script>
+<script src="/static/js/uikit/components/htmleditor.js"></script>
+{% endblock %}
+
+{% block jump-title  %}
+{% if ! __id %}
+课程创建成功
+{% else %}
+课程修改成功
+{% endif %}
+{% endblock %}
+
+{% block production_readyscript %}
+{% include './component/build/train_course.js' %}
+ReactDOM.render(
+ 	React.createElement(NewCoursePage, {}), document.getElementById('vm')
+ 	);
+{% endblock %}
+
+{% block developmode_readyscript %}
+{% include './component/src/train_course.jsx' %}
+ReactDOM.render(
+	<NewCoursePage  />,
+		document.getElementById('vm')
+	);
+{% endblock %}

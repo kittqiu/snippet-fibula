@@ -96,6 +96,10 @@
         create_search_engine: true
     },
 
+    train: {
+        page_size: 20
+    },
+
     // END:
     END: 'END'
  };

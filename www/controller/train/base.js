@@ -16,6 +16,7 @@ var
 
 var 
 	modelUser = db.user,
+	modelCourse = db.train_course,
 	next_id = db.next_id,
 	warp = db.warp;
 var 
@@ -53,12 +54,37 @@ function* $render( context, model, view ){
     context.render( 'train/' + view, yield home.$getModel.apply(context, [model]) );
 }
 
+function* $course_list(offset, limit){
+	var sql = 'select c.*, u.name as owner_name from train_course as c left join users as u on u.id=c.owner_id '
+		+ ' order by c.created_at desc ',
+		rs;
+	if( offset !== undefined ){
+		sql += ' limit ? offset ?';
+		offset = offset ? offset : 0;
+		limit = limit ? limit : 10;
+		offset = offset < 0 ? 0: offset;
+		limit = limit < 0 ? 10 : limit;
+		rs = yield warp.$query(sql, [limit, offset]);
+	}else{
+		rs = yield warp.$query(sql, []);	
+	}
+	return rs;
+}
+
+function* $course_count(){
+	return yield modelCourse.$findNumber( {
+				select: 'count(*)'
+			});
+}
+
 module.exports = {
+	modelCourse: modelCourse,
 
 	setHistoryUrl: setHistoryUrl,
 	getHistoryUrl: getHistoryUrl,
 	$render: $render,
 	validate: json_schema.validate,
+	next_id: next_id,
 
 
 	/***cache***/
@@ -67,6 +93,7 @@ module.exports = {
 	},
 
 	config: {
+		PAGE_SIZE: config.train.page_size
 	},
 
 
@@ -74,6 +101,11 @@ module.exports = {
 		$list: team_base.member.$getUsers,
 		$havePerm: team_base.$havePerm,
 		$testPerm: team_base.$testPerm
+	},
+
+	course: {
+		$list: $course_list,
+		$count: $course_count
 	}
 	
 };

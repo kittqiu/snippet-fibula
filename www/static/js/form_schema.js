@@ -143,6 +143,15 @@ var SCHEMAS = {
 		},
 		required:['oldpassword', 'newpassword', 'verifypassword']
 	},
+	courseCreate: {
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME,
+			brief: SCHEMA_PROPERTY.BRIEF,
+			details: SCHEMA_PROPERTY.EXPLANATION
+		},
+		required:['name', 'brief', 'details']
+	},
 	createDepartment:{
 		type: 'object',
 		properties: {
