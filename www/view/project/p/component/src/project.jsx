@@ -41,9 +41,9 @@ var Task = React.createClass({
 				<td>{task.executor_name}</td>				
 				<td><span className={durationCls}>{task.isCompleted?task.duration:task.plan_duration}</span></td>
 				<td>{plan_mode}</td>
+				<td>{relies.toString()||'无'}</td>
 				<td><span className={timeCls}>{start_time}</span></td>
 				<td><span className={timeCls}>{end_time}</span></td>
-				<td>{relies.toString()||'无'}</td>
 			</tr>
 			);
 	}
@@ -110,9 +110,9 @@ var TaskTable = React.createClass({
 							<th className="uk-width-1-10">负责人</th>							
 							<th className="uk-width-1-10">工期(小时)</th>
 							<th className="uk-width-1-10">计划模式</th>
+							<th className="uk-width-1-10">前置任务</th>
 							<th className="uk-width-1-10">开始时间</th>
 							<th className="uk-width-1-10">结束时间</th>
-							<th className="uk-width-1-10">前置任务</th>	
 						</tr>
 					</thead>
 					<tbody>

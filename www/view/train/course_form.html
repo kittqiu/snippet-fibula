@@ -16,15 +16,28 @@
 
 {% block production_readyscript %}
 {% include './component/build/train_course.js' %}
+{% if ! __id %}
 ReactDOM.render(
  	React.createElement(NewCoursePage, {}), document.getElementById('vm')
  	);
+{% else %}
+ReactDOM.render(
+ 	React.createElement(EditCoursePage, {cid:'{{__id}}'}), document.getElementById('vm')
+ 	);
+{% endif %}
 {% endblock %}
 
 {% block developmode_readyscript %}
 {% include './component/src/train_course.jsx' %}
+{% if ! __id %}
 ReactDOM.render(
 	<NewCoursePage  />,
 		document.getElementById('vm')
 	);
+{% else %}
+ReactDOM.render(
+	<EditCoursePage cid='{{__id}}' />,
+		document.getElementById('vm')
+	);
+{% endif %}
 {% endblock %}

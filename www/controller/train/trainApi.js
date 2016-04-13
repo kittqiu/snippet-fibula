@@ -1,6 +1,7 @@
 'use strict';
 
 var 
+	db = require( __base + 'db'),
 	api = require( __base + 'api'),
 	Page = require( __base + 'page'),
 	home = require( __base + 'controller/home'), 
@@ -16,11 +17,14 @@ GET METHOD:
 /train/c/creation
 /train/c/list?page=xx
 /train/c/:id
+/train/c/:id/edit
 /api/train/c/list?page=xx
+/api/train/c/:id
 
 POST METHOD:
 
 /api/train/c
+/api/train/c/:id
 
 ********/
 
@@ -31,7 +35,7 @@ module.exports = {
 	},
 
 	'GET /train/c/creation': function* (){
-		yield base.$render( this, {}, 'course_form.html')
+		yield base.$render( this, {}, 'course_form.html');
 	},
 
 	'GET /train/c/list': function* (){
@@ -46,6 +50,10 @@ module.exports = {
 
 	},
 
+	'GET /train/c/:id/edit': function* (id){
+		yield base.$render( this, {__id:id}, 'course_form.html')
+	},
+
 	'GET /api/train/c/list': function* (){
 		var index = this.request.query.page || '1',
 			index = parseInt(index),
@@ -54,6 +62,10 @@ module.exports = {
 			rs = yield yield base.course.$list( page_size*(index-1), page_size);
 		page.total = yield base.course.$count();
 		this.body = { page:page, courses: rs};
+	},
+
+	'GET /api/train/c/:id': function* (id){
+		this.body = yield base.modelCourse.$find(id);
 	},
 
 	'POST /api/train/c': function* (){
@@ -70,6 +82,21 @@ module.exports = {
 			details: data.details
 		};		
 		yield base.modelCourse.$create( r );
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+	'POST /api/train/c/:id': function* (id){
+		var r = yield base.modelCourse.$find(id),
+			data = this.request.body;
+
+		base.validate('courseCreate', data);
+		if( r === null ){
+			throw api.notFound('course', this.translate('Record not found'));
+		}
+
+		yield db.op.$update_record( r, data, ['name', 'brief', 'details'])
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)
