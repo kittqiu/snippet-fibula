@@ -415,6 +415,16 @@ var schemas = {
 		},
 		required:['name', 'start_time', 'end_time', 'master_id', 'details']
 	},
+	section_create: {
+		type: 'object',
+		properties: {
+			course_id: PROPERTY.ID_EXT,
+			name: PROPERTY.NAME,
+			brief: PROPERTY.BRIEF,
+			content:PROPERTY.EMPTYSTRING
+		},
+		required:['course_id', 'name', 'brief', 'content']
+	},
 	simpleDepartment:{
 		type: 'object',
 		properties: {

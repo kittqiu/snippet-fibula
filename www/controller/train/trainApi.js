@@ -19,14 +19,18 @@ GET METHOD:
 /train/c/:id
 /train/c/:id/edit
 /train/s/creation?cid=xx
+/train/s/:id
 /api/train/c/list?page=xx
 /api/train/c/:id
 /api/train/c/:id/sections
+/api/train/s/:id
 
 POST METHOD:
 
 /api/train/c
 /api/train/c/:id
+/api/train/s
+/api/train/s/:id
 
 ********/
 
@@ -64,6 +68,15 @@ module.exports = {
 		yield base.$render( this, model, 'section_form.html');
 	},
 
+	'GET /train/s/:id/edit': function* (id){
+		yield base.$render( this, {__id:id}, 'section_form.html')
+	},
+
+	'GET /train/s/:id': function* (id){
+		var model = { __id: id };
+		yield base.$render( this, model, 'section_form.html');
+	},
+
 	'GET /api/train/c/list': function* (){
 		var index = this.request.query.page || '1',
 			index = parseInt(index),
@@ -80,6 +93,10 @@ module.exports = {
 
 	'GET /api/train/c/:id': function* (id){
 		this.body = yield base.modelCourse.$find(id);
+	},
+
+	'GET /api/train/s/:id': function* (id){
+		this.body = yield base.modelSection.$find(id);
 	},
 
 	'POST /api/train/c': function* (){
@@ -111,6 +128,51 @@ module.exports = {
 		}
 
 		yield db.op.$update_record( r, data, ['name', 'brief', 'details'])
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+
+	'POST /api/train/s': function* (){
+		var r, course, maxOrder, cid,
+			data = this.request.body;
+
+		base.validate('section_create', data);
+		cid = data.course_id;
+
+		course = yield base.modelCourse.$find(cid);
+		if( course === null ){
+			throw api.notFound('course', this.translate('Record not found'));
+		}
+		maxOrder = yield base.section.$getMaxOrder(cid);
+
+		r = {
+			id: base.next_id(),
+			own_id: this.request.user.id,
+			course_id: cid,
+			order: maxOrder+1,
+			name: data.name, 
+			brief: data.brief,
+			content: data.content
+		};		
+		yield base.modelSection.$create( r );
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+
+	'POST /api/train/s/:id': function* (id){
+		var r = yield base.modelSection.$find(id),
+			data = this.request.body;
+
+		base.validate('section_create', data);
+		if( r === null ){
+			throw api.notFound('course', this.translate('Record not found'));
+		}
+
+		yield db.op.$update_record( r, data, ['name', 'brief', 'content'])
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)

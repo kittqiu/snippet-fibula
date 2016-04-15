@@ -238,6 +238,14 @@ var SCHEMAS = {
 			automode:SCHEMA_PROPERTY.MINIINTEGER
 		},
 		required:['name', 'executor_id', 'manager_id', 'plan_duration', 'plan_start_time']
+	},
+	sectionCreate: {
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME,
+			brief: SCHEMA_PROPERTY.BRIEF
+		},
+		required:['name', 'brief']
 	}
 };
 

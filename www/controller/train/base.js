@@ -106,8 +106,15 @@ function* $course_listSection( cid ){
 	return sections;
 }
 
+function* $section_getMaxOrder(course_id){
+	var sql = 'select MAX(`order`) AS maxorder from train_section where course_id=?',
+    	rs = yield warp.$query( sql, [course_id] );
+    return rs.length > 0? rs[0].maxorder: -1;
+}
+
 module.exports = {
 	modelCourse: modelCourse,
+	modelSection: modelSection,
 
 	setHistoryUrl: setHistoryUrl,
 	getHistoryUrl: getHistoryUrl,
@@ -136,6 +143,10 @@ module.exports = {
 		$list: $course_list,
 		$count: $course_count,
 		$listSection: $course_listSection
+	},
+
+	section: {
+		$getMaxOrder: $section_getMaxOrder
 	}
 	
 };

@@ -247,11 +247,11 @@ var CoursePage = React.createClass({
 							<table className="uk-table uk-table-striped">
 								<thead>
 									<tr>
-										<td className="uk-width-1-10">序号</td>
-										<td className="uk-width-2-10">名称</td>
-										<td className="uk-width-3-10">简介</td>
-										<td className="uk-width-2-10">资源下载</td>
-										<td className="uk-width-2-10">操作</td>
+										<th className="uk-width-1-10">序号</th>
+										<th className="uk-width-2-10">名称</th>
+										<th className="uk-width-3-10">简介</th>
+										<th className="uk-width-2-10">资源下载</th>
+										<th className="uk-width-2-10">操作</th>
 									</tr>
 								</thead>					
 								<tbody>
@@ -260,10 +260,12 @@ var CoursePage = React.createClass({
 											return (
 												<tr>
 													<td>{index+1}</td>
-													<td>{s.name}</td>
-													<td>{s.brief}></td>
+													<td><a href={'/train/s/' + s.id} className="dv-link">{s.name}</a></td>
+													<td>{s.brief}</td>
 													<td></td>
-													<td></td>
+													<td>
+														<a href={'/train/s/' + s.id + '/edit'} className="dv-link">修改</a>
+													</td>
 												</tr>
 											)
 										})
