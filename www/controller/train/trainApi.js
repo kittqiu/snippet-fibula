@@ -18,8 +18,10 @@ GET METHOD:
 /train/c/list?page=xx
 /train/c/:id
 /train/c/:id/edit
+/train/s/creation?cid=xx
 /api/train/c/list?page=xx
 /api/train/c/:id
+/api/train/c/:id/sections
 
 POST METHOD:
 
@@ -47,11 +49,19 @@ module.exports = {
 	},
 
 	'GET /train/c/:id': function* (id){
-
+		var model = { __id: id };
+		yield base.$render( this, model, 'train_course.html');
+		base.setHistoryUrl(this);
 	},
 
 	'GET /train/c/:id/edit': function* (id){
 		yield base.$render( this, {__id:id}, 'course_form.html')
+	},
+
+	'GET /train/s/creation': function* (){
+		var cid = this.request.query.cid || '',
+			model = { cid: cid };
+		yield base.$render( this, model, 'section_form.html');
 	},
 
 	'GET /api/train/c/list': function* (){
@@ -62,6 +72,10 @@ module.exports = {
 			rs = yield yield base.course.$list( page_size*(index-1), page_size);
 		page.total = yield base.course.$count();
 		this.body = { page:page, courses: rs};
+	},
+
+	'GET /api/train/c/:id/sections': function* (id){
+		this.body = yield base.course.$listSection(id);
 	},
 
 	'GET /api/train/c/:id': function* (id){

@@ -232,11 +232,11 @@ var MyDaily = React.createClass({
 					<table	className="uk-width-1-1 uk-table" style={styles.tableBorder} >
 						<thead>
 							<tr>
-								<th className="uk-width-2-10">任务</th>
-								<th className="uk-width-2-10">今日计划</th>
-								<th className="uk-width-3-10">今日工作</th>
-								<th className="uk-width-2-10">明日计划</th>					
-								<th className="uk-width-1-10">操作</th>					
+								<th className="dv-width-4-20">任务</th>
+								<th className="dv-width-4-20">今日计划</th>
+								<th className="dv-width-7-20">今日工作</th>
+								<th className="dv-width-4-20">明日计划</th>					
+								<th className="dv-width-1-20">操作</th>					
 							</tr>
 						</thead>
 						<tbody>

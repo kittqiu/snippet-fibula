@@ -24,7 +24,8 @@ var UserTaskDaily = React.createClass({
 			report = daily.report || '未填写',
 			marginTop = {marginTop:'40px'},
 			marginLeft = {marginLeft:'0px', paddingTop:'10px'},
-			nopadding = {padding:'0'},
+			nopadding = {padding:'0', maxWidth:'310px'},
+			nopadding_plan = {padding:'0', maxWidth:'230px'},
 			nomargin = {margin:'0', borderRadius:'0'},
 			org_plan_cls = org_plan === '未填写' ? 'dv-pre-clear uk-text-muted': 'dv-pre-clear',
 			report_cls = report === '未填写' ? 'dv-pre-clear uk-text-muted': 'dv-pre-clear',
@@ -36,14 +37,18 @@ var UserTaskDaily = React.createClass({
 					<div id={"modal_task_daily_"+t.id} className="uk-modal"></div>
 					<div id={"modal_task_"+t.id} className="uk-modal"></div>
 				</td>
-				<td><a href={'/project/p/' + t.project_id + '/build'} className="dv-link">{t.project_name}</a></td>
-				<td>{t.manager_name}</td>
-				<td className="dv-border"><pre className={org_plan_cls} style={nopadding}>{org_plan}</pre></td>
-				<td className="dv-border"> 
+				<td className="dv-width-7-20"> 
 					<pre className={report_cls} style={nopadding}>{ report }</pre>
 				</td>
-				<td className={duration_cls}>
-					{daily.duration ? (daily.duration + '小时') : '0'}
+				<td className="dv-width-5-20"><pre className={org_plan_cls} style={nopadding_plan}>{org_plan}</pre></td>
+				<td>
+					<div>项目：<a href={'/project/p/' + t.project_id + '/build'} className="dv-link">{t.project_name}</a></div>
+					<div>审核人：{t.manager_name}</div>
+					{
+						daily.duration ? 
+						<div>今日用时：<span className={duration_cls}>{daily.duration + '小时'}</span></div>
+						:null
+					}
 				</td>
 			</tr>
 		)
@@ -69,7 +74,8 @@ var DepTaskDaily = React.createClass({
 			report = daily.report || '未填写',
 			marginTop = {marginTop:'40px'},
 			marginLeft = {marginLeft:'0px', paddingTop:'10px'},
-			nopadding = {padding:'0'},
+			nopadding = {padding:'0', maxWidth:'310px'},
+			nopadding_plan = {padding:'0', maxWidth:'230px'},
 			nomargin = {margin:'0', borderRadius:'0'},
 			org_plan_cls = org_plan === '未填写' ? 'dv-pre-clear uk-text-muted': 'dv-pre-clear',
 			report_cls = report === '未填写' ? 'dv-pre-clear uk-text-muted': 'dv-pre-clear',
@@ -82,14 +88,18 @@ var DepTaskDaily = React.createClass({
 					<div id={"modal_task_daily_"+t.id} className="uk-modal"></div>
 					<div id={"modal_task_"+t.id} className="uk-modal"></div>
 				</td>
-				<td><a href={'/project/p/' + t.project_id + '/build'} className="dv-link">{t.project_name}</a></td>
-				<td>{t.manager_name}</td>
-				<td className="dv-border"><pre className={org_plan_cls} style={nopadding}>{org_plan}</pre></td>
 				<td className="dv-border"> 
 					<pre className={report_cls} style={nopadding}>{ report }</pre>
-				</td>
-				<td className={duration_cls}>
-					{daily.duration ? (daily.duration + '小时') : '0'}
+				</td>				
+				<td className="dv-border"><pre className={org_plan_cls} style={nopadding_plan}>{org_plan}</pre></td>
+				<td>
+					<div>项目：<a href={'/project/p/' + t.project_id + '/build'} className="dv-link">{t.project_name}</a></div>
+					<div>审核人：{t.manager_name}</div>
+					{
+						daily.duration ? 
+						<div>今日用时：<span className={duration_cls}>{daily.duration + '小时'}</span></div>
+						:null
+					}					
 				</td>
 			</tr>
 		)
@@ -174,13 +184,11 @@ var DepartmentDaily = React.createClass({
 					<table	className="uk-width-1-1 uk-table" style={styles.tableBorder} >
 						<thead>
 							<tr>
-								<th className="uk-width-1-10">执行人</th>							
-								<th className="uk-width-2-10">任务</th>															
-								<th className="uk-width-1-10">项目</th>															
-								<th className="uk-width-1-10">审核人</th>
-								<th className="uk-width-2-10">当日计划</th>
-								<th className="uk-width-2-10">当日工作</th>
-								<th className="uk-width-1-10">用时</th>				
+								<th className="dv-width-2-20">执行人</th>							
+								<th className="dv-width-4-20">任务</th>
+								<th className="dv-width-6-20">当日工作</th>
+								<th className="dv-width-4-20">原计划</th>													
+								<th className="dv-width-4-20">任务信息</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -281,12 +289,10 @@ var UserDaily = React.createClass({
 					<table	className="uk-width-1-1 uk-table" style={styles.tableBorder} >
 						<thead>
 							<tr>
-								<th className="uk-width-2-10">任务</th>
-								<th className="uk-width-2-10">项目</th>
-								<th className="uk-width-1-10">审核人</th>
-								<th className="uk-width-2-10">当日计划</th>
-								<th className="uk-width-2-10">当日工作</th>
-								<th className="uk-width-1-10">工作用时</th>				
+								<th className="dv-width-4-20">任务</th>
+								<th className="dv-width-7-20">当日工作</th>
+								<th className="dv-width-5-20">原计划</th>
+								<th className="dv-width-4-20">任务信息</th>
 							</tr>
 						</thead>
 						<tbody>

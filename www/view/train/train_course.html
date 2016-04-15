@@ -1,0 +1,19 @@
+{% extends './train_base.html' %}
+
+{% block right_toolbar %}
+{% endblock %}
+
+{% block production_readyscript %}
+{% include './component/build/train_course.js' %}
+ReactDOM.render(
+ 	React.createElement(CoursePage, {cid:'{{__id}}'}), document.getElementById('vm')
+ 	);
+{% endblock %}
+
+{% block developmode_readyscript %}
+{% include './component/src/train_course.jsx' %}
+ReactDOM.render(
+	<CoursePage  cid='{{__id}}' />,
+		document.getElementById('vm')
+	);
+{% endblock %}

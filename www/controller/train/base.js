@@ -17,6 +17,8 @@ var
 var 
 	modelUser = db.user,
 	modelCourse = db.train_course,
+	modelSection = db.train_section,
+	modelRes = db.train_resource,
 	next_id = db.next_id,
 	warp = db.warp;
 var 
@@ -51,7 +53,7 @@ function getHistoryUrl( context ){
 }
 
 function* $render( context, model, view ){
-    context.render( 'train/' + view, yield home.$getModel.apply(context, [model]) );
+	context.render( 'train/' + view, yield home.$getModel.apply(context, [model]) );
 }
 
 function* $course_list(offset, limit){
@@ -75,6 +77,33 @@ function* $course_count(){
 	return yield modelCourse.$findNumber( {
 				select: 'count(*)'
 			});
+}
+
+function* $course_listSection( cid ){
+	var sections = yield modelSection.$findAll({
+			select: '*',
+			where: '`course_id`=?',
+			params: [cid]
+		});
+	if( sections.length > 0 ){
+		var sql = 'select res.section_id, res.att_id, att.path, att.name from train_resource as res '
+			+ ' left join attachment as att on res.att_id=att.id where res.course_id=?',
+			rs = yield warp.$query( sql, [cid] ),
+			i, j;
+
+		for(i = 0; i < sections.length; i++　){
+			var s = sections[i];
+			s.atts = [];
+
+			for(j = 0; j < rs.length; j++　){
+				var r = rs[j];
+				if( r.section_id === s.id ){
+					s.atts.push(r);
+				}
+			}
+		}
+	}
+	return sections;
 }
 
 module.exports = {
@@ -105,7 +134,8 @@ module.exports = {
 
 	course: {
 		$list: $course_list,
-		$count: $course_count
+		$count: $course_count,
+		$listSection: $course_listSection
 	}
 	
 };

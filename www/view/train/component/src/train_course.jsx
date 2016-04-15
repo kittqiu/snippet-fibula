@@ -30,13 +30,14 @@ var NewCoursePage = React.createClass({
 
 	},
 	componentDidMount: function(){
-		var htmleditor = UIkit.htmleditor($('#details').get(0), {
-				markdown: true,
-				maxsplitsize: 300
-			});
+		// var htmleditor = UIkit.htmleditor($('#details').get(0), {
+		// 		markdown: true,
+		// 		maxsplitsize: 300
+		// 	});
 	},
 	render: function(){
-		var small_margin = {marginTop:'40px', width:'480px'};
+		var small_margin = {marginTop:'40px', width:'480px'},
+			texteara_height={height:'120px'};
 		return (
 			<div>
 				<h1 className="uk-text-center"><b>创建新课程</b></h1>				
@@ -63,7 +64,7 @@ var NewCoursePage = React.createClass({
 							<div className="uk-form-row uk-width-1-1">
 								<label className="uk-form-label">课程说明</label>
 								<div className="uk-form-controls">
-									<textarea ref="details" id="details" name="details" className="uk-width-4-5">
+									<textarea ref="details" id="details" name="details" className="uk-width-4-5" style={texteara_height}>
 									</textarea>
 								</div>
 							</div>
@@ -118,10 +119,10 @@ var EditCoursePage = React.createClass({
 					fatal(err);
 				}else{
 					this.setState({name:data.name, brief:data.brief, details:data.details});
-					var htmleditor = UIkit.htmleditor($('#details').get(0), {
-						markdown: true,
-						maxsplitsize: 300
-					});
+					// var htmleditor = UIkit.htmleditor($('#details').get(0), {
+					// 	markdown: true,
+					// 	maxsplitsize: 300
+					// });
 				}
 			}.bind(this)
 		);
@@ -140,11 +141,10 @@ var EditCoursePage = React.createClass({
 	},
 	componentDidMount: function(){
 		this.loadData();
-		
 	},
 	render: function(){
-		var small_margin = {marginTop:'40px', width:'480px'};
-		console.log(this.state.details)
+		var small_margin = {marginTop:'40px', width:'480px'},
+			texteara_height={height:'120px'};
 		return (
 			<div>
 				<h1 className="uk-text-center"><b>创建新课程</b></h1>				
@@ -174,7 +174,7 @@ var EditCoursePage = React.createClass({
 								<label className="uk-form-label">课程说明</label>
 								<div className="uk-form-controls">
 									<textarea ref="details" id="details" name="details" value={this.state.details} 
-										className="uk-width-4-5" onChange={this.handleDetailsChange}>
+										className="uk-width-4-5" onChange={this.handleDetailsChange} style={texteara_height}>
 									</textarea>
 								</div>
 							</div>
@@ -185,6 +185,96 @@ var EditCoursePage = React.createClass({
 							</div>
 						</fieldset>
 					</form>
+				</div>
+			</div>
+			)
+	}
+});
+
+
+var CoursePage = React.createClass({
+	loadSections: function(){
+		getJSON( '/api/train/c/'+ this.props.cid +'/sections', {}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.setState({sections:data});					
+				}
+			}.bind(this)
+		);
+	},
+	loadData: function(){
+		getJSON( '/api/train/c/' + this.props.cid, {}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.setState({course:data});
+					this.loadSections();				
+				}
+			}.bind(this)
+		);
+	},
+	componentDidMount: function(){
+		this.loadData();
+	},
+	getInitialState: function(){
+		return { course: {}, sections:[]}
+	},
+	render: function(){
+		var course = this.state.course,
+			block_margin = {marginTop:'30px'};
+		return (
+			<div>
+				<h1 className="uk-text-center"><b>课程：{course.name}</b></h1>				
+				<div className="uk-text-right">
+					<a href={ "/train/s/creation?cid=" + course.id } className="dv-link">添加章节</a>
+				</div>
+				<hr className="dv-hr"/>
+				<div>
+					<div>
+						<h3><b>简介</b></h3>
+						<div>{course.brief}</div>
+					</div>
+					<div style={block_margin}>
+						<h3><b>说明</b></h3>
+						<div><pre className="dv-pre-clear">{course.details}</pre></div>
+					</div>
+					<div style={block_margin}>
+						<h3><b>章节</b></h3>
+						<div>
+							{
+								this.state.sections.length > 0 ? 
+							<table className="uk-table uk-table-striped">
+								<thead>
+									<tr>
+										<td className="uk-width-1-10">序号</td>
+										<td className="uk-width-2-10">名称</td>
+										<td className="uk-width-3-10">简介</td>
+										<td className="uk-width-2-10">资源下载</td>
+										<td className="uk-width-2-10">操作</td>
+									</tr>
+								</thead>					
+								<tbody>
+									{
+										this.state.sections.map( function(s,index){
+											return (
+												<tr>
+													<td>{index+1}</td>
+													<td>{s.name}</td>
+													<td>{s.brief}></td>
+													<td></td>
+													<td></td>
+												</tr>
+											)
+										})
+									}
+								</tbody>
+							</table>
+							: <p>无章节记录，请<a href={ "/train/s/creation?cid=" + course.id } className="dv-link">创建新章节</a></p>
+							}
+						</div>
+					</div>
+					
 				</div>
 			</div>
 			)

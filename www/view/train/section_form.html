@@ -1,0 +1,43 @@
+{% extends './train_base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/codemirror.css"/>
+<script src="/static/js/codemirror.js"></script>
+<script src="/static/js/uikit/components/htmleditor.js"></script>
+{% endblock %}
+
+{% block jump-title  %}
+{% if ! __id %}
+章节创建成功
+{% else %}
+章节修改成功
+{% endif %}
+{% endblock %}
+
+{% block production_readyscript %}
+{% include './component/build/train_section.js' %}
+{% if ! __id %}
+ReactDOM.render(
+ 	React.createElement(NewSectionPage, {cid:'{{cid}}'}), document.getElementById('vm')
+ 	);
+{% else %}
+ReactDOM.render(
+ 	React.createElement(EditSectionPage, {sid:'{{__id}}'}), document.getElementById('vm')
+ 	);
+{% endif %}
+{% endblock %}
+
+{% block developmode_readyscript %}
+{% include './component/src/train_section.jsx' %}
+{% if ! __id %}
+ReactDOM.render(
+	<NewSectionPage cid='{{cid}}' />,
+		document.getElementById('vm')
+	);
+{% else %}
+ReactDOM.render(
+	<EditSectionPage sid='{{__id}}' />,
+		document.getElementById('vm')
+	);
+{% endif %}
+{% endblock %}
