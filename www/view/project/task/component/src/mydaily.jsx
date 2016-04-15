@@ -145,7 +145,8 @@ var TaskDaily = React.createClass({
 			report = daily.report || '未填写',
 			marginTop = {marginTop:'40px'},
 			marginLeft = {marginLeft:'0px', paddingTop:'10px'},
-			nopadding = {padding:'0'},
+			nopadding = {padding:'0', maxWidth:'310px'},
+			nopadding_plan = {padding:'0', maxWidth:'230px'},
 			nomargin = {margin:'0', borderRadius:'0'};
 		return (
 		    <tr>
@@ -154,13 +155,13 @@ var TaskDaily = React.createClass({
                     <div id={"modal_task_daily_"+t.id} className="uk-modal"></div>
                     <div id={"modal_task_"+t.id} className="uk-modal"></div>
                 </td>
-                <td className="dv-border"><pre className="dv-pre-clear" style={nopadding}>{org_plan}</pre></td>
+                <td className="dv-border"><pre className="dv-pre-clear" style={nopadding_plan}>{org_plan}</pre></td>
                 <td className="dv-border"> 
                     <pre className="dv-pre-clear" style={nopadding}>{ report }</pre>
                     {daily.duration ? <span style={marginLeft}> {'用时：' + daily.duration + '小时'}</span>:''}
                 </td>
                 <td className="dv-border">
-                	<pre className="dv-pre-clear" style={nopadding}>{plan}</pre>
+                	<pre className="dv-pre-clear" style={nopadding_plan}>{plan}</pre>
                 </td>
                 <td className="dv-border">
                 	<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
