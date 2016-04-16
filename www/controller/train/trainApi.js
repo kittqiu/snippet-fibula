@@ -96,7 +96,9 @@ module.exports = {
 	},
 
 	'GET /api/train/s/:id': function* (id){
-		this.body = yield base.modelSection.$find(id);
+		var s = yield base.modelSection.$find(id);
+		s.atts = yield base.section.$listAttachments(id);
+		this.body = s;
 	},
 
 	'POST /api/train/c': function* (){
@@ -155,8 +157,9 @@ module.exports = {
 			name: data.name, 
 			brief: data.brief,
 			content: data.content
-		};		
+		};
 		yield base.modelSection.$create( r );
+		yield base.section.$addAttachments(r.id, cid, data.attachments );
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)
@@ -172,7 +175,8 @@ module.exports = {
 			throw api.notFound('course', this.translate('Record not found'));
 		}
 
-		yield db.op.$update_record( r, data, ['name', 'brief', 'content'])
+		yield db.op.$update_record( r, data, ['name', 'brief', 'content']);
+		yield base.section.$updateAttachments(id, r.course_id, data.attachments);
 		this.body = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)

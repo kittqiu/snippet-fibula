@@ -4,9 +4,9 @@ var CourseList = React.createClass({
 			<table className="uk-width-1-1 uk-table">
 				<thead>
 					<tr>
-						<td>课程名称</td>
-						<td>课程简述</td>
-						<td>操作</td>
+						<th>课程名称</th>
+						<th>课程简述</th>
+						<th>操作</th>
 					</tr>
 				</thead>
 				<tbody>

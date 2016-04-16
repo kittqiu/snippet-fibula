@@ -12,7 +12,8 @@ var
 	team_base = require( __base + 'controller/team/base'),
 	helper = require( __base + 'helper'),
 	co = require('co'), 
-	perm = require( __base + 'controller/system/permission');
+	perm = require( __base + 'controller/system/permission'),
+	attop = require(__base +'controller/system/attachment');;
 
 var 
 	modelUser = db.user,
@@ -112,6 +113,59 @@ function* $section_getMaxOrder(course_id){
     return rs.length > 0? rs[0].maxorder: -1;
 }
 
+function* $section_addAttachments(section_id, course_id, atts){
+	for( var i = 0; i < atts.length; i++ ){
+		var r = {
+				section_id: section_id,
+				course_id: course_id,
+				att_id: atts[i]
+			};
+		yield modelRes.$create(r);
+		yield attop.$addRefer(atts[i]);
+	}
+}
+
+function* $section_listAttachments(section_id){
+	var sql = 'select s.att_id, a.name from train_resource as s left join attachment as a on s.att_id=a.id '
+		+ ' where s.section_id=?';
+	return yield warp.$query(sql, [section_id]);
+}
+
+function* $section_updateAttachments(section_id, course_id, atts){
+	var ors, r, i, j, aid, found;
+	ors = yield modelRes.$findAll({
+			select: '*',
+			where: '`section_id`=?',
+			params: [section_id]
+		});
+	for( i = 0; i < atts.length; i++ ){
+		aid = atts[i];
+		found = false;
+		for( j = 0; j < ors.length; j++ ){
+			if( ors[j].att_id === aid ){
+				ors.splice(j,1);
+				found = true;
+				break;
+			}
+		}
+		if( !found ){//create on not found
+			r = {
+				section_id: section_id,
+				course_id: course_id,
+				att_id: aid
+			};
+			yield modelRes.$create(r);
+			yield attop.$addRefer(aid);
+		}
+	}
+	//delete old resource
+	for( i = 0; i < ors.length; i++ ){
+		r = ors[i];
+		yield attop.$descRefer(r.att_id);
+		yield r.$destroy();
+	}
+}
+
 module.exports = {
 	modelCourse: modelCourse,
 	modelSection: modelSection,
@@ -146,7 +200,11 @@ module.exports = {
 	},
 
 	section: {
-		$getMaxOrder: $section_getMaxOrder
+		$getMaxOrder: $section_getMaxOrder,
+		$addAttachments: $section_addAttachments,
+		$listAttachments: $section_listAttachments,
+		$updateAttachments: $section_updateAttachments
 	}
+
 	
 };

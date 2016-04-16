@@ -191,6 +191,23 @@ var EditCoursePage = React.createClass({
 	}
 });
 
+var CourseSectionFileList = React.createClass({
+	render: function(){
+		return (
+			<ul>
+				{
+					this.props.atts.map( function(att, index){
+						return (
+							<li key={index}>
+								<a href={ '/api/file/'+ att.att_id} className="dv-link">{att.name}</a>
+							</li>
+							)
+						})
+				}
+			</ul>
+			)
+	}
+});
 
 var CoursePage = React.createClass({
 	loadSections: function(){
@@ -247,25 +264,34 @@ var CoursePage = React.createClass({
 							<table className="uk-table uk-table-striped">
 								<thead>
 									<tr>
-										<th className="uk-width-1-10">序号</th>
-										<th className="uk-width-2-10">名称</th>
-										<th className="uk-width-3-10">简介</th>
-										<th className="uk-width-2-10">资源下载</th>
-										<th className="uk-width-2-10">操作</th>
+										<th className="dv-width-1-20">序号</th>
+										<th className="dv-width-4-20">名称</th>
+										<th className="dv-width-8-20">简介</th>
+										<th className="dv-width-5-20">资源下载</th>
+										{
+											ENV.user.id===course.owner_id ?
+											<th className="dv-width-2-20">操作</th>:null
+										}										
 									</tr>
 								</thead>					
 								<tbody>
 									{
 										this.state.sections.map( function(s,index){
 											return (
-												<tr>
+												<tr key={index}>
 													<td>{index+1}</td>
 													<td><a href={'/train/s/' + s.id} className="dv-link">{s.name}</a></td>
 													<td>{s.brief}</td>
-													<td></td>
 													<td>
-														<a href={'/train/s/' + s.id + '/edit'} className="dv-link">修改</a>
+														<CourseSectionFileList atts={s.atts}/>
 													</td>
+													{
+														ENV.user.id===course.owner_id ?
+														<td>
+															<a href={'/train/s/' + s.id + '/edit'} className="dv-link">修改</a>
+														</td>
+														:null
+													}													
 												</tr>
 											)
 										})

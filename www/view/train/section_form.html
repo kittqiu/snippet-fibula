@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="/static/css/codemirror.css"/>
 <script src="/static/js/codemirror.js"></script>
 <script src="/static/js/uikit/components/htmleditor.js"></script>
+<script src="/static/js/uikit/components/upload.js"></script>
 {% endblock %}
 
 {% block jump-title  %}
@@ -18,11 +19,11 @@
 {% include './component/build/train_section.js' %}
 {% if ! __id %}
 ReactDOM.render(
- 	React.createElement(NewSectionPage, {cid:'{{cid}}'}), document.getElementById('vm')
+ 	React.createElement(EditSectionPage, {mode:'new', cid:'{{cid}}'}), document.getElementById('vm')
  	);
 {% else %}
 ReactDOM.render(
- 	React.createElement(EditSectionPage, {sid:'{{__id}}'}), document.getElementById('vm')
+ 	React.createElement(EditSectionPage, {mode:'edit', sid:'{{__id}}'}), document.getElementById('vm')
  	);
 {% endif %}
 {% endblock %}
@@ -31,12 +32,12 @@ ReactDOM.render(
 {% include './component/src/train_section.jsx' %}
 {% if ! __id %}
 ReactDOM.render(
-	<NewSectionPage cid='{{cid}}' />,
+	<EditSectionPage mode='new' cid='{{cid}}' />,
 		document.getElementById('vm')
 	);
 {% else %}
 ReactDOM.render(
-	<EditSectionPage sid='{{__id}}' />,
+	<EditSectionPage mode='edit' sid='{{__id}}' />,
 		document.getElementById('vm')
 	);
 {% endif %}

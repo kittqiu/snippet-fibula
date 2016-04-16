@@ -421,9 +421,10 @@ var schemas = {
 			course_id: PROPERTY.ID_EXT,
 			name: PROPERTY.NAME,
 			brief: PROPERTY.BRIEF,
-			content:PROPERTY.EMPTYSTRING
+			content:PROPERTY.EMPTYSTRING,
+			attachments: PROPERTY.ID_EMPTY_LIST
 		},
-		required:['course_id', 'name', 'brief', 'content']
+		required:['course_id', 'name', 'brief', 'content', 'attachments']
 	},
 	simpleDepartment:{
 		type: 'object',
