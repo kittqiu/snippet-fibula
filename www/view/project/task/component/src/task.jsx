@@ -138,7 +138,6 @@ var TaskFlow = React.createClass({
 	},
 	changeAction: function(event){
 		this.setState({actionType:event.target.value})
-		console.log(event.target.value)
 	},
 	getPostData: function(){
 		var data = {

@@ -340,8 +340,8 @@ var TeamDaily = React.createClass({
 				<div className="uk-width-8-10">
 				{
 					this.state.selectedType === 'user'? 
-					<UserDaily uid={this.state.selectedItem} users={this.state.UserMap}/> :
-					<DepartmentDaily depid={this.state.selectedItem} members={this.state.members} 
+					<UserDaily key={'UserDaily_' + this.state.selectedItem} uid={this.state.selectedItem} users={this.state.UserMap}/> :
+					<DepartmentDaily key={'DepartmentDaily_' + this.state.selectedItem}  depid={this.state.selectedItem} members={this.state.members} 
 						deps={this.state.DepMap} users={this.state.UserMap}/>
 				}
 					
