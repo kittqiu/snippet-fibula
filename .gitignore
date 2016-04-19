@@ -29,6 +29,6 @@ media
 
 # private config files:
 config_production.js
-config_development.js
+config_development*.js
 schema.sql
 test.js

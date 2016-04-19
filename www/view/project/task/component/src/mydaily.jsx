@@ -2,7 +2,7 @@
 var styles = {
 	smallBottomMargin: {marginBottom:'2px'},
 	toolbar: {marginTop:'20px'},
-	areaHeight: { height: '60px'},
+	areaHeight: { height: '120px'},
 	tableBorder: { borderCollapse: 'collapse'}
 };
 
@@ -116,7 +116,7 @@ var TaskDaily = React.createClass({
 		e.preventDefault();
 		var task = this.props.task;
 		ReactDOM.render(
-			<ReportDialog task={task} dayTime={this.props.dayTime} onUpdate={this.onUpdate}/>,
+			<ReportDialog key={ 'key_task_daily_'+task.id + '_' + this.props.dayTime }  task={task} dayTime={this.props.dayTime} onUpdate={this.onUpdate}/>,
 				document.getElementById('modal_task_daily_'+task.id)
 			);
 	},
