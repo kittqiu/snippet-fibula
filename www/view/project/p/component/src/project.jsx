@@ -68,7 +68,8 @@ var TaskTable = React.createClass({
 			selectable: true,
 			selectedClass: 'dv-row-selected',
 			onSelected:options.onSelected,
-			leafClass:'uk-icon-leaf'
+			leafClass:'uk-icon-leaf',
+			initialState:'collapsed'
 		});
 	},
 	dragTask: function(task_id, toParentId, fromParentId ){
