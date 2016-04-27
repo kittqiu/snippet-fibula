@@ -14,6 +14,7 @@ function* $_render( context, model, view ){
 /**************
 GET METHOD:
 /manage
+/manage/project
 /manage/user/role
 
 POST METHOD:
@@ -28,6 +29,11 @@ module.exports = {
 	},
 	'GET /manage/user/role': function* (){
 		yield $_render( this, {}, 'role.html');
+		base.setHistoryUrl(this);
+	},
+
+	'GET /manage/project': function* (){
+		yield $_render( this, {}, 'project.html');
 		base.setHistoryUrl(this);
 	},
 

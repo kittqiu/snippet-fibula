@@ -7,10 +7,10 @@ var
     perm = require( __base + 'controller/system/permission'),
     api = require( __base + 'api');
 
-
 var 
 	warp = db.warp,
 	next_id = db.next_id, 
+	modelUser = db.user,
 	modelDep = db.team_department,
 	modelMember = db.team_member,
 	DEP_ROOT = 'root',
@@ -123,6 +123,14 @@ function* $member_collectUser(uid){
 	return rs[0];
 }
 
+function* $member_isAdmin(uid){
+	var u = yield modelUser.$find(uid);
+	if( u !== null ){
+		return u.role===0 && u.username === 'Admin';
+	}
+	return false;
+}
+
 function* $department_listUsers(){
 	var sql = "select u.id, u.name, m.department from users as u,team_member as m where u.id=m.user_id and m.department <>''";
 	return yield warp.$query(sql);
@@ -197,7 +205,8 @@ module.exports = {
 		$getUser: $member_getUser,
 		$listRoles: perm.user.$listRoles,
 		$havePerm: perm.user.$havePerm,
-		$collectUser: $member_collectUser
+		$collectUser: $member_collectUser,
+		$isAdmin: $member_isAdmin
 	},
 
 	perm: perm,

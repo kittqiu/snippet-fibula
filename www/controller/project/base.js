@@ -117,6 +117,22 @@ function*  $project_listAllOnRun(offset, limit){
 	return rs;
 }
 
+function* $project_count(){
+	return yield modelProject.$findNumber( {
+				select: 'count(*)'
+			});
+}
+
+function* $project_delete(pid){
+	yield warp.$query( 'delete from project_task_flow_record where task_id in (select id from project_task  where project_id=?)', [pid] );
+	yield warp.$query( 'delete from project_daily where project_id=?', [pid] );
+	yield warp.$query( 'delete from project_task_rely where project_id=?', [pid] );
+	yield warp.$query( 'delete from project_task where project_id=?', [pid] );
+	yield warp.$query( 'delete from project_member_group where project_id=?', [pid] );
+	yield warp.$query( 'delete from project_member where project_id=?', [pid] );
+	yield warp.$query( 'delete from project where id=?', [pid] );
+}
+
 function* $project_countAllOnRun(){
 	return yield modelProject.$findNumber( {
 				select: 'count(*)',
@@ -712,6 +728,8 @@ module.exports = {
 
 	project: {
 		$list: $project_list,
+		$count: $project_count,
+		$destroy:$project_delete,
 		$listAllOnRun: $project_listAllOnRun,
 		$listAllOnEnd: $project_listAllOnEnd,
 		$listUserJoinOnRun: $project_listUserJoinOnRun,
@@ -764,7 +782,8 @@ module.exports = {
 		$havePermEditProject: $user_havePermEditProject,
 		$isProjectMaster: $user_isProjectMaster,
 		$havePerm: team_base.$havePerm,
-		$testPerm: team_base.$testPerm
+		$testPerm: team_base.$testPerm,
+		$isAdmin: team_base.member.$isAdmin
 	}
 	
 };

@@ -31,6 +31,7 @@ GET METHOD:
 /project/p/:id
 
 
+/api/project/p/all?page=xx
 /api/project/p/allDoing?page=xx
 /api/project/p/allHistory?page=xx
 /api/project/p/myDoing?page=xx
@@ -50,6 +51,7 @@ POST METHOD:
 
 /api/project/p
 /api/project/p/:id
+/api/project/p/:id/delete
 /api/project/p/:id/group
 /api/project/p/:id/task
 /api/project/group/:id
@@ -186,6 +188,16 @@ module.exports = {
 				roleOptions: base.project.roleOptions()
 			};
 		yield $_render( this, model, 'p/project_view.html');
+	},
+
+	'GET /api/project/p/all': function*(){
+		var index = this.request.query.page || '1',
+			index = parseInt(index),
+			page_size = base.config.PAGE_SIZE,
+			page = new Page(index, page_size), 
+			rs = yield yield base.project.$list( page_size*(index-1), page_size);
+		page.total = yield base.project.$count();
+		this.body = { page:page, projects: rs};
 	},
 
 	'GET /api/project/p/allDoing': function*(){
@@ -332,6 +344,21 @@ module.exports = {
 			redirect: base.getHistoryUrl(this)
 		}
 	},
+
+	'POST /api/project/p/:id/delete': function* (id){
+		var uid = this.request.user.id;
+
+		if( !(yield base.user.$isAdmin(uid))){
+			throw api.notAllowed('Deleting the project need administrator permission. ');
+		}
+		yield base.project.$destroy(id);
+
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+
 	'POST /api/project/p/:id/group': function* (id){
 		var r, 
 			data = this.request.body || {},
