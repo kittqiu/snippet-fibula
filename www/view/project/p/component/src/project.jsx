@@ -57,8 +57,8 @@ var TaskTable = React.createClass({
 		options = options || {};
 		$('.tree').treegrid({
 			treeColumn: 1,
-			expanderExpandedClass: 'uk-icon-folder-open-o',
-			expanderCollapsedClass: 'uk-icon-folder-o',
+			expanderExpandedClass: 'uk-icon-minus-square-o',
+			expanderCollapsedClass: 'uk-icon-plus-square-o',
 			nodeClasses: {
 				task:'uk-icon-tasks'
 			},
@@ -68,7 +68,7 @@ var TaskTable = React.createClass({
 			selectable: true,
 			selectedClass: 'dv-row-selected',
 			onSelected:options.onSelected,
-			leafClass:'uk-icon-leaf',
+			leafClass:'uk-icon-file-text-o',
 			initialState:'collapsed'
 		});
 	},
