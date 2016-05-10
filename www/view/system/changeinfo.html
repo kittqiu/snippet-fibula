@@ -1,0 +1,19 @@
+{% extends './sys_base.html' %}
+
+{% block right_toolbar %}
+{% endblock %}
+
+{% block production_readyscript %}
+{% include './component/build/User.js' %}
+ReactDOM.render(
+ 	React.createElement(UserInfoEdit, {uid:ENV.user.id}), document.getElementById('vm')
+ 	);
+{% endblock %}
+
+{% block developmode_readyscript %}
+{% include './component/src/User.jsx' %}
+ReactDOM.render(
+	<UserInfoEdit  uid={ENV.user.id} />,
+		document.getElementById('vm')
+	);
+{% endblock %}

@@ -14,7 +14,8 @@ var
 	i18n = require('../i18n'),
 	smtp = require('./system/email'),
 	swig = require('swig'),
-	requestIp = require('request-ip');
+	requestIp = require('request-ip'),
+	home = require('./home');
 
 var 
 	User = db.user,
@@ -94,6 +95,28 @@ function getHistoryUrl( context ){
 	var url = context.cookies.get('SYSTEM_HISTORYURL');
 	return url || '/';
 }
+
+function* $render( context, model, view ){
+	context.render( 'system/' + view, yield home.$getModel.apply(context, [model]) );
+}
+
+/*
+GET:
+/auth/CancelEmail/:id
+/auth/ConfirmEmail/:id
+/auth/ConfirmEmail
+/auth/signout
+/user/changeinfo
+
+/api/user/:id
+
+POST:
+/api/authenticate
+/api/auth/ConfirmEmail
+/api/signup
+/api/user/changepwd
+/api/user/:id
+*/
 
 module.exports = {
 
@@ -374,6 +397,35 @@ module.exports = {
 		this.body = {
 			id: user.id
 		};
+	},
+
+	'GET /user/changeinfo': function*(){
+		var model = {  };
+		yield  $render( this, model, 'changeinfo.html' );
+	},
+
+	'GET /api/user/:id': function*(id){
+		var user = yield User.$find(id);
+		if( user == null ){
+			throw api.notFound('user', this.translate('User not found.'));
+		}
+		this.body = { id: id, username: user.username, name: user.name, email: user.email } 
+	},
+
+	'POST /api/user/:id': function* (id){
+		var data = this.request.body,
+			user = yield User.$find(id);
+		if( user == null ){
+			throw api.notFound('user', this.translate('User not found.'));
+		}
+		json_schema.validate('userEdit', data);
+
+		user.name = data.name;
+		yield user.$update(['name']);
+		this.body = {
+			result: 'ok',
+			redirect: '/'
+		}
 	},
 	'LoginRequired': [ '/api/user/changepwd'] 
 };

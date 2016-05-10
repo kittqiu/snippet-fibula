@@ -37,10 +37,10 @@
 	        <li><a href="/snippet/">snippet</a></li>
 	        <li><a href="/project/">project</a></li>
 	        <!--li><a href="/req/">requirement</a></li-->
-	        <li><a href="/team/">team</a></li>
-	        {% if __user__.username == 'Admin' %}
-	        <li><a href="/manage/">manage</a></li>
 	        <li><a href="/train/">train</a></li>
+	        <li><a href="/team/">team</a></li>	        
+	        {% if __user__.username == 'Admin' %}
+	        <li><a href="/manage/">manage</a></li>	        
 	        {% endif %}
     	</ul> 
     	{% endblock %}   					
@@ -51,6 +51,7 @@
                     <div class="uk-dropdown uk-dropdown-navbar" style="top: 30px; left: -170px;">
                         <ul class="uk-nav uk-nav-navbar uk-subnav-pill">
                         	<li><a href="/user/changepassword">{{ _('change password')}}</a></li>
+                        	<li><a href="/user/changeinfo">修改个人信息</a></li>
                             <li class="uk-nav-divider"></li>
                             <li class="uk-active"><a href="/auth/signout?referer={{__request__.url}}">{{ _('logout')}}</a></li>
                         </ul>

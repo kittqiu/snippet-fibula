@@ -489,6 +489,13 @@ var schemas = {
 			content_bottom: PROPERTY.SETTING
 		}
 	},
+	userEdit:{
+		type: 'object',
+		properties: {
+			name: PROPERTY.NAME,
+		},
+		required:['name']
+	},
 	version:{
 		type: 'object',
 		properties: {

@@ -31,6 +31,8 @@ POST METHOD:
 /api/train/c/:id
 /api/train/s
 /api/train/s/:id
+/api/train/s/:id/up
+/api/train/s/:id/down
 
 ********/
 
@@ -73,8 +75,9 @@ module.exports = {
 	},
 
 	'GET /train/s/:id': function* (id){
-		var model = { __id: id };
-		yield base.$render( this, model, 'section_form.html');
+		var s = yield base.modelSection.$find(id),
+			model = { __id: id, course_id: s.course_id };
+		yield base.$render( this, model, 'train_section.html');
 	},
 
 	'GET /api/train/c/list': function* (){
@@ -92,7 +95,7 @@ module.exports = {
 	},
 
 	'GET /api/train/c/:id': function* (id){
-		this.body = yield base.modelCourse.$find(id);
+		this.body = yield base.course.$find(id);
 	},
 
 	'GET /api/train/s/:id': function* (id){
@@ -164,6 +167,16 @@ module.exports = {
 			result: 'ok',
 			redirect: base.getHistoryUrl(this)
 		}
+	},
+
+	'POST /api/train/s/:id/down': function* (id){
+		yield base.section.$move(id, 1);
+		this.body = { result: 'ok' };
+	},
+
+	'POST /api/train/s/:id/up': function* (id){
+		yield base.section.$move(id, -1);
+		this.body = { result: 'ok' };
 	},
 
 	'POST /api/train/s/:id': function* (id){

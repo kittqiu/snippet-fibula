@@ -57,6 +57,13 @@ function* $render( context, model, view ){
 	context.render( 'train/' + view, yield home.$getModel.apply(context, [model]) );
 }
 
+function* $course_find(cid){
+	var sql = 'select c.*, u.name as owner_name from train_course as c left join users as u on u.id=c.owner_id '
+		+ ' where c.id=?',
+		rs = yield warp.$query(sql, [cid]);
+	return rs && rs[0];
+}
+
 function* $course_list(offset, limit){
 	var sql = 'select c.*, u.name as owner_name from train_course as c left join users as u on u.id=c.owner_id '
 		+ ' order by c.created_at desc ',
@@ -84,7 +91,8 @@ function* $course_listSection( cid ){
 	var sections = yield modelSection.$findAll({
 			select: '*',
 			where: '`course_id`=?',
-			params: [cid]
+			params: [cid],
+			order:  '`order` asc'
 		});
 	if( sections.length > 0 ){
 		var sql = 'select res.section_id, res.att_id, att.path, att.name from train_resource as res '
@@ -166,6 +174,27 @@ function* $section_updateAttachments(section_id, course_id, atts){
 	}
 }
 
+function* $section_move( sid, offset ){
+	var r = yield modelSection.$find(sid),
+		maxOrder, sql, order;
+	if( r === null ){
+		throw api.notFound("course's section", this.translate('Record not found'));
+	}
+	maxOrder = yield $section_getMaxOrder(r.course_id);
+	order = r.order + offset;
+	if( offset !== 0 && order > 0 && order <= maxOrder ){
+		if( offset > 0 ){
+			sql = 'update train_section set `order`=`order`-1 where `course_id`=? and `order`>? and `order`<?'
+			yield warp.$query( sql,	[r.course_id, r.order, order+1]);
+		}else{
+			sql = 'update train_section set `order`=`order`+1 where `course_id`=? and `order`>? and `order`<?'
+			yield warp.$query( sql,	[r.course_id, order-1, r.order]);
+		}
+		r.order = order;
+		yield r.$update(['order']);
+	}
+}
+
 module.exports = {
 	modelCourse: modelCourse,
 	modelSection: modelSection,
@@ -194,6 +223,7 @@ module.exports = {
 	},
 
 	course: {
+		$find: $course_find,
 		$list: $course_list,
 		$count: $course_count,
 		$listSection: $course_listSection
@@ -203,7 +233,8 @@ module.exports = {
 		$getMaxOrder: $section_getMaxOrder,
 		$addAttachments: $section_addAttachments,
 		$listAttachments: $section_listAttachments,
-		$updateAttachments: $section_updateAttachments
+		$updateAttachments: $section_updateAttachments,
+		$move: $section_move
 	}
 
 	

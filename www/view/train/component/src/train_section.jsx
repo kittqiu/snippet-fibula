@@ -268,3 +268,70 @@ var EditSectionPage = React.createClass({
 			)
 	}
 });
+
+
+var SectionView = React.createClass({
+	loadData: function(){
+		getJSON( '/api/train/s/' + this.props.sid, {}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					var fs = [];
+					data.atts.forEach( function(att, index) {
+						fs.push({id:att.att_id, name:att.name});
+					});
+					this.setState({name:data.name, brief: data.brief, content: data.content, files:fs});
+				}
+			}.bind(this)
+		);
+	},
+	componentDidMount: function(){
+		this.loadData();
+	},
+	getInitialState: function(){
+		return { name: '', brief:'', content:'', course:{}, files:[]}
+	},
+	render: function(){
+		var marginSmall = {marginBottom:'2px'};
+		var content = { __html: marked(this.state.content)};
+		return (
+			<div>
+				<h1 className="uk-text-center">
+					<b>{ this.state.name }</b>
+				</h1>				
+				<p className="uk-text-muted" style={marginSmall} >{this.state.brief}</p>
+				<hr className="dv-hr"/>
+				<div id="section_content" dangerouslySetInnerHTML={content} className="wiki-content">
+				</div>
+				<p className="uk-text-muted" style={marginSmall} >附件</p>
+				<hr className="dv-hr"/>
+				<div>
+					{
+						this.state.files.length > 0 ? 
+						<table id="attachments" className="uk-table uk-table-striped">
+							<thead>
+								<tr>
+									<th className="uk-width-3-4">文件名</th>
+									<th className="uk-width-1-4">下载</th>
+								</tr>
+							</thead>
+							<tbody>
+							{
+								this.state.files.map(function(f,index){
+									return (
+										<tr key={'file-'+index} id={f.id}>
+											<td>{f.name}</td>
+											<td><a className="uk-icon-cloud-download dv-link" href={'/api/file/'+f.id}>下载</a></td>
+										</tr>
+										)
+								}.bind(this))
+							}
+							</tbody>
+						</table>
+						: '无'
+					}
+				</div>
+			</div>
+			)
+	}
+});

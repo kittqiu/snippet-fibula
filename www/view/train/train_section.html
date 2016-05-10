@@ -1,0 +1,20 @@
+{% extends './train_base.html' %}
+
+{% block right_toolbar %}
+<a href="/train/c/{{course_id}}" class="dv-link">查看章节列表</a>
+{% endblock %}
+
+{% block production_readyscript %}
+{% include './component/build/train_section.js' %}
+ReactDOM.render(
+ 	React.createElement(SectionView, {sid:'{{__id}}'}), document.getElementById('vm')
+ 	);
+{% endblock %}
+
+{% block developmode_readyscript %}
+{% include './component/src/train_section.jsx' %}
+ReactDOM.render(
+	<SectionView  sid='{{__id}}' />,
+		document.getElementById('vm')
+	);
+{% endblock %}

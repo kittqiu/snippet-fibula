@@ -246,6 +246,13 @@ var SCHEMAS = {
 			brief: SCHEMA_PROPERTY.BRIEF
 		},
 		required:['name', 'brief']
+	},
+	userEdit: {
+		type: 'object',
+		properties: {
+			name: SCHEMA_PROPERTY.NAME
+		},
+		required:['name']
 	}
 };
 
