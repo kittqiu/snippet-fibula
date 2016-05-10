@@ -117,5 +117,15 @@ gulp.task('babel_system', function() {
     }
 );
 
+gulp.task('babel_train', function() {
+    return gulp.src('./view/train/component/src/*.jsx')
+            .pipe(babel({
+                presets: ['es2015','react']
+            }))
+            .pipe(uglify())
+            .pipe(gulp.dest('./view/train/component/build'))
+    }
+);
+
 gulp.task('default', ['less']);
-gulp.task('babel', ['babel_project','babel_task', 'babel_structure', 'babel_manage', 'babel_system'])
+gulp.task('babel', ['babel_project','babel_task', 'babel_structure', 'babel_manage', 'babel_system', 'babel_train'])
