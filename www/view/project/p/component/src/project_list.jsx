@@ -4,11 +4,11 @@ var ProjectList = React.createClass({
 			<table className="uk-width-1-1 uk-table">
 				<thead>
 					<tr>
-						<td>项目名称</td>
-						<td>负责人</td>
-						<td>开始时间</td>
-						<td>结束时间</td>
-						<td>操作</td>
+						<th>项目名称</th>
+						<th>负责人</th>
+						<th>开始时间</th>
+						<th>结束时间</th>
+						<th>操作</th>
 					</tr>
 				</thead>
 				<tbody>

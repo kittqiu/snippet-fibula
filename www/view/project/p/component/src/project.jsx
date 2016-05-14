@@ -69,7 +69,8 @@ var TaskTable = React.createClass({
 			selectedClass: 'dv-row-selected',
 			onSelected:options.onSelected,
 			leafClass:'uk-icon-file-text-o',
-			initialState:'collapsed'
+			initialState:'collapsed',
+			saveState: true
 		});
 	},
 	dragTask: function(task_id, toParentId, fromParentId ){
