@@ -1,0 +1,23 @@
+{% extends './train_base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block jump-title  %}
+作者列表修改成功
+{% endblock %}
+
+{% block production_readyscript %}
+{% include './component/build/train_course.js' %}
+ReactDOM.render(
+ 	React.createElement(CourseAuthorForm, {cid:'{{__id}}'}), document.getElementById('vm')
+ 	);
+{% endblock %}
+
+{% block developmode_readyscript %}
+{% include './component/src/train_course.jsx' %}
+ReactDOM.render(
+	<CourseAuthorForm cid='{{__id}}' />,
+		document.getElementById('vm')
+	);
+{% endblock %}

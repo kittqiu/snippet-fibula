@@ -17,6 +17,7 @@ GET METHOD:
 /train/c/creation
 /train/c/list?page=xx
 /train/c/:id
+/train/c/:id/author/edit
 /train/c/:id/edit
 /train/s/creation?cid=xx
 /train/s/:id
@@ -29,6 +30,8 @@ POST METHOD:
 
 /api/train/c
 /api/train/c/:id
+/api/train/c/:id/member/add
+/api/train/c/:id/member/delete
 /api/train/s
 /api/train/s/:id
 /api/train/s/:id/up
@@ -60,6 +63,10 @@ module.exports = {
 		base.setHistoryUrl(this);
 	},
 
+	'GET /train/c/:id/author/edit': function* (id){
+		yield base.$render( this, {__id:id}, 'course_author_form.html')
+	},
+
 	'GET /train/c/:id/edit': function* (id){
 		yield base.$render( this, {__id:id}, 'course_form.html')
 	},
@@ -88,6 +95,10 @@ module.exports = {
 			rs = yield yield base.course.$list( page_size*(index-1), page_size);
 		page.total = yield base.course.$count();
 		this.body = { page:page, courses: rs};
+	},
+
+	'GET /api/train/c/:id/authors': function* (id){
+		this.body = yield base.course.$listAuthor(id);
 	},
 
 	'GET /api/train/c/:id/sections': function* (id){
@@ -123,6 +134,35 @@ module.exports = {
 			redirect: base.getHistoryUrl(this)
 		}
 	},
+
+	'POST /api/train/c/:id/member/add': function* (id){
+		var r = yield base.modelCourse.$find(id),
+			data = this.request.body;
+
+		if( r === null ){
+			throw api.notFound('course', this.translate('Record not found'));
+		}
+		yield base.course.$addMembers(id, data);
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+
+	'POST /api/train/c/:id/member/delete': function* (id){
+		var r = yield base.modelCourse.$find(id),
+			data = this.request.body;
+
+		if( r === null ){
+			throw api.notFound('course', this.translate('Record not found'));
+		}
+		yield base.course.$deleteMember(id, data.user);
+		this.body = {
+			result: 'ok',
+			redirect: base.getHistoryUrl(this)
+		}
+	},
+
 	'POST /api/train/c/:id': function* (id){
 		var r = yield base.modelCourse.$find(id),
 			data = this.request.body;

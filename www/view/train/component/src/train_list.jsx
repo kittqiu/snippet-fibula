@@ -19,7 +19,8 @@ var CourseList = React.createClass({
 									<td className="uk-width-2-10">
 										<a href={"/train/c/" + c.id } className="dv-link">查看</a>
 										{
-											c.owner_id === ENV.user.id ? <a href={"/train/c/" + c.id + "/edit"} className="dv-link">修改</a>
+											c.owner_id === ENV.user.id ? <span><a href={"/train/c/" + c.id + "/edit"} className="dv-link">修改</a>
+											<a href={"/train/c/" + c.id + "/author/edit"} className="dv-link">修改作者</a></span>
 												: null
 										}
 									</td>

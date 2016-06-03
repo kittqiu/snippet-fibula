@@ -19,6 +19,7 @@ var
 	modelUser = db.user,
 	modelCourse = db.train_course,
 	modelSection = db.train_section,
+	modelMember = db.train_course_member,
 	modelRes = db.train_resource,
 	next_id = db.next_id,
 	warp = db.warp;
@@ -115,6 +116,35 @@ function* $course_listSection( cid ){
 	return sections;
 }
 
+function* $course_listAuthor( cid ){
+	var sql = 'select m.user_id, u.name as user_name from train_course_member as m left join users as u on u.id=m.user_id '
+		+ ' where m.course_id=?',
+		rs = yield warp.$query(sql, [cid]);
+	return rs;
+}
+
+function* $course_addMembers( cid, us ){
+	var i;
+	for( i = 0; i < us.length; i++ ){
+		var m = {
+			user_id: us[i].id,
+			course_id: cid
+		};
+		yield modelMember.$create(m);
+	}
+}
+
+function* $course_deleteMember( cid, user_id ){
+	var r = yield modelMember.$find({
+			select: '*',
+			where: '`course_id`=? and `user_id` = ?',
+			params: [ cid, user_id ]
+		});
+	if( !!r ){
+		yield r.$destroy();
+	}
+}
+
 function* $section_getMaxOrder(course_id){
 	var sql = 'select MAX(`order`) AS maxorder from train_section where course_id=?',
     	rs = yield warp.$query( sql, [course_id] );
@@ -198,6 +228,7 @@ function* $section_move( sid, offset ){
 module.exports = {
 	modelCourse: modelCourse,
 	modelSection: modelSection,
+	modelMember: modelMember,
 
 	setHistoryUrl: setHistoryUrl,
 	getHistoryUrl: getHistoryUrl,
@@ -215,7 +246,6 @@ module.exports = {
 		PAGE_SIZE: config.train.page_size
 	},
 
-
 	user: {
 		$list: team_base.member.$getUsers,
 		$havePerm: team_base.$havePerm,
@@ -226,7 +256,10 @@ module.exports = {
 		$find: $course_find,
 		$list: $course_list,
 		$count: $course_count,
-		$listSection: $course_listSection
+		$listSection: $course_listSection,
+		$listAuthor: $course_listAuthor,
+		$addMembers: $course_addMembers,
+		$deleteMember: $course_deleteMember
 	},
 
 	section: {

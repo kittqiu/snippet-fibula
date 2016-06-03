@@ -60,7 +60,6 @@ var NewCoursePage = React.createClass({
 									<input name="brief" type="text" ref="brief" className="uk-width-1-1" placeholder="1-100字符" defaultValue="" maxLength="100"/>
 								</div>
 							</div>
-							
 							<div className="uk-form-row uk-width-1-1">
 								<label className="uk-form-label">课程说明</label>
 								<div className="uk-form-controls">
@@ -228,12 +227,23 @@ var CoursePage = React.createClass({
 			}
 		}.bind(this));
 	},
+	loadAuthors: function(){
+		getJSON( '/api/train/c/'+ this.props.cid +'/authors', {}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.setState({authors:data});					
+				}
+			}.bind(this)
+		);
+	},
 	loadSections: function(){
 		getJSON( '/api/train/c/'+ this.props.cid +'/sections', {}, function(err, data ){
 				if(err){
 					fatal(err);
 				}else{
-					this.setState({sections:data});					
+					this.setState({sections:data});
+					this.loadAuthors();				
 				}
 			}.bind(this)
 		);
@@ -253,7 +263,20 @@ var CoursePage = React.createClass({
 		this.loadData();
 	},
 	getInitialState: function(){
-		return { course: {}, sections:[]}
+		return { course: {}, sections:[], authors:[]}
+	},
+	isAuthor: function(){
+		if( ENV.user.id===this.state.course.owner_id ){
+			return true;
+		}else{
+			var us = this.state.authors;
+			for( var i = 0; i < us.length; i++ ){
+				if( us[i].user_id === ENV.user.id ){
+					return true;
+				}
+			}
+			return false;
+		}
 	},
 	render: function(){
 		var course = this.state.course,
@@ -262,10 +285,10 @@ var CoursePage = React.createClass({
 		return (
 			<div>
 				<h1 className="uk-text-center"><b>课程：{course.name}</b></h1>				
-				<div className="uk-text-right">
+				<div className="uk-text-right">					
 					{
-						ENV.user.id===course.owner_id ? <a href={ "/train/s/creation?cid=" + course.id } className="dv-link">添加章节</a>
-						: <span>作者：{ course.owner_name}</span>
+						this.isAuthor() ? <a href={ "/train/s/creation?cid=" + course.id } className="dv-link">添加章节</a>
+						: <span>创建人：{ course.owner_name}</span>
 					}
 					
 				</div>
@@ -278,6 +301,19 @@ var CoursePage = React.createClass({
 					<div style={block_margin}>
 						<h3><b>说明</b></h3>
 						<div><pre className="dv-pre-clear">{course.details}</pre></div>
+					</div>
+					<div style={block_margin}>
+						<h3><b>作者</b></h3>
+						<div>
+							<span>{ course.owner_name }</span>
+							{
+								this.state.authors.map(function(u,index){
+										return (
+											<span key={index}>、{u.user_name}</span>
+											)
+									})
+							}
+						</div>
 					</div>
 					<div style={block_margin}>
 						<h3><b>章节</b></h3>
@@ -309,7 +345,7 @@ var CoursePage = React.createClass({
 														}
 													</td>
 													{
-														ENV.user.id===course.owner_id ?
+														this.isAuthor() ?
 														<td>
 															<a href={'/train/s/' + s.id + '/edit'} className="dv-link">修改</a>
 															{
@@ -339,6 +375,195 @@ var CoursePage = React.createClass({
 						</div>
 					</div>
 					
+				</div>
+			</div>
+			)
+	}
+});
+
+var SelectMemberDialog = React.createClass({
+	updateFreeUser: function(users, authors){
+		var i, as = [], 
+			freeusers = [];
+		for( i = 0; i < authors.length; i++ ){
+			as.push( authors[i].user_id );
+		}
+		for( i = 0; i < users.length; i++ ){
+			if( as.indexOf(users[i].id) == -1 ){
+				freeusers.push( users[i]);
+			}
+		}
+		this.setState({freeusers: freeusers});
+	},
+	loadUsers: function(){
+		getJSON( '/api/team/member/list', {}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.updateFreeUser(data, this.props.authors);
+					this.setState({users:data});
+				}
+			}.bind(this)
+		);
+	},
+	handleSubmit: function(){
+		var $members = $("#modal_add_member input:checked"),
+			ms = [], fs=[], as=[], i, users = this.state.users;
+		for( i = 0; i < $members.length; i++){
+			ms.push($members[i].value);
+		}
+		for( i = 0; i < users.length; i++ ){
+			var u = users[i];
+			if( ms.indexOf(u.id)!== -1){
+				as.push(u);
+			}else{
+				fs.push(u);
+			}
+		}
+		//this.setState({users:fs});
+		this.props.addUsers(as);
+
+		var modal = UIkit.modal("#modal_add_member");
+		modal.hide();
+	},
+	componentWillReceiveProps: function(nextProps){
+		this.updateFreeUser(this.state.users, nextProps.authors);
+	},
+	componentWillMount: function(){
+		this.loadUsers();
+	},
+	getInitialState: function(){
+		return {users:[], freeusers:[]}
+	},
+	render: function(){
+		return (
+			<div id="modal_add_member" className="uk-modal uk-text-left">
+				<div className="uk-modal-dialog">
+					<a href="" className="uk-modal-close uk-close uk-close-alt"></a>
+					<div className="uk-modal-header "><h2>选择新成员</h2></div>
+					<div>
+						<form className="uk-form uk-form-stacked uk-form-horizontal">
+							<fieldset>
+								<div className="uk-alert uk-alert-danger uk-hidden"></div>
+								{
+									this.state.freeusers.map(function(u,index){
+										return (
+											<div key={u.id} className="uk-form-controls">
+												<input id={u.id} type="checkbox" value={u.id} />
+												<label htmlFor={u.id}>{u.name}</label>
+											</div>
+											)
+									})
+								}
+								<div className={this.state.users.length>0?'uk-hidden':''}>无新成员</div>
+							</fieldset>
+						</form>
+					</div>
+					<div className="uk-modal-footer uk-text-right">
+						<button type="button" onClick={this.handleSubmit} className="uk-button uk-button-primary">提交</button>
+					</div>
+				</div>
+			</div>
+			)
+	}
+});
+
+var CourseAuthorForm = React.createClass({
+	addUsers: function(users){
+		var as = this.state.authors, i;
+		for( i = 0; i < users.length; i++ ){
+			var u = users[i];
+			as.push( {user_id: u.id, user_name: u.name})
+		}
+		
+		postJSON( '/api/train/c/'+this.props.cid+'/member/add', users, function(err, result){
+			if(err)
+				fatal(err);
+			else{
+				this.setState( {authors:as});
+			}
+		}.bind(this));
+	},
+	deleteUser: function( user_id ){
+		postJSON( '/api/train/c/'+this.props.cid+'/member/delete', {user:user_id}, function(err, result){
+			if(err)
+				fatal(err);
+			else{
+				var as = this.state.authors, i;
+				for( i = 0; i < as.length; i++ ){
+					var u = as[i];
+					if( u.user_id === user_id ){
+						as.splice( i, 1);
+						break;
+					}
+				}
+				this.setState( {authors:as});
+			}
+		}.bind(this));
+	},
+	loadAuthors: function(){
+		getJSON( '/api/train/c/' + this.props.cid + '/authors', {}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.setState({authors:data});
+				}
+			}.bind(this)
+		);
+	},
+	loadData: function(){
+		getJSON( '/api/train/c/' + this.props.cid, {}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.setState({course:data});
+					this.loadAuthors();				
+				}
+			}.bind(this)
+		);
+	},
+	componentDidMount: function(){
+		this.loadData();
+	},
+	getInitialState: function(){
+		return { course: {}, authors:[]}
+	},
+	render: function(){
+		return (
+			<div>
+				<h1 className="uk-text-center"><b>修改课程的作者：<span>{this.state.course.name}</span></b></h1>				
+				<div className="uk-text-right">
+					<button className="uk-button-link dv-link" data-uk-modal="{center:true,target:'#modal_add_member'}" >添加新作者</button>
+					<SelectMemberDialog authors={this.state.authors} addUsers={this.addUsers} />
+				</div>
+				<hr className="dv-hr"/>
+				<div id="form_new_course">
+					{
+						this.state.authors.length > 0 ? 
+						<table className="uk-width-1-1 uk-table">
+							<thead>
+								<tr>
+									<th className="uk-width-1-2">作者</th>
+									<th className="uk-width-1-2">操作</th>
+								</tr>
+							</thead>
+							<tbody>							
+								{									
+									this.state.authors.map( function(c,index){
+										return (
+											<tr key={index}>
+												<td className="uk-text-left">{ c.user_name }</td>
+												<td>
+													<a onClick={ this.deleteUser.bind(this, c.user_id )} className="dv-link">删除</a>
+												</td>
+											</tr>
+											)
+									}.bind(this))
+								}
+							</tbody>
+						</table>
+						: '无其他作者'
+					}
 				</div>
 			</div>
 			)
