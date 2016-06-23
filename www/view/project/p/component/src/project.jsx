@@ -70,7 +70,8 @@ var TaskTable = React.createClass({
 			onSelected:options.onSelected,
 			leafClass:'uk-icon-file-text-o',
 			initialState:'collapsed',
-			saveState: true
+			saveState: true,
+			saveStateName: 'project-' + this.props.project.id
 		});
 	},
 	dragTask: function(task_id, toParentId, fromParentId ){
@@ -80,7 +81,7 @@ var TaskTable = React.createClass({
 			console.log( 'Move task ' + TaskMap[task_id].name +' from ' + (fromParentId==='root'||fromParentId===null ?'root':TaskMap[fromParentId].name) + ' to ' + TaskMap[toParentId].name );
 		}
 	},
-	resetTree: function(){
+	resetTree: function(){		
 		this.initTree({
 			onSelected: this.props.onTaskSelected
 		});
@@ -90,7 +91,18 @@ var TaskTable = React.createClass({
 	},
 	componentDidUpdate:function(){
 		if( this.props.tasks.length !== this.state.taskLen){
-			this.resetTree();
+			if( this.state.taskLen === 0 ){
+				this.resetTree();
+			}else{
+				if( this.props.action.startsWith("add")){
+					var $this = $('.tree'),
+						id = this.props.action.split("-")[1],
+						settings = $this.data('settings');
+					var $node = $this.treegrid('getSetting', 'getNodeById').apply($this, [id, $this]);
+					$node.treegrid('initNode', settings);
+				}
+			}
+			
 			this.setState({taskLen:this.props.tasks.length})
 		}
 		if( this.props.project.update_cnt !== this.state.update_cnt){
@@ -232,7 +244,7 @@ var ToolBar = React.createClass({
 
 var Project = React.createClass({
 	getInitialState: function() {
-		return { project: {}, users:[], tasks:[], selected_task:'root', UserMap:{}, TaskMap:{}};
+		return { project: {}, users:[], tasks:[], selected_task:'root', UserMap:{}, TaskMap:{}, action:''};
 	},
 	onNewTask: function(id){
 		getJSON( '/api/project/task/'+id, function(err, data ){
@@ -245,7 +257,7 @@ var Project = React.createClass({
 					this.state.TaskMap[t.id] = t;
 					ts.push(t);
 					this.sortTasks(ts);
-					this.setState({tasks:ts});
+					this.setState({tasks:ts, action:'add-' + t.id});
 				}
 			}.bind(this)
 		); 
@@ -496,7 +508,7 @@ var Project = React.createClass({
 				}			
 				<hr className="dv-hr"/>				
 				<TaskTable project={this.state.project} tasks={this.state.tasks} onTaskSelected={this.onTaskSelected} 
-					getTaskById={this.getTaskById} handleMoveTo={this.handleMoveTo} mode={this.props.mode}/>
+					getTaskById={this.getTaskById} handleMoveTo={this.handleMoveTo} mode={this.props.mode} action={this.state.action}/>
 			</div>
 			);
 	}
