@@ -346,9 +346,15 @@ function formatNow(){
 	return formatDate( Date.now());
 }
 
+function formatDateToMonth(date){
+	var mm = date.getMonth()+1;
+	return date.getFullYear() + '-' + (mm>9?mm:'0'+mm);	
+}
+
 function toDateTime(strdate){
 	return new Date(strdate).getTime();
 }
+
 function getDateTimeAt0(millisecond){    
     var n = millisecond || Date.now();
     var day = new Date(n);

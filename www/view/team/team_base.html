@@ -3,6 +3,14 @@
 {% block title %} Team {% endblock %}
 
 {% block pagehead %}
+{% if __production__ %}
+<script src="/static/js/react.min.js"></script>
+<script src="/static/js/react-dom.min.js"></script>
+{% else %}
+<script src="/static/js/react.js"></script>
+<script src="/static/js/react-dom.js"></script>
+<script src="/static/js/browser.min.js"></script>
+{% endif %}
 <script src="/static/js/jquery.treegrid.js"></script>
 <link rel="stylesheet" href="/static/css/jquery.treegrid.css"/>	
 {% block head %}<!-- head  -->{% endblock %}
@@ -15,7 +23,7 @@
 <div id="main-header" class="uk-grid">
 	<div class="uk-width-1-1 uk-block uk-block-muted uk-flex x-toolbar" >
 		<div class="uk-flex-item-auto " style="padding:10px 20px;">
-			<!--a href="/req/plan" class="dv-link" style="margin-right:15px">{{ _('Product Manage') }}</a-->
+			<a href="/team/evaluation" class="dv-link" style="margin-right:15px">评价</a>
 		{% block toolbar %}
 		{% endblock %}
 		</div>

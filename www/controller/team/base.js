@@ -13,6 +13,7 @@ var
 	modelUser = db.user,
 	modelDep = db.team_department,
 	modelMember = db.team_member,
+	modelEvaluation = db.team_evaluation,
 	DEP_ROOT = 'root',
 	DEFAULT_EXPIRES_IN_MS = 1000 * config.session.expires,
 	PERM_EDIT_STRUCTURE = 'team.structure.edit',
@@ -158,6 +159,28 @@ function* $_member_getUsers(){
 	return yield warp.$query(sql);
 }
 
+function* $_evaluation_get(uid, year, month){
+	var day = new Date( year, month, 15 );
+	var r = yield modelEvaluation.$find({
+			select: '*',
+			where: '`time`=? && `user_id`=?',
+			params: [day.getTime(), uid]
+	});
+	return r || {};
+}
+
+function* $_evaluation_create(uid, date, evaluation){
+	date = new Date( date.getFullYear(), date.getMonth(), 15 );
+	var r = {
+			user_id: uid,
+			manager_id: '',
+			time: date.getTime(),
+			evaluation: JSON.stringify( evaluation )
+		};
+	yield modelEvaluation.$create( r );
+	return true
+}
+
 function* $_havePerm(context,perm_name){
 	return yield perm.user.$havePerm(context.request.user.id, perm_name);
 }
@@ -207,6 +230,11 @@ module.exports = {
 		$havePerm: perm.user.$havePerm,
 		$collectUser: $member_collectUser,
 		$isAdmin: $member_isAdmin
+	},
+
+	evaluation: {
+		$get: $_evaluation_get,
+		$create: $_evaluation_create
 	},
 
 	perm: perm,

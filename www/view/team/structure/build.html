@@ -12,15 +12,10 @@ var perm_edit = {{__perm_Edit__ || false}};
 </script>
 
 {% if __production__ %}
-<script src="/static/js/react.min.js"></script>
-<script src="/static/js/react-dom.min.js"></script>
 <script type="text/javascript">
 {% include './component/build/structure.js' %}
 </script>
 {% else %}
-<script src="/static/js/react.js"></script>
-<script src="/static/js/react-dom.js"></script>
-<script src="/static/js/browser.min.js"></script>
 <script type="text/babel">
 {% include './component/src/structure.jsx' %}
 ReactDOM.render(
