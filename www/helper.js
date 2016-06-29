@@ -73,6 +73,14 @@ function getFirstDayOfMonth(){
     return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
+function getFirstDayOfYear(year){
+    return new Date(year, 0, 1, 0, 0, 0, 0);
+}
+
+function getLastDayOfYear(year){
+    return new Date(year, 11, 31, 23, 59, 59, 999);
+}
+
 function getId(request) {
     var id = request.query.id;
     if (id && id.length === 50) {
@@ -110,5 +118,7 @@ module.exports = {
     getPreviousDateTime: getPreviousDateTime,
     getWeek: getWeek, 
     getFirstDayOfMonth: getFirstDayOfMonth,
+    getFirstDayOfYear: getFirstDayOfYear,
+    getLastDayOfYear: getLastDayOfYear,
     getId: getId
 };

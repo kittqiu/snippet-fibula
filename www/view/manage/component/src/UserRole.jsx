@@ -64,8 +64,7 @@ var UserRole = React.createClass({
 				roles.push(r.id);
 			}
 		}
-		console.log(roles);
-
+		
 		form.postJSON( '/api/sys/user/'+uid+'/roles', roles, function(err, result){
 			if( !err ){
 				UIkit.modal.alert("保存成功！");

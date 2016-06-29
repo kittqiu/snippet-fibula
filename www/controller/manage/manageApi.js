@@ -14,17 +14,26 @@ function* $_render( context, model, view ){
 /**************
 GET METHOD:
 /manage
+/manage/config/workday
 /manage/project
 /manage/user/role
 
-POST METHOD:
 
+POST METHOD:
 
 *************/
 
 module.exports = {
 	'GET /manage': function* (){
 		yield $_render( this, {}, 'manage_index.html');
+		base.setHistoryUrl(this);
+	},
+	'GET /manage/config/workday': function* (){
+		yield $_render( this, {}, 'config_workday.html');
+		base.setHistoryUrl(this);
+	},
+	'GET /manage/user/role': function* (){
+		yield $_render( this, {}, 'role.html');
 		base.setHistoryUrl(this);
 	},
 	'GET /manage/user/role': function* (){

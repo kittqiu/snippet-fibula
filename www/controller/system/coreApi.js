@@ -8,6 +8,7 @@ var
     db = require('../../db'), 
     help = require('./help'),
     perm = require('./permission'),
+    config = require('./config'),
     home = require( __base + 'controller/home');
 
 var 
@@ -23,21 +24,29 @@ function* $_render( context, model, view ){
 GET:
 /sys/error/auth
 /api/file/:id
+/api/date/list?year=xxx
 /api/help?path=encodeURIComponent(path)
 
 /api/sys/role/list
 /api/sys/user/:id/roles
 
 POST:
+/api/date/workday/add
+/api/date/workday/:id/switch
 /api/file?t=?
-
 /api/sys/user/:id/roles
+
 */
 
 module.exports = {
     /***************** GET METHOD *********/
     'GET /sys/error/auth': function* (){
         yield $_render(this, {__message__:'您无权限访问该资源！'}, 'error.html');
+    },
+
+    'GET /api/date/list': function* (){
+        var year = this.request.query.year || '2016';
+        this.body = yield config.date.$listByYear(year);
     },
 
     'GET /api/file/:id': function* (id){
@@ -71,6 +80,25 @@ module.exports = {
     },
 
     /***************** POST METHOD *********/
+    'POST /api/date/workday/add': function* (){
+        var data = this.request.body || {},
+            year = data.year || 2016,
+            month = data.month || 0,
+            date = data.date || 1,
+            isworkday = data.iswordday || true;
+        var res = yield config.date.$addWorkDate( year, month, date, isworkday);
+        this.body = {
+            result: res? 'ok': 'err'
+        };
+    },
+
+    'POST /api/date/workday/:id/switch':function*(id){
+        var res = yield config.date.$switchWorkDate(id);
+        this.body = {
+            result:  res ? 'ok' : 'err'
+        };
+    },
+
     'POST /api/file': function* (){
     	if( !this.request.is('multipart/*')){
     		return yield next;
