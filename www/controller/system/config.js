@@ -48,11 +48,27 @@ function* $date_switchWorkDate(id){
 	return false;
 }
 
+function* $date_isWorkDate(year, month, date ){
+	var d = new Date( year, month, date, 12, 0, 0 ),
+		r = yield modelDate.$find({
+			select: '*',
+			where: '`time`=?',
+			params: [d.getTime()]
+		});
+	if( r !== null ){
+		return r.workday;
+	}else{
+		var day = d.getDay();
+		return (day > 0 && day < 6 )
+	}
+}
+
 module.exports = {
 	
 	date: {
 		$listByYear: $date_listByYear,
 		$addWorkDate: $date_addWorkDate,
-		$switchWorkDate: $date_switchWorkDate
+		$switchWorkDate: $date_switchWorkDate,
+		$isWorkDate: $date_isWorkDate
 	}
 };

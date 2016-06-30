@@ -24,6 +24,7 @@ function* $_render( context, model, view ){
 GET:
 /sys/error/auth
 /api/file/:id
+/api/date/isworkday?year=xxx&&month=xx&&date=xx
 /api/date/list?year=xxx
 /api/help?path=encodeURIComponent(path)
 
@@ -42,6 +43,14 @@ module.exports = {
     /***************** GET METHOD *********/
     'GET /sys/error/auth': function* (){
         yield $_render(this, {__message__:'您无权限访问该资源！'}, 'error.html');
+    },
+
+    'GET /api/date/isworkday': function* (){
+        var q = this.request.query,
+            y = q.year || 2016,
+            m = q.month || 0,
+            d = q.date || 1;
+        this.body = yield config.date.$isWorkDate( y, m, d );
     },
 
     'GET /api/date/list': function* (){
@@ -85,7 +94,7 @@ module.exports = {
             year = data.year || 2016,
             month = data.month || 0,
             date = data.date || 1,
-            isworkday = data.iswordday || true;
+            isworkday = data.iswordday;
         var res = yield config.date.$addWorkDate( year, month, date, isworkday);
         this.body = {
             result: res? 'ok': 'err'

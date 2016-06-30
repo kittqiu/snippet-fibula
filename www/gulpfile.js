@@ -97,6 +97,16 @@ gulp.task('babel_structure', function() {
     }
 );
 
+gulp.task('babel_team', function() {
+    return gulp.src('./view/team/component/src/*.jsx')
+            .pipe(babel({
+                presets: ['es2015','react']
+            }))
+            .pipe(uglify())
+            .pipe(gulp.dest('./view/team/component/build'))
+    }
+);
+
 gulp.task('babel_manage', function() {
     return gulp.src('./view/manage/component/src/*.jsx')
             .pipe(babel({
@@ -128,4 +138,4 @@ gulp.task('babel_train', function() {
 );
 
 gulp.task('default', ['less']);
-gulp.task('babel', ['babel_project','babel_task', 'babel_structure', 'babel_manage', 'babel_system', 'babel_train'])
+gulp.task('babel', ['babel_project','babel_task', 'babel_structure', 'babel_team', 'babel_manage', 'babel_system', 'babel_train'])

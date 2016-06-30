@@ -139,7 +139,7 @@ var TaskDaily = React.createClass({
 	},     
 	render: function(){
 		var t = this.props.task,
-		    daily = t.daily,
+			daily = t.daily,
 			org_plan = daily.org_plan || '未填写',
 			plan = daily.plan || '未填写',
 			report = daily.report || '未填写',
@@ -149,26 +149,26 @@ var TaskDaily = React.createClass({
 			nopadding_plan = {padding:'0', maxWidth:'230px'},
 			nomargin = {margin:'0', borderRadius:'0'};
 		return (
-		    <tr>
-		        <td className="dv-border">
-                    <a onClick={this.handleViewTask} className="uk-button-link dv-link">{t.name}</a>
-                    <div id={"modal_task_daily_"+t.id} className="uk-modal"></div>
-                    <div id={"modal_task_"+t.id} className="uk-modal"></div>
-                </td>
-                <td className="dv-border"><pre className="dv-pre-clear" style={nopadding_plan}>{org_plan}</pre></td>
-                <td className="dv-border"> 
-                    <pre className="dv-pre-clear" style={nopadding}>{ report }</pre>
-                    {daily.duration ? <span style={marginLeft}> {'用时：' + daily.duration + '小时'}</span>:''}
-                </td>
-                <td className="dv-border">
-                	<pre className="dv-pre-clear" style={nopadding_plan}>{plan}</pre>
-                </td>
-                <td className="dv-border">
-                	<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
-                </td>
-            </tr>
-        )
-    }
+			<tr>
+				<td className="dv-border">
+					<a onClick={this.handleViewTask} className="uk-button-link dv-link">{t.name}</a>
+					<div id={"modal_task_daily_"+t.id} className="uk-modal"></div>
+					<div id={"modal_task_"+t.id} className="uk-modal"></div>
+				</td>
+				<td className="dv-border"><pre className="dv-pre-clear" style={nopadding_plan}>{org_plan}</pre></td>
+				<td className="dv-border"> 
+					<pre className="dv-pre-clear" style={nopadding}>{ report }</pre>
+					{daily.duration ? <span style={marginLeft}> {'用时：' + daily.duration + '小时'}</span>:''}
+				</td>
+				<td className="dv-border">
+					<pre className="dv-pre-clear" style={nopadding_plan}>{plan}</pre>
+				</td>
+				<td className="dv-border">
+					<a onClick={this.handleEdit} className="dv-link"><i className="uk-icon-small uk-icon-edit"></i></a>
+				</td>
+			</tr>
+		)
+	}
 });
 
 var MyDaily = React.createClass({
@@ -176,25 +176,41 @@ var MyDaily = React.createClass({
 		getJSON( '/api/project/daily', {date:dayTime}, function(err, data ){
 				if(err){
 					fatal(err);
-				}else{                  
+				}else{
 					this.setState({tasks:data});
+				}
+			}.bind(this)
+		);
+	},
+	toWorkday: function(day, offset ){
+		day.setDate(day.getDate() +　offset);
+		var dayTime = day.getTime();
+		getJSON( '/api/date/isworkday', {year:day.getFullYear(), month: day.getMonth(), date: day.getDate() },
+			 function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					if( data === true ){
+						this.setState({dayTime:dayTime});
+						this.loadData(dayTime);
+					}else{
+						this.toWorkday(day, offset);
+					}
 				}
 			}.bind(this)
 		);
 	},
 	previous: function(){
 		var day = new Date(this.state.dayTime);
-		day.setDate(day.getDate()-1);
-		var dayTime = day.getTime();
-		this.setState({dayTime:dayTime});
-		this.loadData(dayTime);
+		this.toWorkday(day, -1);
 	},
 	next: function(){
 		var day = new Date(this.state.dayTime);
-		day.setDate(day.getDate()+1);
-		var dayTime = day.getTime();
-		this.setState({dayTime:dayTime});
-		this.loadData(dayTime);
+		this.toWorkday(day, 1);
+		// day.setDate(day.getDate()+1);
+		// var dayTime = day.getTime();
+		// this.setState({dayTime:dayTime});
+		// this.loadData(dayTime);
 	},
 	onTimeChanged: function(event){
 		var dayTime = toDateTime(event.target.value);
@@ -217,14 +233,14 @@ var MyDaily = React.createClass({
 				<div style={styles.toolbar}>
 				<ul className="uk-pagination" style={styles.smallBottomMargin} >
 					<li className="uk-pagination-previous">
-						<a onClick={this.previous}><i className="uk-icon-angle-double-left"></i>前一天</a>
+						<a onClick={this.previous}><i className="uk-icon-angle-double-left"></i>前一工作日</a>
 					</li>
 					<li className="">
 						<input type="text" name="time" ref="time" style={dateWidth} 
 							value={formatDate(this.state.dayTime)} onChange={this.onTimeChanged}/>
 					</li>
 					<li className="uk-pagination-next">
-						<a onClick={this.next}>后一天<i className="uk-icon-angle-double-right"></i></a>
+						<a onClick={this.next}>后一工作日<i className="uk-icon-angle-double-right"></i></a>
 					</li>
 				</ul>
 				</div>

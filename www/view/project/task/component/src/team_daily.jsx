@@ -127,27 +127,49 @@ var DepartmentDaily = React.createClass({
 		this.state.tasks.splice(0, this.state.tasks.length);
 		this.loadUserDaily(users, 0, dayTime);
 	},
+	toWorkday: function(day, offset ){
+		day.setDate(day.getDate() +　offset);
+		var dayTime = day.getTime();
+		getJSON( '/api/date/isworkday', {year:day.getFullYear(), month: day.getMonth(), date: day.getDate() },
+			 function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					if( data === true ){
+						this.setState({dayTime:dayTime});
+						this.props.onTimeChanged(dayTime);
+						this.loadData(this.props.members, dayTime);
+					}else{
+						this.toWorkday(day, offset);
+					}
+				}
+			}.bind(this)
+		);
+	},
 	previous: function(){
 		var day = new Date(this.state.dayTime);
-		day.setDate(day.getDate()-1);
-		var dayTime = day.getTime();
-		this.setState({dayTime:dayTime});
-		this.loadData(this.props.members,dayTime);
+		// day.setDate(day.getDate()-1);
+		// var dayTime = day.getTime();
+		// this.setState({dayTime:dayTime});
+		// this.loadData(this.props.members,dayTime);
+		this.toWorkday( day, -1 );
 	},
 	next: function(){
 		var day = new Date(this.state.dayTime);
-		day.setDate(day.getDate()+1);
-		var dayTime = day.getTime();
-		this.setState({dayTime:dayTime});
-		this.loadData(this.props.members,dayTime);
+		// day.setDate(day.getDate()+1);
+		// var dayTime = day.getTime();
+		// this.setState({dayTime:dayTime});
+		// this.loadData(this.props.members,dayTime);
+		this.toWorkday( day, 1 );
 	},
 	onTimeChanged: function(event){
 		var dayTime = toDateTime(event.target.value);
 		this.setState({dayTime:dayTime});
+		this.props.onTimeChanged(dayTime);
 		this.loadData(this.props.members,dayTime);
 	},
 	getInitialState: function() {
-		return {dayTime:Date.now(), tasks:[]}
+		return {dayTime: this.props.daytime, tasks:[]}
 	},
 	componentDidMount: function(){
 		var datepicker = UIkit.datepicker(this.refs.time, {weekstart:0, format:'YYYY-MM-DD'});
@@ -168,14 +190,14 @@ var DepartmentDaily = React.createClass({
 				<div style={styles.toolbar}>
 				<ul className="uk-pagination" style={styles.smallBottomMargin} >
 					<li className="uk-pagination-previous">
-						<a onClick={this.previous}><i className="uk-icon-angle-double-left"></i>前一天</a>
+						<a onClick={this.previous}><i className="uk-icon-angle-double-left"></i>前一工作日</a>
 					</li>
 					<li className="">
 						<input type="text" name="time" ref="time" style={dateWidth} 
 							value={formatDate(this.state.dayTime)} onChange={this.onTimeChanged}/>
 					</li>
 					<li className="uk-pagination-next">
-						<a onClick={this.next}>后一天<i className="uk-icon-angle-double-right"></i></a>
+						<a onClick={this.next}>后一工作日<i className="uk-icon-angle-double-right"></i></a>
 					</li>
 				</ul>
 				</div>
@@ -232,27 +254,41 @@ var UserDaily = React.createClass({
 			}.bind(this)
 		);
 	},
+	toWorkday: function(day, offset ){
+		day.setDate(day.getDate() +　offset);
+		var dayTime = day.getTime();
+		getJSON( '/api/date/isworkday', {year:day.getFullYear(), month: day.getMonth(), date: day.getDate() },
+			 function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					if( data === true ){
+						this.setState({dayTime:dayTime});
+						this.props.onTimeChanged(dayTime);
+						this.loadData(this.props.uid, dayTime);
+					}else{
+						this.toWorkday(day, offset);
+					}
+				}
+			}.bind(this)
+		);
+	},
 	previous: function(){
 		var day = new Date(this.state.dayTime);
-		day.setDate(day.getDate()-1);
-		var dayTime = day.getTime();
-		this.setState({dayTime:dayTime});
-		this.loadData(this.props.uid,dayTime);
+		this.toWorkday(day, -1);
 	},
 	next: function(){
 		var day = new Date(this.state.dayTime);
-		day.setDate(day.getDate()+1);
-		var dayTime = day.getTime();
-		this.setState({dayTime:dayTime});
-		this.loadData(this.props.uid,dayTime);
+		this.toWorkday(day, 1);
 	},
 	onTimeChanged: function(event){
 		var dayTime = toDateTime(event.target.value);
 		this.setState({dayTime:dayTime});
+		this.props.onTimeChanged(dayTime);
 		this.loadData(this.props.uid,dayTime);
 	},
 	getInitialState: function() {
-		return {dayTime:Date.now(), tasks:[]}
+		return {dayTime:this.props.daytime, tasks:[]}
 	},
 	componentDidMount: function(){
 		var datepicker = UIkit.datepicker(this.refs.time, {weekstart:0, format:'YYYY-MM-DD'});
@@ -273,14 +309,14 @@ var UserDaily = React.createClass({
 				<div style={styles.toolbar}>
 				<ul className="uk-pagination" style={styles.smallBottomMargin} >
 					<li className="uk-pagination-previous">
-						<a onClick={this.previous}><i className="uk-icon-angle-double-left"></i>前一天</a>
+						<a onClick={this.previous}><i className="uk-icon-angle-double-left"></i>前一工作日</a>
 					</li>
 					<li className="">
 						<input type="text" name="time" ref="time" style={dateWidth} 
 							value={formatDate(this.state.dayTime)} onChange={this.onTimeChanged}/>
 					</li>
 					<li className="uk-pagination-next">
-						<a onClick={this.next}>后一天<i className="uk-icon-angle-double-right"></i></a>
+						<a onClick={this.next}>后一工作日<i className="uk-icon-angle-double-right"></i></a>
 					</li>
 				</ul>
 				</div>
@@ -327,8 +363,11 @@ var TeamDaily = React.createClass({
 	updateDepData: function( depMap){
 		this.setState({DepMap:depMap})
 	},
+	onTimeChanged: function(time){
+		this.setState({daytime:time});
+	},
 	getInitialState: function(){
-		return {selectedType:'user', selectedItem:ENV.user.id, members:[], UserMap:{}, DepMap:{}}
+		return {selectedType:'user', selectedItem:ENV.user.id, members:[], UserMap:{}, DepMap:{}, daytime: Date.now()}
 	},
 	render: function(){
 		var borderRight = { borderRight:'1px solid #ddd'};
@@ -340,9 +379,10 @@ var TeamDaily = React.createClass({
 				<div className="uk-width-8-10">
 				{
 					this.state.selectedType === 'user'? 
-					<UserDaily key={'UserDaily_' + this.state.selectedItem} uid={this.state.selectedItem} users={this.state.UserMap}/> :
+					<UserDaily key={'UserDaily_' + this.state.selectedItem} uid={this.state.selectedItem} 
+						users={this.state.UserMap} daytime={this.state.daytime} onTimeChanged={this.onTimeChanged}/> :
 					<DepartmentDaily key={'DepartmentDaily_' + this.state.selectedItem}  depid={this.state.selectedItem} members={this.state.members} 
-						deps={this.state.DepMap} users={this.state.UserMap}/>
+						deps={this.state.DepMap} users={this.state.UserMap} daytime={this.state.daytime} onTimeChanged={this.onTimeChanged}/>
 				}
 					
 				</div>
