@@ -22,7 +22,22 @@ var ReportDialog = React.createClass({
 		}
 	},
 	handleSubmit: function(e){
-		e.preventDefault();		
+		e.preventDefault();
+		var time = 	this.props.dayTime,
+			now = new Date(),
+			date = new Date(time);
+		if( !isSameDate( date, now )){
+			// now.setFullYear( date.getFullYear());
+			// now.setMonth( date.getMonth());
+			// now.setDate( date.getDate());
+			// time = now.getTime();
+			//固定成12点，以标示是提前或延后填写
+			date.setHours( 12 );
+			date.setMinutes( 0 );
+			date.setSeconds( 0 );
+			date.setMilliseconds(0);
+			time = date.getTime();
+		}
 		var task = this.props.task,
 			tid = task.id,
 			daily = task.daily,
@@ -34,7 +49,7 @@ var ReportDialog = React.createClass({
 				duration: parseInt(this.refs.duration.value),
 				report: this.refs.report.value,
 				plan: this.refs.plan.value,
-				time: this.props.dayTime,
+				time: time,
 				percent: (percent > 100? 100:(percent<0?0:percent))
 			},
 			url = '/api/project/daily/' + (daily.id? daily.id: 'creation');

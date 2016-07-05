@@ -536,7 +536,7 @@ function* $task_get(tid){
 
 function* $task_listDaily(tid){
 	var sql = 'select d.*, u.`name` as user_name from project_daily as d left JOIN users as u on u.id=d.user_id '
-		+ 'where d.task_id =? ';
+		+ 'where d.task_id =? order by d.time desc ';
 	return yield warp.$query(sql, [tid]);
 }
 
