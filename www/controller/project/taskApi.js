@@ -253,6 +253,9 @@ module.exports = {
 				if( uid !== task.manager_id ){
 					recipients.push( task.manager_id );
 				}
+				if( uid === task.executor_id && task.executor_id === task.manager_id ){
+					recipients.push( task.executor_id );
+				}
 			}
 			yield base.task.$sendNoticeEmail( id, notice.title, recipients, data.reply );
 		}
