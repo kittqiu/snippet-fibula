@@ -26,6 +26,18 @@ var ACTIONMAP = {
 	resume: '恢复执行'
 };
 
+var FLOWNOTICES = {
+	confirm:{ title: '您有一个可开始执行的任务---来自项目管理系统', recipient:'executor' },
+	accept:{ title: '您管理的一个任务已开始执行---来自项目管理系统', recipient:'manager' },
+	commit:{ title: '您管理的一个任务已提交，待审核---来自项目管理系统', recipient:'manager' },
+	complete:{ title: '您的任务已被审核通过---来自项目管理系统', recipient:'executor' },
+	cancel:{ title: '您的任务已被取消---来自项目管理系统', recipient:'executor' },
+	pause:{ title: '您有一个正在执行的任务已被暂停---来自项目管理系统', recipient:'executor' },
+	resume:{ title: '您有一个已暂停的任务被重新恢复执行---来自项目管理系统', recipient:'executor' },
+	reopen:{ title: '您的一个任务未被审核通过，需要继续执行---来自项目管理系统', recipient:'executor' },
+	reply: { title: '您的一个任务有了新的回复信息---来自项目管理系统', recipient:'all' }
+};
+
 
 /******
 GET METHOD:
@@ -199,7 +211,8 @@ module.exports = {
 
 	'POST /api/project/t/:id/flow': function* (id){
 		var data = this.request.body,
-			task, flow;
+			task, flow,
+			action = data.action;
 
 		json_schema.validate('taskFlow', data);
 		task = yield base.modelTask.$find( id );
@@ -210,19 +223,39 @@ module.exports = {
 		flow = {
 			task_id: task.id,
 			user_name: this.request.user.name,
-			action: data.action,
+			action: action,
 			reply: data.reply
 		}
 
-		if( task.status === 'clear' && data.action === 'accept'){
+		if( task.status === 'clear' && action === 'accept'){
 			task.start_time = Date.now();
-			yield task.$update(['start_time']);
-		}else if( data.action === 'cancel' || data.action === 'complete'){
+			yield task.$update(['start_time']);			
+		}else if( data.action === 'cancel' || action === 'complete'){
 			task.end_time = Date.now();
 			yield task.$update(['end_time']);
+			yield base.task.$sendNoticeEmail( id, "您一个任务已开始执行---来自项目管理系统", [task.manager_id] );
 		}
 		yield base.modelTaskFlow.$create(flow);
 		yield base.task.$nextFlow(task, data.action);
+
+		if( FLOWNOTICES.hasOwnProperty(action)){
+			var notice = FLOWNOTICES[action],
+				recipients = [],
+				uid = this.request.user.id;
+			if( notice.recipient === 'executor'){
+				recipients.push( task.executor_id );
+			}else if( notice.recipient === 'manager' ){
+				recipients.push( task.manager_id );
+			}else{//all
+				if( uid !== task.executor_id ){
+					recipients.push( task.executor_id );
+				}
+				if( uid !== task.manager_id ){
+					recipients.push( task.manager_id );
+				}
+			}
+			yield base.task.$sendNoticeEmail( id, notice.title, recipients, data.reply );
+		}
 		this.body = { result: 'ok'};		
 	},
 

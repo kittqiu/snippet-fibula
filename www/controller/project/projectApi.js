@@ -404,7 +404,8 @@ module.exports = {
 			status: 'created'
 		};
 		yield base.modelTask.$create(t);
-		yield base.task.$setRelies(t.id, t.project_id, data.relyTo);				
+		yield base.task.$setRelies(t.id, t.project_id, data.relyTo);
+		yield base.task.$sendNoticeEmail( t.id, "您有一个新建的任务---来自项目管理系统" );
 		this.body = { result: 'ok', id: t.id };
 	},
 
@@ -459,7 +460,8 @@ module.exports = {
 		yield db.op.$update_record( r, data, 
 			['name', 'executor_id', 'manager_id', 'plan_duration', 'plan_start_time', 'plan_end_time', 
 				'automode', 'difficulty', 'details'])
-		yield base.task.$setRelies(id, r.project_id,relies);		
+		yield base.task.$setRelies(id, r.project_id,relies);
+		yield base.task.$sendNoticeEmail( id, "您的任务信息发生了变更---来自项目管理系统" );			
 
 		this.body = {
 			result: 'ok',

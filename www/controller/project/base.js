@@ -12,7 +12,9 @@ var
 	team_base = require( __base + 'controller/team/base'),
 	helper = require( __base + 'helper'),
 	co = require('co'), 
-	perm = require( __base + 'controller/system/permission');
+	perm = require( __base + 'controller/system/permission'),
+	swig = require('swig'),
+	smtp = require( __base + 'controller/system/email');
 
 var models = {
 	next_id: db.next_id,
@@ -572,6 +574,47 @@ function* $task_countHistoryExecuteOfUser(uid){
 			});
 }
 
+var _taskStatusMap = {
+	created: '待需求确认',
+	clear: '待接收执行',
+	doing: '正在执行',
+	pending: '已暂停执行',
+	cancel: '已取消', 
+	commit: '已提交',
+	completed: '已完成'
+};
+
+var _difficulties = [ '简单', '普通', '困难'];
+
+function* $task_sendNoticeEmail( task_id, title, recipient_list, other ){
+	var t = yield $task_get( task_id ),
+		m = {},
+		renderHtml, i, addresses = '',
+		recipient = !!recipient_list ? recipient_list : [ t.executor_id ];
+	
+	m.name = t.name;
+	m.manager_name = t.manager_name;
+	m.executor_name = t.executor_name;
+	m.status = _taskStatusMap[t.status];
+	m.plan_duration = t.plan_duration + '小时';
+	m.difficulty = _difficulties[t.difficulty];
+	m.plan_start_time = helper.formatDate( t.plan_start_time );
+	m.plan_end_time = helper.formatDate( t.plan_end_time );;
+	m.details = t.details;
+	m.others = !!other ? other : '无';
+	
+	for( i = 0; i < recipient.length; i++ ){
+		var u = yield modelUser.$find( recipient[i] );
+		if( i == 0 ){
+			addresses = u.email;
+		}else{
+			addresses += ',' + u.email;
+		}
+	}
+	renderHtml = swig.renderFile( __base + 'view/project/task/task_info.html', m );
+	smtp.sendHtml(null, addresses, title, renderHtml );
+}
+
 function* $group_getMembers(id){
 	var sql = 'select m.*, u.`name` from project_member as m, users as u where m.user_id = u.id and m.group_id=?';
 	return yield warp.$query(sql, [id]);
@@ -769,7 +812,8 @@ module.exports = {
 		$listHistoryManageOfUser: $task_listHistoryManageOfUser,
 		$countHistoryManageOfUser: $task_countHistoryManageOfUser,
 		$listHistoryExecuteOfUser: $task_listHistoryExecuteOfUser,
-		$countHistoryExecuteOfUser: $task_countHistoryExecuteOfUser
+		$countHistoryExecuteOfUser: $task_countHistoryExecuteOfUser,
+		$sendNoticeEmail: $task_sendNoticeEmail
 	},
 
 	daily: {

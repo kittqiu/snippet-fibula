@@ -89,6 +89,25 @@ function getId(request) {
     throw api.notFound('id');
 }
 
+function formatDate(time, withTime ){
+    var date = new Date(time);
+    if( withTime ){
+        var dd = date.getDate(),
+            mm = date.getMonth()+1,
+            hour = date.getHours(),
+            minute = date.getMinutes(),
+            second = date.getSeconds();
+        return date.getFullYear() + '-' + (mm>9?mm:'0'+mm) + '-' +  (dd>9?dd:'0'+dd)
+            + ' ' + (hour>9?hour:'0'+hour) + ':' + (minute>9?minute:'0'+minute) + ':' + (second>9?second:'0'+second);
+    }
+    else{
+        var dd = date.getDate(),
+            mm = date.getMonth()+1;
+        return date.getFullYear() + '-' + (mm>9?mm:'0'+mm) + '-' + (dd>9?dd:'0'+dd);    
+    }
+        
+}
+
 module.exports = {
 
 	checkPermission: function( request, expectedRole ){
@@ -120,5 +139,6 @@ module.exports = {
     getFirstDayOfMonth: getFirstDayOfMonth,
     getFirstDayOfYear: getFirstDayOfYear,
     getLastDayOfYear: getLastDayOfYear,
-    getId: getId
+    getId: getId,
+    formatDate: formatDate
 };
