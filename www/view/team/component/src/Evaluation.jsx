@@ -32,6 +32,7 @@ var MonthDailyDialog = React.createClass({
 		this.showModal();
 	},
 	render: function(){
+		var nopadding = {padding:'0'};
 		return (
 			<div className="uk-modal-dialog uk-modal-dialog-large">
 				<a href="#" className="uk-modal-close uk-close uk-close-alt"></a>
@@ -56,7 +57,7 @@ var MonthDailyDialog = React.createClass({
 								return (
 									<tr key={n}>
 										<td>{formatDate(d.time)}</td>
-										<td>{d.report}</td>
+										<td><pre className="dv-pre-clear" style={nopadding}>{d.report}</pre></td>
 										<td>{d.duration}</td>
 										<td>{d.task_name}</td>
 										<td>{d.project_name}</td>
