@@ -1,4 +1,77 @@
-
+var MonthDailyDialog = React.createClass({
+	showModal: function(){		
+		var id = "modal_eval_daily_month";
+		var modal = new UIkit.modal('#'+id);
+		modal.show();
+	},
+	hideModel: function(){
+		var id = "modal_eval_daily_month";
+		var modal = new UIkit.modal('#'+id);
+		modal.hide();
+	},
+	loadData: function(){
+		var uid = this.props.user.user_id,
+			date = this.props.date;
+		getJSON( '/api/project/u/' + uid + '/monthwork', {year:date.getFullYear(), month:date.getMonth()}, function(err, data ){
+				if(err){
+					fatal(err);
+				}else{
+					this.setState({daily_list:data});
+				}
+			}.bind(this)
+		);
+	},
+	getInitialState: function() {
+		return { daily_list:[]}
+	},
+	componentDidMount: function(){
+		this.loadData();
+		this.showModal();
+	},
+	componentDidUpdate:function(){
+		this.showModal();
+	},
+	render: function(){
+		return (
+			<div className="uk-modal-dialog uk-modal-dialog-large">
+				<a href="#" className="uk-modal-close uk-close uk-close-alt"></a>
+				<div className="uk-modal-header"><h2>{this.props.user.name}的月工作</h2></div>					
+				<div id={'form-evaluation-'+ this.props.key}>
+					{
+						this.state.daily_list.length > 0 ? 
+					
+					<table className="uk-width-1-1 uk-table">
+						<thead>
+							<tr>
+								<th className="dv-width-2-20">日期</th>
+								<th className="dv-width-10-20">当日工作</th>
+								<th className="dv-width-1-20">用时</th>
+								<th className="dv-width-4-20">所属任务</th>												
+								<th className="dv-width-3-20">所属项目</th>
+							</tr>
+						</thead>
+						<tbody>
+						{
+							this.state.daily_list.map(function(d, n){
+								return (
+									<tr key={n}>
+										<td>{formatDate(d.time)}</td>
+										<td>{d.report}</td>
+										<td>{d.duration}</td>
+										<td>{d.task_name}</td>
+										<td>{d.project_name}</td>
+									</tr>
+									)
+							}.bind(this))
+						}
+						</tbody>
+					</table>
+					: '无记录'}
+				</div>
+			</div>
+			)
+	}
+});
 
 var ManagerEvalDialog = React.createClass({
 	showModal: function(){		
@@ -225,6 +298,14 @@ var EvaluationPage = React.createClass({
 	onUpdate: function(){
 		this.loadData();
 	},
+	viewDaily: function(e){
+		e.preventDefault();
+		ReactDOM.render(
+			<MonthDailyDialog key={ 'key_eval_month_daily_'+this.state.user_id + '_' + this.state.date.getTime() }  
+				date={this.state.date}	user={this.state.user}/>,
+				document.getElementById('modal_eval_daily_month')
+			);
+	},
 	editByUser: function(e){
 		e.preventDefault();
 		ReactDOM.render(
@@ -329,14 +410,15 @@ var EvaluationPage = React.createClass({
 					<hr className="dv-hr"/>
 					<div className="uk-block uk-block-default">
 						<div id={"modal_eval_user"} className="uk-modal"></div>
-
+						<div id={"modal_eval_daily_month"} className="uk-modal"></div>
 						<table className="uk-table">
 							<caption>个人自评
-								{ !haseval && ENV.user.id === this.state.user_id ?
 								<span className="uk-float-right">
+								<a className="dv-link" onClick={this.viewDaily}>本月工作日志</a>
+								{ !haseval && ENV.user.id === this.state.user_id ?
 									<a className="dv-link" onClick={this.editByUser}>修改</a>
-								</span>
 								:''}
+								</span>
 							</caption>
 							<tbody>
 								<tr>

@@ -58,6 +58,7 @@ GET METHOD:
 /api/project/t/:id/listFlow
 /api/project/t/:id/daily
 /api/project/u/:id/daily?date=xx
+/api/project/u/:id/monthwork?year=xx&&month=xx
 
 
 POST METHOD:
@@ -160,6 +161,12 @@ module.exports = {
 	'GET /api/project/u/:uid/daily': function* (uid){
 		var date = parseInt(this.request.query.date||'0') || Date.now();
 		this.body = yield base.daily.$listUser(uid, date);
+	},
+
+	'GET /api/project/u/:uid/monthwork': function* (uid){
+		var y = parseInt( this.request.query.year || '2016'),
+			m = parseInt(this.request.query.month || '0');
+		this.body = yield base.daily.$listUserByMonth( uid, y, m );
 	},
 
 	'POST /api/project/daily/creation': function* (){

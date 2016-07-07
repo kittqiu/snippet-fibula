@@ -458,7 +458,7 @@ function* $task_listQueueOfUser(uid){
 		});*/
 	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
 		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
-		+ ' where t.executor_id =? and ( t.status=? or t.status=? or t.status=?)order by t.plan_end_time asc';
+		+ ' where t.executor_id =? and ( t.status=? or t.status=? or t.status=?) and t.plan_duration>0 order by t.plan_end_time asc';
 	var rs = yield warp.$query(sql, [uid, 'created', 'clear', 'pending']);
 	return rs;
 }
@@ -466,7 +466,7 @@ function* $task_listQueueOfUser(uid){
 function* $task_listManageOfUser(uid){
 	var sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
 		+ ' left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id LEFT JOIN project as p on t.project_id=p.id '
-		+ ' where t.manager_id =? and t.closed=? order by t.plan_end_time asc';
+		+ ' where t.manager_id =? and t.closed=? and t.plan_duration>0 order by t.plan_end_time asc';
 	var rs = yield warp.$query(sql, [uid, false]);
 	return rs;
 }
@@ -671,6 +671,16 @@ function* $daily_listUser(user_id, dateTime){
 	return ts;
 }
 
+function* $daily_listUserByMonth( uid, year, month ){
+	var begin_day = new Date( year, month, 1),
+	    begin_time = begin_day.getTime(),
+	    end_day = helper.getLastDayOfMonth( year, month ),
+		end_time = end_day.getTime(),
+		sql = 'select d.*, p.`name` as project_name, t.name as task_name from project_daily as d '
+			+ 'left JOIN project as p on p.id=d.project_id left JOIN project_task as t on t.id=d.task_id where d.user_id=? and d.time>=? and d.time<=? order by d.time asc';
+	return yield warp.$query(sql, [uid, begin_time, end_time]);
+}
+
 function* $daily_listProject(project_id, dateTime){
 	var begin_time = helper.getDateTimeAt0(dateTime),
 		end_time = helper.getNextDateTime(dateTime),
@@ -818,7 +828,8 @@ module.exports = {
 
 	daily: {
 		$listUser: $daily_listUser,
-		$listProject: $daily_listProject
+		$listProject: $daily_listProject,
+		$listUserByMonth: $daily_listUserByMonth
 	},
 
 	user: {
