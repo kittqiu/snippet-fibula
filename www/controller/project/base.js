@@ -638,8 +638,8 @@ function* $daily_listUser(user_id, dateTime){
 		yes_time = helper.getPreviousDateTime(dateTime),
 		sql = 'select t.*, u.`name` as manager_name, e.name as executor_name, p.name as project_name from project_task as t '
 			+ 'left JOIN users as u on u.id=t.manager_id left JOIN users as e on e.id=t.executor_id left JOIN project as p on p.id=t.project_id '
-			+ 'where t.executor_id=? and t.start_time<>0 and t.start_time<? and (t.end_time>=? or t.end_time=0) and t.status <>"pending"',
-		ts, ds, os, i, j;
+			+ 'where t.executor_id=? and t.start_time<>0 and t.start_time<? and (t.end_time>=? or t.end_time=0)',
+		ts, ds, os, i, j, dls=[];
 
 	ts = yield warp.$query(sql, [user_id, end_time, begin_time]);
 	ds = yield modelDaily.$findAll({
@@ -668,8 +668,12 @@ function* $daily_listUser(user_id, dateTime){
 				break;
 			}
 		}
+		if( task.status === 'pending' && Object.keys(task.daily).length === 0 ){
+			continue;
+		}
+		dls.push( task );
 	}
-	return ts;
+	return dls;
 }
 
 function* $daily_listUserByMonth( uid, year, month ){
