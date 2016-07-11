@@ -144,7 +144,7 @@ var TaskTable = React.createClass({
 
 var ToolBar = React.createClass({
 	getInitialState: function() {
-		return {new_task_parent:'root', selected_task:'root', disabledDown:true, disabledUp:true, disabledRoot:true};
+		return {new_task_parent:'root', selected_task:'root', disabledDown:true, disabledUp:true, disabledRoot:true, showltb:false};
 	},
 	handleNewTask: function(parent){
 		this.setState({new_task_parent:parent});
@@ -203,6 +203,15 @@ var ToolBar = React.createClass({
 		}
 		this.setState({disabledDown: task.order===maxOrder, disabledUp: task.order===0, disabledRoot: task.parent==='root'});	
 	},
+	showLeftToolBar: function(){
+		var isshown = this.state.showltb;
+		if( isshown ){
+			$('#ID_LeftToolBar').hide();
+		}else{
+			$('#ID_LeftToolBar').show();
+		}
+		this.setState( {showltb: !isshown});
+	},
 	componentWillReceiveProps: function(nextProps){
 		if( nextProps.selected_task !== this.state.selected_task){
 			var selected_task = nextProps.selected_task;
@@ -226,7 +235,11 @@ var ToolBar = React.createClass({
 					<button className="uk-button-link dv-link" onClick={this.handleMove.bind(this,'down')} disabled={this.state.disabledDown}>下移</button>、
 					<button className="uk-button-link dv-link" onClick={this.handleMoveToRoot} disabled={this.state.disabledRoot}>置为顶级</button>
 				</div>
-				<ul className="uk-nav uk-nav-menu" data-uk-scrollspy-nav="{closest:'li', smoothscroll:false}">
+				<div className="uk-width-1-3">
+					其他：
+					<button className="uk-button-link dv-link" onClick={this.showLeftToolBar}>{ this.state.showltb ? '隐藏' : '显示'}左侧工具栏</button>
+				</div>
+				<ul id="ID_LeftToolBar" className={ "uk-nav uk-nav-menu " + ( this.state.showltb ? "": "uk-hidden" )} data-uk-scrollspy-nav="{closest:'li', smoothscroll:false}">
 					<li>添加任务</li>
 					<li><a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,'root')} data-uk-modal="{center:true}">顶级</a></li>
 					<li><a className="dv-link" href={'#modal_new_task'} onClick={this.handleNewTask.bind(this,this.props.evaluateTaskParent(this.props.selected_task))} data-uk-modal="{center:true}">同级</a></li>

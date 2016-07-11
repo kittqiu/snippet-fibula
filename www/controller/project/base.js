@@ -16,6 +16,9 @@ var
 	swig = require('swig'),
 	smtp = require( __base + 'controller/system/email');
 
+require( 'useful-date' );
+require( 'useful-date/locale/en-US.js' );
+
 var models = {
 	next_id: db.next_id,
 	warp : db.warp
@@ -652,6 +655,16 @@ function* $daily_listUser(user_id, dateTime){
 		where: '`user_id`=? and `time` >=? and `time`<?',
 		params: [user_id, yes_time, begin_time]
 	});
+
+	var yesDate = new Date(yes_time);
+	for( i = 0;  os.length === 0 && i < 14; i++ ){		
+		yesDate.adjust( Date.DAY,   -1 );
+		os = yield modelDaily.$findAll({
+			select: '*',
+			where: '`user_id`=? and `time` >=? and `time`<?',
+			params: [user_id, yesDate.getTime(), begin_time]
+		});
+	}
 
 	for( i = 0; i < ts.length; i++ ){
 		var task = ts[i];
