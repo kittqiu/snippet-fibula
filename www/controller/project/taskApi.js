@@ -240,7 +240,6 @@ module.exports = {
 		}else if( data.action === 'cancel' || action === 'complete'){
 			task.end_time = Date.now();
 			yield task.$update(['end_time']);
-			yield base.task.$sendNoticeEmail( id, "您一个任务已开始执行---来自项目管理系统", [task.manager_id] );
 		}
 		yield base.modelTaskFlow.$create(flow);
 		yield base.task.$nextFlow(task, data.action);
