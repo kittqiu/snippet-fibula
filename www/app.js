@@ -133,9 +133,9 @@ app.use( function* theMiddleWare(next){
 	console.log('[%s] %s %s', new Date().toISOString(), method, path);
 	
 
-    if (prefix8 === '/manage/' && request.path !== '/manage/signin') {
-        if (! request.user || request.user.role > constants.role.DEVELOPER) {
-            response.redirect('/manage/signin');
+    if (prefix8.startsWith('/manage') && request.path !== '/login') {
+        if (! request.user || request.user.role != constants.role.ADMIN ) {
+            response.redirect('/');
             return;
         }
     }
