@@ -17,6 +17,7 @@ GET METHOD:
 /manage/config/workday
 /manage/project
 /manage/user/role
+/manage/user
 
 
 POST METHOD:
@@ -30,6 +31,10 @@ module.exports = {
 	},
 	'GET /manage/config/workday': function* (){
 		yield $_render( this, {}, 'config_workday.html');
+		base.setHistoryUrl(this);
+	},
+	'GET /manage/user': function* (){
+		yield $_render( this, {}, 'user.html');
 		base.setHistoryUrl(this);
 	},
 	'GET /manage/user/role': function* (){

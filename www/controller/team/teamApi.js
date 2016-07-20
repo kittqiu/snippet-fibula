@@ -16,7 +16,7 @@ GET METHOD:
 /team
 /team/evaluation
 /api/team/evaluation?user=xx&year=xx&&month=xx
-/api/team/member/list
+/api/team/member/list?contain_unactived=false
 /api/team/member/:id/roles
 /api/team/member/:id
 
@@ -46,7 +46,10 @@ module.exports = {
 	},
 
 	'GET /api/team/member/list': function* (){
-		this.body = yield base.member.$getUsers();
+		var q = this.request.query,
+			contain_unactived = q.contain_unactived || 'false';
+		
+		this.body = yield base.member.$getUsers( contain_unactived=='true');
 	},
 
 	'GET /api/team/member/:id/roles': function* (id){

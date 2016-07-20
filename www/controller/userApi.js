@@ -116,6 +116,7 @@ POST:
 /api/signup
 /api/user/changepwd
 /api/user/:id
+/api/user/:id/status?actived=true
 */
 
 module.exports = {
@@ -409,7 +410,25 @@ module.exports = {
 		if( user == null ){
 			throw api.notFound('user', this.translate('User not found.'));
 		}
-		this.body = { id: id, username: user.username, name: user.name, email: user.email } 
+		this.body = { id: id, username: user.username, name: user.name, email: user.email, actived: user.actived } 
+	},
+
+	'POST /api/user/:id/status': function* (id){
+		var data = this.request.body,
+			actived = !!data.actived,
+			user = yield User.$find(id);
+
+		if( user == null ){
+			throw api.notFound('user', this.translate('User not found.'));
+		}
+		if( this.request.user.role !== constants.role.ADMIN ){
+			throw api.notAllowed('user', "Only administrators can change user' status");
+		}
+		user.actived = actived;
+		yield user.$update(['actived']);
+		this.body = {
+			result: 'ok'
+		}
 	},
 
 	'POST /api/user/:id': function* (id){
@@ -427,5 +446,7 @@ module.exports = {
 			redirect: '/'
 		}
 	},
+
+
 	'LoginRequired': [ '/api/user/changepwd'] 
 };

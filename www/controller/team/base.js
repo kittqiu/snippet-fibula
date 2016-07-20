@@ -154,8 +154,8 @@ function* $_member_create(uid, dep){
 	return m.id;
 }
 
-function* $_member_getUsers(){
-	var sql = "select u.id, u.name from users as u where u.actived=1 and u.verified=1";
+function* $_member_getUsers(contain_unactived){
+	var sql = "select u.id, u.name from users as u where  u.verified=1" + (contain_unactived ? '' : " and u.actived=1");
 	return yield warp.$query(sql);
 }
 
