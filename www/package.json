@@ -39,6 +39,7 @@
     "memcached": "^2.2.1",
     "mysql-warp": "^0.2.9",
     "natural": "^0.2.1",
+    "node-schedule": "^1.1.1",
     "node-uuid": "^1.4.7",
     "nodemailer": "^1.10.0",
     "passport": "^0.3.2",

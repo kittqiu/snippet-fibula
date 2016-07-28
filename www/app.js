@@ -20,6 +20,7 @@ var
 var 
 	db = require('./db');
 
+
 global.__base = __dirname + '/';
 
 app.name = 'snippet-fibula';
@@ -335,6 +336,7 @@ _.each(controllers, function(ctrl, filename){
 	});
 });
 
+var daemon = require('./controller/daemon/main');
 
 app.listen(config.port);
 console.log( 'application start in %s mode at %d', (process.productionMode ? 'production' : 'development', config.port));

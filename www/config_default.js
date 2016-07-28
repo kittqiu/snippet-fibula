@@ -100,6 +100,15 @@
         page_size: 20
     },
 
+    job: {
+        reminder_work_evaluation: 3,
+        reminder_month_kpi: 1
+    },
+
+    team: {
+        manager_list:[]
+    },
+
     // END:
     END: 'END'
  };
