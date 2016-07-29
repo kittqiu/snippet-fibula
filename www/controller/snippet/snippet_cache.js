@@ -5,7 +5,8 @@ var
     base = require('./base'),
     cache = require('../../cache'),
     contrib = require('./contribute'),
-    co = require('co');
+    co = require('co'),
+    global_config = require( __base + 'config');
 
 var 
     model = base.model,
@@ -166,6 +167,10 @@ function* $_getBestSnippet(size){
 }
 
 function MODULE_init(){
+    if( global_config.log.volume === 'quiet' ){
+        return;
+    }
+
     _.each( Languages, function(lang){
         pendingCountKeys.push( keyLangCount(lang)  );
         pendingFirstPageKeys.push( keyLangFirstPage(lang));

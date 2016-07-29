@@ -25,8 +25,11 @@ function* runjobAt8(){
 }
 
 function MODULE_Main(){
-	var j8 = schedule.scheduleJob( "runjobAt8", {hour:8}, function(){
-		co( runjobAt8 ).catch(onerror);
+	
+	var j8 = schedule.scheduleJob( "runjobAt8", {hour:8, minute:1}, function(){
+		console.log("runjobAt8 ")
+		console.log( new Date());
+		//co( runjobAt8 ).catch(onerror);
 	});
 }
 

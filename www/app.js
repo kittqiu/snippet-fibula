@@ -18,7 +18,8 @@ var
 	constants = require('./constants');
 
 var 
-	db = require('./db');
+	db = require('./db'),
+	quiet = config.log.volume === 'quiet';
 
 
 global.__base = __dirname + '/';
@@ -330,7 +331,9 @@ _.each(controllers, function(ctrl, filename){
             if (docs) {
                 api_console.processApiDoc(filename, method, route, docs[1]);
             } else {
-                console.log('WARNING: no api docs found for api: ' + route);
+            	if( !quiet ){
+            		console.log('WARNING: no api docs found for api: ' + route);
+            	}
             }
         }
 	});
