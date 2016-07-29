@@ -21,14 +21,28 @@ warp.$query = thunkify(warp.query);
 warp.$queryNumber = thunkify(warp.queryNumber);
 warp.$update = thunkify(warp.update);
 
-var baseModel = warp.__model;
 
+
+function* $_update(array){
+	if( array.indexOf('updated_at') === -1 && this.hasOwnProperty('updated_at')){
+		array.push( 'updated_at' );
+	}
+	if( array.indexOf('version') === -1 && this.hasOwnProperty('version')){
+		array.push( 'version' );
+	}
+	yield this.$updateOrg( array );
+}
+
+var baseModel = warp.__model;
 baseModel.$find = thunkify(baseModel.find);
 baseModel.$findAll = thunkify(baseModel.findAll);
 baseModel.$findNumber = thunkify(baseModel.findNumber);
 baseModel.$create = thunkify(baseModel.create);
-baseModel.$update = thunkify(baseModel.update);
+baseModel.$update = $_update;
+baseModel.$updateOrg = thunkify(baseModel.update);
 baseModel.$destroy = thunkify(baseModel.destroy);
+
+
 
 // export warp and all model objects:
 var dict = {

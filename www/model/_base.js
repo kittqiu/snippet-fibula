@@ -73,8 +73,8 @@ function defineModel(warp, name, cols, opts) {
         if (fnBeforeUpdate) {
             fnBeforeUpdate(obj);
         }
-        obj.updated_at = Date.now();
-        if( obj.hasOwnProperty('versoin'))obj.version++;
+        if( obj.hasOwnProperty('updated_at'))obj.updated_at = Date.now();
+        if( obj.hasOwnProperty('version'))obj.version++;
     };
     return warp.define(name, columns, options);
 }
