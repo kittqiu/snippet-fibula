@@ -37,7 +37,7 @@ var MonthDailyDialog = React.createClass({
 			<div className="uk-modal-dialog uk-modal-dialog-large">
 				<a href="#" className="uk-modal-close uk-close uk-close-alt"></a>
 				<div className="uk-modal-header"><h2>{this.props.user.name}的月工作</h2></div>					
-				<div id={'form-evaluation-'+ this.props.key}>
+				<div id={'form-evaluation-daily'+ this.props.key}>
 					{
 						this.state.daily_list.length > 0 ? 
 					
@@ -95,7 +95,7 @@ var ManagerEvalDialog = React.createClass({
 				badjobeval: this.refs.badjobeval.value, 
 				kpi: this.refs.kpi.value
 			},
-			formid = 'form-evaluation-'+ this.props.key,
+			formid = 'form-evaluation-manager'+ this.props.key,
 			form = $('#'+formid).find('form');
 				
 		form.postJSON( url, data, function(err, result){
@@ -119,7 +119,7 @@ var ManagerEvalDialog = React.createClass({
 			<div className="uk-modal-dialog">
 				<a href="#" className="uk-modal-close uk-close uk-close-alt"></a>
 				<div className="uk-modal-header"><h2>评价成员的月工作</h2></div>					
-				<div id={'form-evaluation-'+ this.props.key}>
+				<div id={'form-evaluation-manager'+ this.props.key}>
 					<form onSubmit={this.handleSubmit} className="uk-form uk-form-stacked uk-form-horizontal">
 						<fieldset>
 							<div className="uk-alert uk-alert-danger uk-hidden"></div>
@@ -186,7 +186,7 @@ var UserEvalDialog = React.createClass({
 				badjob: this.refs.badjob.value,
 				other: this.refs.other.value
 			},
-			formid = 'form-evaluation-'+ this.props.key,
+			formid = 'form-evaluation-user'+ this.props.key,
 			form = $('#'+formid).find('form');
 		if( !!this.props.data.id ){
 			url = '/api/team/evaluation/' + this.props.data.id + '/edit';
@@ -213,7 +213,7 @@ var UserEvalDialog = React.createClass({
 			<div className="uk-modal-dialog">
 				<a href="#" className="uk-modal-close uk-close uk-close-alt"></a>
 				<div className="uk-modal-header"><h2>修改月工作自评</h2></div>					
-				<div id={'form-evaluation-'+ this.props.key}>
+				<div id={'form-evaluation-user'+ this.props.key}>
 					<form onSubmit={this.handleSubmit} className="uk-form uk-form-stacked uk-form-horizontal">
 						<fieldset>
 							<div className="uk-alert uk-alert-danger uk-hidden"></div>
@@ -386,7 +386,6 @@ var EvaluationPage = React.createClass({
 			data = this.state.data.evaluation  || {},
 			haseval = !!this.state.manager.name,
 			hasinfo = !!this.state.data.id;
-			console.log(data)
 		return (
 			<div className="uk-grid">
 				<div className="uk-width-2-10" style={borderRight}>
