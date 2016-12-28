@@ -1,5 +1,6 @@
 'use strict';
 
+/*根据系统环境变量得出是否为生产模式*/
 process.productionMode = (process.env.NODE_ENV === 'production');
 
 var 
@@ -13,26 +14,30 @@ var
 	i18n = require('./i18n'),
 	cache = require( './cache'),
 	api_console = require('./api_console'),
-	app = koa(),//global app
+	app = koa(),//global app，加载Web APP
 	auth = require('./auth'),
-	constants = require('./constants');
+	constants = require('./constants'),
+	log = require('./logger');
 
 var 
 	db = require('./db'),
-	quiet = config.log.volume === 'quiet';
+	quiet = config.log.volume === 'quiet';//是否需要打印日志
 
 
+/*初始化全局变量*/
 global.__base = __dirname + '/';
 
 app.name = 'snippet-fibula';
 app.proxy = true;
 
-//load i18n
+//load i18n，加载国际化模块
 var i18nT = i18n.getI18NTranslators('./view/i18n');
 
 
 /* On producton, serve static files by http container.
  * Otherwise by nodejs.
+ * 在生产模式下，静态资源文件通过Web容器方式获取，
+ * 在开发模式下，直接通过nodejs得到
  */
 function serveStatic(){
 	var root = __dirname;
@@ -43,7 +48,7 @@ function serveStatic(){
 			pos;
 
 		if( method === 'GET' && (path.indexOf('/static/') === 0 || path === '/favicon.ico')){
-			console.log('>>> static path: ' + path);
+			log.debug('GET static path: ' + path);
 			pos = path.lastIndexOf('.');
 			if( pos !== -1 ){
 				this.type = path.substring(pos);
@@ -59,24 +64,11 @@ function serveStatic(){
 /* locate before other middleware*/
 if( process.productionMode ){
 	app.on( 'error', function(err){
-		console.error(new Date().toISOString() + ' [Unhandled ERR] ', err);
+		log.error( '[Unhandled ERR] ', err);
 	});
 	//serveStatic();
 }else{
 	serveStatic();
-}
-
-function logJSON(data){
-	if(data){
-		console.log( JSON.stringify(data, function(key, value){
-			if( key === 'image' && value ){
-				return value.substring(0,20) + ' (' + value.length + ' bytes image data) ...';
-			}
-			return value;
-		}));
-	}else{
-		console.log('(EMPTY)');
-	}
 }
 
 app.use( auth.$userIdentityParser );
@@ -145,8 +137,8 @@ app.use( function* theMiddleWare(next){
     this.translate = i18n.createI18N( request.get('Accept-Language') || 'en', i18nT );
     if( isApi ){
     	if( isDevelopment ){
-    		console.log('[API Request]');
-    		logJSON( request.body );
+    		log.debug('[API Request]');
+    		log.logJSON( request.body );
     	}
     }else{
     	this.render = function( template, model){
@@ -212,8 +204,8 @@ app.use( function* theMiddleWare(next){
     /*log the response on api request*/
     if (isApi) {
         if (isDevelopment) {
-            console.log('[API Response]');
-            logJSON(response.body);
+            log.debug('[API Response]');
+            log.logJSON(response.body);
         }
     }
 });

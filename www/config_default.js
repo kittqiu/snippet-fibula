@@ -19,7 +19,8 @@
     theme: 'default',
     home: '/snippet',
     log: {
-        volume: 'loud'
+        volume: 'loud',
+        level: 2
     },
     security: {
         //password salt

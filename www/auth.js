@@ -120,6 +120,9 @@ function* $findUserAuthByProvider(provider, id) {
 
 // parseSessionCookie:
 // provider:uid:expires:sha1(provider:uid:expires:passwd:salt)
+/*
+ * 解析用户cookie对象，如果有效，则返回用户信息对象
+*/
 function* $parseSessionCookie(s) {
 	var 
 		ss = _safe_b64decode(s).split(':'),
