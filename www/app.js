@@ -1,7 +1,9 @@
 'use strict';
 
-/*根据系统环境变量得出是否为生产模式*/
-process.productionMode = (process.env.NODE_ENV === 'production');
+/*初始化全局变量*/
+process.productionMode = (process.env.NODE_ENV === 'production');/*根据系统环境变量得出是否为生产模式*/
+global.__base = __dirname + '/';
+
 
 var 
 	_ = require("lodash"),
@@ -14,27 +16,31 @@ var
 	i18n = require('./i18n'),
 	cache = require( './cache'),
 	api_console = require('./api_console'),
-	app = koa(),//global app，加载Web APP
+	db = require('./db'),
 	auth = require('./auth'),
 	constants = require('./constants'),
-	log = require('./logger');
+	log = require('./logger'),
+	app = koa();//global app，加载Web APP
 
 var 
-	db = require('./db'),
-	quiet = config.log.volume === 'quiet';//是否需要打印日志
+	isDevelopment = !process.productionMode,
+	static_prefix = config.cdn.static_prefix,
+	activeTheme = config.theme,
+	hostname = require('os').hostname(),
+	swigTemplatePath = __dirname + '/view/',// set view template
+	i18nT = i18n.getI18NTranslators('./view/i18n');//load i18n，加载国际化模块
 
-
-/*初始化全局变量*/
-global.__base = __dirname + '/';
-
+/*应用配置*/
 app.name = 'snippet-fibula';
 app.proxy = true;
 
-//load i18n，加载国际化模块
-var i18nT = i18n.getI18NTranslators('./view/i18n');
+app.use( auth.$userIdentityParser );//从cookie中解析得到用户信息
+app.use( bodyParser());/*try to parse body to be a json object or a form object*/
 
 
-/* On producton, serve static files by http container.
+/*
+ * 配置静态资源文件获取方式 
+ *On producton, serve static files by http container.
  * Otherwise by nodejs.
  * 在生产模式下，静态资源文件通过Web容器方式获取，
  * 在开发模式下，直接通过nodejs得到
@@ -71,20 +77,10 @@ if( process.productionMode ){
 	serveStatic();
 }
 
-app.use( auth.$userIdentityParser );
 
-/*try to parse body to be a json object or a form object*/
-app.use( bodyParser());
-
-var 
-	isDevelopment = !process.productionMode,
-	static_prefix = config.cdn.static_prefix,
-	activeTheme = config.theme,
-	hostname = require('os').hostname(),
-	swigTemplatePath = __dirname + '/view/';// set view template
-
+/*注册页面内参数替换函数*/
 swig.setDefaults({
-    cache: process.productionMode ? 'memory' : false
+	cache: process.productionMode ? 'memory' : false
 });
 function swFind(input,str) { return input.indexOf(str) !== -1; }
 swig.setFilter('find', swFind);
@@ -100,18 +96,19 @@ swig.setFilter('url', swURL);
 
 function swTimeToDate(input,str) {
 	var date = new Date(input);
-    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate();
+	return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate();
 }
 swig.setFilter('time2Date', swTimeToDate);
 
 function swTimeToTime(input,str) {
 	var date = new Date(input);
-    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate() 
-    		+ ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+	return date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate() 
+			+ ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
 }
 swig.setFilter('time2time', swTimeToTime);
 
 /*define template render function, log execution time and catch the exception*/
+/*核心中间件:http请求处理*/
 app.use( function* theMiddleWare(next){
 	var 
 		request = this.request,
@@ -124,90 +121,90 @@ app.use( function* theMiddleWare(next){
 		execTime,
 		isApi = path.indexOf('/api/') === 0 ;
 
-	console.log('[%s] %s %s', new Date().toISOString(), method, path);
+	log.info('Request ' + method + ' ' + path );
 	
+	//只有管理员才能访问manage地址
+	if (prefix8.startsWith('/manage') && request.path !== '/login') {
+		if( !request.user || request.user.role != constants.role.ADMIN ) {
+			response.redirect('/');
+			return;
+		}
+	}
 
-    if (prefix8.startsWith('/manage') && request.path !== '/login') {
-        if (! request.user || request.user.role != constants.role.ADMIN ) {
-            response.redirect('/');
-            return;
-        }
-    }
+	this.translate = i18n.createI18N( request.get('Accept-Language') || 'en', i18nT );
+	if( isApi ){
+		if( isDevelopment ){
+			log.logJSON( '[API Request]', request.body );
+		}
+	}else{
+		//根据模板生成返回的显示页面
+		this.render = function( template, model){
+			model._ = this.translate;//i18n.createI18N( request.get('Accept-Language') || 'en', i18nT );
+			model.__static_prefix = static_prefix;
+			model.__user__ = request.user;
+			model.__time__ = start;
+			model.__theme__ = activeTheme;
+			model.__request__ = request;
+			var renderHtml = swig.renderFile( swigTemplatePath + template, model );
+			response.body = renderHtml;
+			response.type = '.html';
+		};
+	}
 
-    this.translate = i18n.createI18N( request.get('Accept-Language') || 'en', i18nT );
-    if( isApi ){
-    	if( isDevelopment ){
-    		log.debug('[API Request]');
-    		log.logJSON( request.body );
-    	}
-    }else{
-    	this.render = function( template, model){
-    		model._ = i18n.createI18N( request.get('Accept-Language') || 'en', i18nT );
-    		model.__static_prefix = static_prefix;
-    		model.__user__ = request.user;
-    		model.__time__ = start;
-    		model.__theme__ = activeTheme;
-    		model.__request__ = request;
-    		var renderHtml = swig.renderFile( swigTemplatePath + template, model );
-    		response.body = renderHtml;
-    		response.type = '.html';
-    	};
-    }
+	try{
+		if( auth.loginRequired(this) ){//GET method and require login
+			return;
+		}else{
+			yield next;//action now，所有后续业务处理都在此
+		}
+		
+		execTime = String(Date.now() - start);
+		response.set('X-Cluster-Node', hostname);
+		response.set( 'X-Execution-Time', execTime );    	
+		if (response.status === 404) {
+			this.throw(404);
+		}
+	}catch(err){
+		execTime = String(Date.now() - start);
+		response.set('X-Execution-Time', execTime);
+		log.error('error when handle url: ' + request.path + ' on X-Execution-Time: ' + execTime);
+		log.error(err.stack);
 
-    try{
-    	if(auth.loginRequired(this)){//GET method and require login
-    		return;
-    	}else{
-    		yield next;//action now
-    	}
-    	
-    	execTime = String(Date.now() - start);
-    	response.set('X-Cluster-Node', hostname);
-    	response.set( 'X-Execution-Time', execTime );    	
-    	if (response.status === 404) {
-            this.throw(404);
-        }
-    }catch(err){
-    	execTime = String(Date.now() - start);
-        response.set('X-Execution-Time', execTime);
-        console.log('X-Execution-Time: ' + execTime);
-        console.log('[Error] error when handle url: ' + request.path);
-        console.log(err.stack);
-        if (err.code && err.code === 'POOL_ENQUEUELIMIT') {/*system error: mysql connect pool*/
-            // force kill node process:
-            console.error(new Date().toISOString() + ' [FATAL] POOL_ENQUEUELIMIT, process exit 1.');
-            process.exit(1);
-        }
-        if (isApi) {
-            // API error:
-            response.body = {
-                error: err.error || (err.status === 404 ? '404' : '500'),
-                data: err.data || '',
-                message: err.status === 404 ? 'API not found.' : (err.message || 'Internal error.')
-            };
-        }
-        else if (err.status === 404 || err.error === 'entity:notfound') {
-            response.body = '404 Not Found'; //this.render('404.html', {});
-        }
-        else if( err.error === 'auth:failed'){
-        	this.redirect('/sys/error/auth');
-        }
-        else {
-            console.error(new Date().toISOString() + ' [ERROR] 500 ', err.stack);
-            response.body = '500 Internal Server Error'; //this.render('500.html', {});
-        }
-        if (execTime > 1000) {
-            console.error(new Date().toISOString() + ' [ERROR] X-Execution-Time too long: ' + execTime);
-        }
-    }
+		if (err.code && err.code === 'POOL_ENQUEUELIMIT') {/*system error: mysql connect pool*/
+			// force kill node process:
+			log.error( ' [FATAL] POOL_ENQUEUELIMIT, process exit 1.');
+			process.exit(1);
+		}
 
-    /*log the response on api request*/
-    if (isApi) {
-        if (isDevelopment) {
-            log.debug('[API Response]');
-            log.logJSON(response.body);
-        }
-    }
+		if (isApi) {
+			// API error:
+			response.body = {
+				error: err.error || (err.status === 404 ? '404' : '500'),
+				data: err.data || '',
+				message: err.status === 404 ? 'API not found.' : (err.message || 'Internal error.')
+			};
+		}
+		else if (err.status === 404 || err.error === 'entity:notfound') {
+			response.body = '404 Not Found'; //this.render('404.html', {});
+		}
+		else if( err.error === 'auth:failed'){
+			this.redirect('/sys/error/auth');
+		}
+		else {
+			log.error( ' [ERROR] 500 ' + err.stack );
+			response.body = '500 Internal Server Error'; //this.render('500.html', {});
+		}
+		if (execTime > 1000) {
+			log.warn( ' X-Execution-Time too long: ' + execTime);
+		}
+	}
+
+	/*log the response on api request*/
+	if (isApi) {
+		if (isDevelopment) {
+			log.logJSON( '[API Response]', response.body);
+		}
+	}
 });
 
 /*
@@ -216,22 +213,22 @@ app.use( function* theMiddleWare(next){
 
 function registerRoute(method, path, fn){
 	if( method === 'GET' ){
-		console.log( "found route: GET %s", path );
+		log.debug( "found route: GET %s", path );
 		app.use( route.get(path,fn));
 	}else if( method === 'POST'){
-		console.log( "found route: POST %s", path );
+		log.debug( "found route: POST %s", path );
 		app.use( route.post(path,fn));
 	}
 }
 
-//return file name array
+//return file name array，得到controller目录下所有js文件的文件名集合
 function loadControllerFileNames(){
 	var files = fs.readdirSync( __dirname + "/controller" ),
 		re = new RegExp( "^[A-Za-z][A-Za-z0-9\\_]*\\.js$"),
 		jss = _.filter( files, function(f){
 			return re.test(f);
 		});
-		console.log( jss );
+		log.debug( jss );
 	return _.map( jss, function(f){
 		return f.substring(0, f.length-3);
 	});
@@ -252,7 +249,7 @@ function loadApiModule(parent, ctrls){
 	_.each(modules, function(module){
 		var cls = parent +'/' + module;
 		ctrls[cls] = require( parent + '/' + module );
-		console.log('load module: cls(' + cls + '), mod(' + parent + '/' + module + ')');
+		log.debug('load module: cls(' + cls + '), mod(' + parent + '/' + module + ')');
 	});
 
 	_.each( files, function(f){
@@ -302,36 +299,34 @@ _.each(controllers, function(ctrl, filename){
 
 		ss = path.split(' ', 2);
 		if( ss.length !== 2 ){
-			console.log( "Invalid route definition: " + path );
+			log.warn( "Invalid route definition: " + path );
 			return;
 		}
 
 		method = ss[0];
 		route = ss[1];
 		if( method === 'GET' ){
-			console.log("found: GET " + route + " in " + filename + ".js");
+			log.debug("found: GET " + route + " in " + filename + ".js");
 			registerRoute( "GET", route, fn );
 		}else if( method === 'POST'){
-			console.log("found: POST " + route + " in " + filename + ".js");
+			log.debug("found: POST " + route + " in " + filename + ".js");
 			registerRoute( "POST", route, fn );
 		}else{
-			console.log( "Invalid method:" + method );
+			log.warn( "Invalid method:" + method );
 		}
 
 		if (route.indexOf('/api/') === 0) {
-            docs = fn.toString().match(/[\w\W]*\/\*\*?([\d\D]*)\*?\*\/[\w\W]*/);
-            if (docs) {
-                api_console.processApiDoc(filename, method, route, docs[1]);
-            } else {
-            	if( !quiet ){
-            		console.log('WARNING: no api docs found for api: ' + route);
-            	}
-            }
-        }
+			docs = fn.toString().match(/[\w\W]*\/\*\*?([\d\D]*)\*?\*\/[\w\W]*/);
+			if (docs) {
+				api_console.processApiDoc(filename, method, route, docs[1]);
+			} else {
+				log.debug('WARNING: no api docs found for api: ' + route);
+			}
+		}
 	});
 });
 
 var daemon = require('./controller/daemon/main');
 
 app.listen(config.port);
-console.log( 'application start in %s mode at %d', (process.productionMode ? 'production' : 'development', config.port));
+log.info( 'application start in %s mode at %d', (process.productionMode ? 'production' : 'development', config.port));

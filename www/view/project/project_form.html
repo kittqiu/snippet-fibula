@@ -113,7 +113,8 @@ $(function () {
 				<div class="uk-form-row uk-width-1-2" style="margin-top:20px">
 					<label class="uk-form-label">{{ _('Name') }}</label>
 					<div class="uk-form-controls">
-						<input v-model="name" name="name"  type="text" class="uk-width-1-1" autofucus>
+						<input v-model="name" name="name"  type="text" class="uk-width-1-1" autofucus
+						 placeholder="请填写项目名称">
 					</div>
 					<p class="help-text">3-50字符</p>
 				</div>
@@ -137,13 +138,14 @@ $(function () {
 				<div class="uk-form-row" style="margin-top:20px">
 					<label class="uk-form-label">{{ _('End time')}}</label>
 					<div class="uk-form-controls">
-						<input type="text" v-model="end_time" name="end_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}"/>
+						<input type="text" v-model="end_time" name="end_time" data-uk-datepicker="{weekstart:0, format:'YYYY-MM-DD'}" placeholder="请选择结束日期"/>
 					</div>
 				</div>
 				<div class="uk-form-row uk-width-1-1" style="margin-top:20px">
 					<label class="uk-form-label">{{ _('Explanation')}}</label>
 					<div class="uk-form-controls">
-						<textarea v-model="details" name="details" class="uk-width-1-1" style="height:120px">
+						<textarea v-model="details" name="details" class="uk-width-1-1" style="height:120px"
+							placeholder="不可为空">
 						</textarea>
 					</div>
 				</div>

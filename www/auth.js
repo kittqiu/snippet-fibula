@@ -25,7 +25,8 @@ var
 	constants = require('./constants'), 
 	db = require('./db'),
 	_ = require('lodash'),
-	api = require('./api');
+	api = require('./api'),
+	log = require('./logger');
 
 var 
 	User = db.user,
@@ -92,11 +93,12 @@ function makeSessionCookie(provider, theId, passwd, expires) {
 	return enstr;
 }
 
+/*从数据库查找用户，并返回用户对象*/
 function* $findUserAuthByProvider(provider, id) {
 	var au, lu, user, passwd;
-	if (provider === constants.signin.LOCAL) {
+	if( provider === constants.signin.LOCAL ) {
 		lu = yield LocalUser.$find(id);
-		if (lu === null) {
+		if( lu === null ) {
 			return null;
 		}
 		passwd = lu.passwd;
@@ -118,18 +120,20 @@ function* $findUserAuthByProvider(provider, id) {
 }
 
 
-// parseSessionCookie:
-// provider:uid:expires:sha1(provider:uid:expires:passwd:salt)
 /*
  * 解析用户cookie对象，如果有效，则返回用户信息对象
-*/
+ * 传入参数格式为provider:uid:expires:sha1
+ * sha1的格式为provider:uid:expires:passwd:salt
+ */
 function* $parseSessionCookie(s) {
 	var 
 		ss = _safe_b64decode(s).split(':'),
 		user,
 		auth,
 		theId, provider, expiresStr, expires, sha1, secure, expected;
-	console.log(ss);
+
+	//解析得到各个session字段的值
+	log.debug(ss);
 	if( ss.length !== 4 ){
 		return null;
 	}
@@ -141,27 +145,33 @@ function* $parseSessionCookie(s) {
 	if( isNaN(expires) || (expires < Date.now()) || !theId || !sha1 ){
 		return null;
 	}
+
+	//从数据库查到用户对象
 	auth = yield $findUserAuthByProvider(provider, theId);
 	if( auth === null ){
 		return null;
 	}
-	//check
+	
+	//重新生成hash值，如果与Cookie中一致表示cookie有效
 	secure = [provider, theId, expiresStr, auth.passwd, COOKIE_SALT ].join(':');
 	expected = crypto.createHash('sha1').update(secure).digest('hex');
-	console.log('>>> secure: ' + secure);
-	console.log('>>> sha1: ' + sha1);
-	console.log('>>> expected: ' + expected);
+	log.debug('session secure: ' + secure);
 	if (sha1 !== expected) {
+		log.debug( 'Cookie for ' + auth.user.username + ' expired.' );
 		return null;
 	}
 	if( auth.user.locked_until > Date.now()){
-		console.log('User is locked: ' + auth.user.email);
+		log.warn('User is locked: ' + auth.user.email);
 		return null;
 	}
 	return auth.user;
 }
 
- // middleware for bind user from session cookie:
+/**
+ * middleware for bind user from session cookie
+ * 从cookie中解析得到用户信息，并绑定的中间件，先是得到用户ID，并判断该用户是否有效，cookie是否过期，用户是否已被锁定。
+ * 如果所有项合法，则从数据库查询得到用户信息，并绑定到session中
+ */
 function* $userIdentityParser(next){
 	this.request.user = null;
 	var 
@@ -170,14 +180,14 @@ function* $userIdentityParser(next){
 		cookie = this.cookies.get(COOKIE_NAME);
 
 	if(cookie){
-		console.log('try to parse session cookie...' + cookie);
+		log.debug('try to parse session cookie...' + cookie);
 		user = yield $parseSessionCookie(cookie);
 		if( user ){
 			user.passwd = '******';
 			this.request.user = user;
-			console.log('bind user from session cookie: ' + user.email);
+			log.debug('bind user from session cookie: ' + user.email);
 		}else{
-			console.log('invalid session cookie. cleared.');
+			log.warn('invalid session cookie. cleared.');
 			this.cookies.set( COOKIE_NAME, 'deleted', {
 				path:'/',
 				httpOnly: true, 
@@ -191,8 +201,11 @@ function* $userIdentityParser(next){
 	yield next;
 }
 
-var authFixedPaths = [];
-var authPaths = [];
+/*用户访问页面时，判断是否需要满足登录条件*/
+var authFixedPaths = [];	//需要登录授权的字符串类型的固定路径集合
+var authPaths = [];			//需要登录授权的正则表达式类型的固定路径集合
+/*注册需要先登录才可访问的URL地址。每次应用收到一个请求后，将判断
+ 目标地址是否在地址池中，如果是，则要求必须处于已登录状态。*/
 function registerAuthPaths(paths){
 	paths.forEach(function(p, index){
 		if( p instanceof(RegExp)){
@@ -202,12 +215,13 @@ function registerAuthPaths(paths){
 		}
 	});
 }
+/* 判断当前访问的地址是否需要先登录，如果需要且未登录，则直接跳转至登录界面 */
 function loginRequired(context){
 	var path = context.request.path,
 		required = false;
-	 if( _.indexOf(authFixedPaths, path) !== -1 ){
+	if( _.indexOf(authFixedPaths, path) !== -1 ){
 		required = true;
-	 }else{
+	}else{
 	 	for( var i = 0; i < authPaths.length; i++ ){
 	 		if( authPaths[i].test(path)){
 	 			required = true;

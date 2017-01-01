@@ -43,8 +43,9 @@ function _error( data ){
 }
 
 /*打印JSON对象*/
-function _logJSON(data){
+function _logJSON(name, data){
 	if(data){
+		_debug( name + ':' );
 		_debug( JSON.stringify(data, function(key, value){
 			if( key === 'image' && value ){
 				return value.substring(0,20) + ' (' + value.length + ' bytes image data) ...';
@@ -52,7 +53,7 @@ function _logJSON(data){
 			return value;
 		}));
 	}else{
-		_debug('(EMPTY Object)');
+		_debug('%s-(EMPTY Object)', name);
 	}
 }
 
