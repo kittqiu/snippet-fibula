@@ -55,7 +55,7 @@ var TaskTable = React.createClass({
 	},
 	initTree: function (options){
 		options = options || {};
-		$('.tree').treegrid({
+		$('.tree').treegrid('initTreeInOrder', {
 			treeColumn: 1,
 			expanderExpandedClass: 'uk-icon-minus-square-o',
 			expanderCollapsedClass: 'uk-icon-plus-square-o',

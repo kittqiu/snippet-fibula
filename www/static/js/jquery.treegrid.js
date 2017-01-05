@@ -52,6 +52,101 @@
 			});
 		},
 		/**
+		 * Initialize tree which is in order. Add by qiuzy.
+		 * @param {object} options
+		 * @returns {Object[]}
+		 */
+		initTreeInOrder: function( options ){
+			var settings = $.extend({}, this.treegrid.defaults, options);
+			return this.each(function() {
+				var $this = $(this),
+					nodes = $this.find('tr'),
+					i, j, pids = [], npid, id, level=0, pnc=[];
+				var tplId = /treegrid-([A-Za-z0-9_-]+)/,
+					tplPid = /treegrid-parent-([A-Za-z0-9_-]+)/;
+
+				$this.data('treegrid',$this);
+				$this.data('settings', settings);				
+				//var starttime= new Date().getTime();
+				for( i = 0; i < nodes.length; i++ ){
+					/*得到节点ID和父结点ID*/
+					var $n = $(nodes[i]);
+					if( $n.attr('id') === undefined)continue;/*跳过表头*/
+					
+					var collapsed = $n.hasClass('treegrid-collapsed');
+					id = tplId.exec($n.attr('class'))[1];
+					if( $n.attr('class').indexOf('treegrid-parent-')!==-1){
+						npid = tplPid.exec($n.attr('class'))[1];
+						var index = pids.indexOf(npid);
+						if( index === -1){/*新一层*/
+							pids.push(npid);
+						}else{/*收缩到前几层*/
+							if( index !== pids.length - 1 ){
+								pids.splice( index+1, pids.length -1 - index );
+								pnc.splice( index+2, pids.length - 1 - index );
+							}
+						}
+					}else{//else root node
+						pids = [];
+						pnc = [];						
+						npid = 'root';
+					}
+					pnc.push( collapsed );
+					level = pids.length;
+
+					/*init*/
+					$n.data('treegrid',$this);					
+
+					$n.treegrid('initExpanderAcc', settings).treegrid('initIndentAcc', settings,level);
+					$n.treegrid('initDragAcc', settings).treegrid('initEventsAcc', settings);
+					$n.trigger("collapse");
+					$n.treegrid('initChangeEvent').treegrid("initSettingsEvents");
+					//$n.treegrid('initExpander').treegrid('initIndent', level).treegrid('initDrag').treegrid('initEvents').treegrid('initState').treegrid('initChangeEvent').treegrid("initSettingsEvents");
+					
+					/*render*/
+					/*
+					for( j = 0; j < pnc.length-1; j++ ){
+						if( pnc[j]){
+							$n.hide();
+							break;
+						}else if( j == pnc.length-2 && !pnc[j]){
+							$n.show();
+						}
+					}*/
+					if( npid == 'root' ){
+						$n.show();
+					}else{
+						$n.hide();
+					}
+					if ( i != nodes.length - 1) {
+						var nextNode = nodes[i+1];
+						if( $(nextNode).attr('class').indexOf('treegrid-parent-'+id) !== -1 ){
+							var expander = $n.find('.treegrid-expander');
+							if (expander) {
+								//if (!$n.hasClass('treegrid-collapsed')) {
+								//	expander.removeClass(settings.expanderCollapsedClass);
+								//	expander.addClass(settings.expanderExpandedClass);
+								//} else {
+									expander.removeClass(settings.expanderExpandedClass);
+									expander.addClass(settings.expanderCollapsedClass);
+								//}                     
+							}
+						}
+					}
+				}
+				
+				//if( i > 400 ){
+						//console.log(new Date().getTime()-starttime)
+				//		break;
+				//	}
+			});
+		},
+		renderAcc: function( $n, settings ){
+
+		},
+
+
+		/**
 		 * Initialize node
 		 *
 		 * @param {Object} settings
@@ -68,6 +163,21 @@
 		initDrag: function(){
 			var $this = $(this);
 			if( $this.treegrid('getSetting', 'draggable' )){
+				var options = {},
+					drag = {droppable:true, draggable:true }, 
+					optstr = $this.attr('data-treegrid-drag');
+				if( optstr !== undefined ){
+					options = Utils.options(optstr);
+				}
+				$.extend(drag, options);
+				$this.data('dragOptions', drag);
+				$this.attr('draggable', true );        
+			}
+			return $this;
+		},
+		initDragAcc: function(settings){
+			var $this = $(this);
+			if( settings.draggable ){
 				var options = {},
 					drag = {droppable:true, draggable:true }, 
 					optstr = $this.attr('data-treegrid-drag');
@@ -142,6 +252,60 @@
 				});
 			}
 			if( $this.treegrid('getSetting', 'selectable' )){
+			   this.on("click", function(ev){
+					var $this = $(this),
+						cls = $this.treegrid('getSetting', 'selectedClass');
+					$('.'+cls).removeClass(cls);
+					$this.addClass( cls );
+					$this.treegrid('getSetting', 'onSelected').apply($this, [$this.treegrid('getNodeId')]);
+			   });
+			}
+
+			return $this;
+		},
+		initEventsAcc: function(settings) {
+			var $this = $(this);
+			//Default behavior on collapse
+			$this.on("collapse", function() {
+				var $this = $(this);
+				$this.removeClass('treegrid-expanded');
+				$this.addClass('treegrid-collapsed');
+			});
+			//Default behavior on expand
+			$this.on("expand", function() {
+				var $this = $(this);
+				$this.removeClass('treegrid-collapsed');
+				$this.addClass('treegrid-expanded');
+			});
+
+			if( settings.draggable ){
+				this.on("dragstart", function(ev) {
+					var $this = $(this);
+					ev.originalEvent.dataTransfer.setData("src_id", $this.treegrid('getNodeId'));
+				});
+			
+				this.on("dragover", function(ev){                    
+				   ev.preventDefault();
+				});
+				this.on( "drop", function(ev){
+					ev.preventDefault();
+					var id = ev.originalEvent.dataTransfer.getData("src_id"), 
+						$this = $(this),
+						nid = $this.treegrid('getNodeId'),
+						$srcNode = $(this).treegrid('getSetting', 'getNodeById').apply(this, [id, $(this).treegrid('getTreeContainer')]),
+						orgParentId = $srcNode.treegrid('getParentNodeId');
+					if( id === nid || $srcNode.treegrid('isAncestor', nid)){
+						return;
+					}
+					if( $this.treegrid('getSetting', 'renderOnDrag')){
+						$(this).treegrid('appendChild', id );
+					}
+					
+					$this.treegrid('getSetting', 'onMove').apply($this, [id,$this.treegrid('getNodeId'),orgParentId]);
+					return false;
+				});
+			}
+			if( settings.selectable ){
 			   this.on("click", function(ev){
 					var $this = $(this),
 						cls = $this.treegrid('getSetting', 'selectedClass');
@@ -439,17 +603,51 @@
 			//$this.treegrid('getSetting', 'expanderTemplate');
 			return $this;
 		},
+		/* 初始化Expander加速方法 */
+		initExpanderAcc: function(ss) {
+			var $this = $(this);
+			var settings = ss==undefined?$this.treegrid('getSettings'):ss;
+			var cell = $this.find('td').get(settings.treeColumn);
+			var $tpl = $(settings.expanderTemplate);
+			/*var expander = $this.find('.treegrid-expander');
+			if (expander) {
+				expander.remove();
+			}*/
+			$tpl.prependTo(cell).click(function() {
+				$($(this).closest('tr')).treegrid('toggle');
+			});
+			
+			
+			var type = $this.attr('data-treegrid-type');
+			if( type !== undefined ){
+				$tpl.addClass(settings.nodeClasses[type]);
+			}else{
+				$tpl.addClass(settings.leafClass);
+			}
+			return $this;
+		},
 		/**
 		 * Initialize indent for node
 		 *
 		 * @returns {Node}
 		 */
-		initIndent: function() {
+		initIndent: function(level) {
 			var $this = $(this);
 			$this.find('.treegrid-indent').remove();
 			var tpl = $this.treegrid('getSetting', 'indentTemplate');
 			var expander = $this.find('.treegrid-expander');
-			var depth = $this.treegrid('getDepth');
+			var depth = level === undefined ? $this.treegrid('getDepth'):level;
+			for (var i = 0; i < depth; i++) {
+				$(tpl).insertBefore(expander);
+			}
+			return $this;
+		},
+		initIndentAcc: function(settings,level) {
+			var $this = $(this);
+			$this.find('.treegrid-indent').remove();
+			var tpl = settings.indentTemplate;
+			var expander = $this.find('.treegrid-expander');
+			var depth = level === undefined ? $this.treegrid('getDepth'):level;
 			for (var i = 0; i < depth; i++) {
 				$(tpl).insertBefore(expander);
 			}
@@ -540,6 +738,13 @@
 				return null;
 			}
 			return $(this).treegrid('getTreeContainer').data('settings')[name];
+		},
+		/* add by qiuzy*/
+		getSettings: function(name) {
+			if (!$(this).treegrid('getTreeContainer')) {
+				return null;
+			}
+			return $(this).treegrid('getTreeContainer').data('settings');
 		},
 		/**
 		 * Add new settings
