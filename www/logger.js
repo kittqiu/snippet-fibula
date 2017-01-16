@@ -14,31 +14,45 @@ var
 	DEBUG_LEVEL = 7,		//细粒度信息事件，有助于调试应用程序。
 	level = config.log.level;
 
+
+
 /*调试等级输出*/
 function _debug( data ){
 	if( level >= DEBUG_LEVEL ){
-		console.log( '[%s]-[DEBUG]: %s', new Date().toISOString(), data );
+		if( arguments.length == 1 )
+			console.log( '[%s]-[DEBUG]: %s', new Date().toISOString(), data );
+		else
+			console.log.apply(console, ['[%s]-[DEBUG]: '+arguments[0], new Date().toISOString()].concat(Array.prototype.slice.call(arguments, 1)));
 	}
 }
 
 /*info等级输出*/
 function _info( data ){
 	if( level >= INFO_LEVEL ){
-		console.log( '[%s]-[INFO]: %s', new Date().toISOString(), data );
+		if( arguments.length == 1 )
+			console.log( '[%s]-[INFO]: %s', new Date().toISOString(), data );
+		else
+			console.log.apply(console, ['[%s]-[INFO]: '+arguments[0], new Date().toISOString()].concat(Array.prototype.slice.call(arguments, 1)));
 	}
 }
 
 /*警告等级输出*/
 function _warning( data ){
 	if( level >= WARN_LEVEL ){
-		console.warn( '[%s]-[WARN]: %s', new Date().toISOString(), data );
+		if( arguments.length == 1 )
+			console.warn( '[%s]-[WARN]: %s', new Date().toISOString(), data );
+		else
+			console.warn.apply(console, ['[%s]-[WARN]: '+arguments[0], new Date().toISOString()].concat(Array.prototype.slice.call(arguments, 1)));
 	}
 }
 
 /*错误等级输出*/
 function _error( data ){
 	if( level >= ERROR_LEVEL ){
-		console.error( '[%s]-[ERROR]: %s', new Date().toISOString(), data );
+		if( arguments.length == 1 )
+			console.error( '[%s]-[ERROR]: %s', new Date().toISOString(), data );
+		else
+			console.error.apply(console, ['[%s]-[ERROR]: '+arguments[0], new Date().toISOString()].concat(Array.prototype.slice.call(arguments, 1)));
 	}
 }
 

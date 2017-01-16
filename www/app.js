@@ -28,7 +28,7 @@ var
 	activeTheme = config.theme,
 	hostname = require('os').hostname(),
 	swigTemplatePath = __dirname + '/view/',// set view template
-	i18nT = i18n.getI18NTranslators('./view/i18n');//load i18n，加载国际化模块
+	i18nT = i18n.getI18NTranslators( __base +'view/i18n');//load i18n，加载国际化模块
 
 /*应用配置*/
 app.name = 'snippet-fibula';
@@ -329,4 +329,4 @@ _.each(controllers, function(ctrl, filename){
 var daemon = require('./controller/daemon/main');
 
 app.listen(config.port);
-log.info( 'application start in %s mode at %d', (process.productionMode ? 'production' : 'development', config.port));
+log.info( 'application start in %s mode at %d', (process.productionMode ? 'production' : 'development'), config.port);
